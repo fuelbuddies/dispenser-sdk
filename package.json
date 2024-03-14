@@ -1,10 +1,9 @@
 {
-  "name": "electron-dispenser-ts",
-  "version": "1.0.0",
+  "name": "@fuelbuddy/dispenser-sdk",
+  "version": "0.0.1",
   "description": "",
   "main": "main.ts",
   "scripts": {
-    "build": "tsc",
     "start": "node -r @swc-node/register main.ts",
     "test": "jest --detectOpenHandles --forceExit"
   },
