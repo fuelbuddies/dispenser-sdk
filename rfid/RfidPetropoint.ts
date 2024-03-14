@@ -4,14 +4,14 @@ import { BaseRfid } from "./BaseRfid";
 
 export class RfidPetropoint extends BaseRfid {
 
-    rfidType() {
+    checkType() {
         this.debugLog('rfidType', 'RFID')
-        this.connection.send('RFID');
+        return 'PETROPOINTHECTRONICS';
     }
 
     rfidStatus() {
         this.debugLog('rfidStatus', 'Status_RFID')
-        this.connection.send('Status_RFID');
+        this.innerByteTimeoutParser.send('Status_RFID');
     }
 
     processRawRfidStatus(res: string) {

@@ -1,46 +1,66 @@
-import { IRfid } from "../IRfid";
-import Logger from 'idb-logger';
+import { IRfid } from "./interface/IRfid";
+import { SerialPort } from 'serialport';
+import { QueueObject, queue } from 'async';
+import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
 
 export class BaseRfid implements IRfid {
-  connection: WebSocket;
-  logger: Logger;
+  connection: SerialPort;
+  queue: QueueObject<any>;
+  innerByteTimeoutParser: InterByteTimeoutParser;
 
-  constructor(socket: WebSocket) {
+  constructor(socket: SerialPort) {
     this.connection = socket;
-    this.logger = new Logger({id: 'rfid', useConsole: false});
+    this.queue = queue(this.processRfidTask.bind(this), 1); 
+    this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 200 }));
   }
 
-  bind(fn: EventListenerOrEventListenerObject) {
-    return this.connection.addEventListener('message', fn);
-  }
-
-  unbind(fn: EventListenerOrEventListenerObject) {
-    return this.connection.removeEventListener('message', fn);
-  }
-
-  execute(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const totalizerHandler = (event: any) => {
-        try {
-          if (bindFunction instanceof Function) {
-            resolve(bindFunction.call(this, event.data, calleeArgs));
-          } else {
-            resolve(event.data);
-          }
-        } catch (e) {
-          reject(e);
-        } finally {
-          this.unbind(totalizerHandler);
+  processRfidTask(task: any, callback: any) {
+    const {bindFunction, callee, calleeArgs} = task;
+    this.innerByteTimeoutParser.once('data', (data: any): void => {
+      try {
+        if (bindFunction instanceof Function) {
+          callback(null, bindFunction.call(this, data.toString('hex'), calleeArgs, callee.name));
+        } else {
+          callback(null, data.toString('hex'));
         }
-      };
-      this.bind(totalizerHandler)
-      if (calleeArgs) return callee.call(this, calleeArgs);
-      callee.call(this);
+      } catch (e) {
+        console.log("error in try catch fn");
+        callback(e);
+      }
+    });
+    callee.call(this, calleeArgs || undefined);
+  }
+
+  execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
     });
   }
 
-  checkType() {
-    this.connection.send("Dispenser");
+  executeInPriority(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.queue.unshift({ callee, bindFunction, calleeArgs }, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  /**
+   * reset queue
+   */
+  resetQueue(): void {
+    this.queue.kill();
+    this.queue = queue(this.processRfidTask.bind(this), 1);
   }
 
   /**
@@ -86,16 +106,7 @@ export class BaseRfid implements IRfid {
     return Math.round(num * pow) / pow;
   }
 
-  debugLog(fnName: string, message: string) {
-    this.logger.log(`[${fnName}] - ${message}`);
-  }
-
-  /** export logs */
-  async exportLogs(): Promise<any> {
-    return await this.logger.getAll() ;
-  }
-
-  downloadLogs(): void {
-    this.logger.download({name: "rfid-log-"+Date.now()});
+  debugLog(message: string, data: any) {
+    console.log(`[${new Date().toISOString()}] ${message}: ${JSON.stringify(data)}`);
   }
 }

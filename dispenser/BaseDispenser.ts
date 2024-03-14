@@ -1,4 +1,4 @@
-import { IDispenser } from "../IDispenser";
+import { IDispenser } from "./interface/IDispenser";
 import { QueueObject, queue } from 'async';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
@@ -13,8 +13,8 @@ export class BaseDispenser implements IDispenser {
   constructor(socket: SerialPort) {
     this.connection = socket;
     this.queue = queue(this.processTask.bind(this), 1); 
-    this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 200 }));
     // Adjust concurrency as needed
+    this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 200 }));
     // this.logger = new Logger({id: 'dispenser', useConsole: false});
   }
 
@@ -46,11 +46,6 @@ export class BaseDispenser implements IDispenser {
   execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
     return new Promise((resolve, reject) => {
       this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
-        // this.connection.listeners('data').forEach((listener: any) => {
-        //   console.log('listener found!!');
-        //   this.connection.removeListener('data', listener);
-        // });
-
         if (err) {
           reject(err);
         } else {
