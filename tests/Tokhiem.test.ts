@@ -1,5 +1,5 @@
 import { SerialPort } from "serialport";
-import { Tokhiem } from "../dispenser/Tokhiem";
+import { Tokhiem } from "../main";
 import findDispenserPort, { attributeId, hardwareId } from '../utils/findDispenserPort';
 
 describe('Tokhiem', () => {
