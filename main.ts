@@ -1,4 +1,1 @@
-/**
- * see test directory for usage examples
- *
- */
+export { Tokhiem } from "./dispenser/Tokhiem";
