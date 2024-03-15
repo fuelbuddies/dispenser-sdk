@@ -1,6 +1,6 @@
 import { SerialPort } from "serialport";
 import { Tokhiem } from "../dispenser/Tokhiem";
-import findPort, { attributeId, hardwareId } from '../utils/findPort';
+import findDispenserPort, { attributeId, hardwareId } from '../utils/findDispenserPort';
 
 describe('Tokhiem', () => {
     let dispenser: Tokhiem;
@@ -8,7 +8,7 @@ describe('Tokhiem', () => {
 
     beforeEach(async () => {
         if(!serialPort) {
-            serialPort = new SerialPort({path: await findPort(hardwareId, attributeId), baudRate: 9600 });
+            serialPort = new SerialPort({path: await findDispenserPort(hardwareId, attributeId), baudRate: 9600 });
             dispenser = new Tokhiem(serialPort);
         }
     });

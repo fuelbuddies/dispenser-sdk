@@ -5,7 +5,7 @@ export const hardwareId = '0403';
 export const attributeId = '6001';
 
 // Function to find port based on hardware ID and attribute ID
-export default async function findPort(hardwareId: string, attributeId: string) {
+export default async function findDispenserPort(hardwareId: string, attributeId: string) {
     try {
         const foundPort = (await SerialPort.list()).find(port => {
             return port.vendorId === hardwareId && port.productId === attributeId;
