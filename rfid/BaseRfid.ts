@@ -1,6 +1,5 @@
 import { IRfid } from "./interface/IRfid";
 import { SerialPort } from 'serialport';
-import { QueueObject, queue } from 'async';
 import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
 
 export class BaseRfid implements IRfid {

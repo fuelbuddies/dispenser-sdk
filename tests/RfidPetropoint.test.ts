@@ -1,6 +1,6 @@
 import { SerialPort } from "serialport";
 import { RfidPetropoint } from "../main";
-import findRfidPort, { attributeId, hardwareId } from '../utils/findRfidPort';
+import { findRfidPort, attributeId, hardwareId } from '../utils/findRfidPort';
 import { delay } from "../utils/delay";
 
 describe('RfidPetropoint', () => {
