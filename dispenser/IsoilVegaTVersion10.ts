@@ -50,12 +50,12 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
     readPreset() {
         this.debugLog("readPreset", "Read_Status");
-        this.connection.send('Read_Status'); // same command to get data on isoil
+        this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
     }
 
     readSale() {
         this.debugLog("readSale", "Read_Status");
-        this.connection.send('Read_Status'); // same command to get data on isoil
+        this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
     }
 
     async readStatus() {
@@ -92,14 +92,72 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         await this.connection.write(this.start);
     }
 
-    setPreset(quantity: number) {
+    async setPreset(quantity: number) {
         this.debugLog("setPreset", `Preset_QTY=${quantity}`);
-        this.connection.send(`Preset_QTY=${quantity}`);
+        await this.sendPreset(quantity);
     }
 
-    cancelPreset() {
+    async sendPreset(quantity: number) {
+        let J = 0, K = 0, L = 0, P = 0;
+        const set: number = Math.floor(quantity);
+        if (set < 10) {
+            J = 0;
+            K = 0;
+            L = 0;
+            P = set;
+        }
+        if (set > 9 && set < 100) {
+            J = 0;
+            K = 0;
+            L = Math.floor(set / 10);
+            P = set % 10;
+        }
+        if (set > 99 && set < 1000) {
+            J = 0;
+            K = Math.floor(set / 100);
+            L = Math.floor((set / 10) % 10);
+            P = set % 10;
+        }
+        if (set > 999 && set < 10000) {
+            J = Math.floor(set / 1000);
+            K = Math.floor((set / 100) % 10);
+            L = Math.floor((set / 10) % 10);
+            P = set % 10;
+        }
+
+        const one: number = 0x30 + J;
+        const two: number = 0x30 + K;
+        const three: number = 0x30 + L;
+        const four: number = 0x30 + P;
+        const BCC: number[] = [0x02, 0x30, 0x30, 0x31, 0x31, 0x34, 0x32, 0x31, 0x30, 0x30, one, two, three, four, 0x31, 0x31, 0x20, 0x20, 0x20, 0x20];
+        const BCC_SIZE: number = 20;
+
+        let checksum: number = 0;
+        for (let i = 0; i < BCC_SIZE; i++) {
+            checksum += BCC[i];
+        }
+        checksum %= 256;
+
+        const checksumHex: string = checksum.toString(16).toUpperCase().padStart(2, '0');
+        const checksum1: number = checksumHex.charCodeAt(0);
+        const checksum2: number = checksumHex.charCodeAt(1);
+
+        const volume: number[] = [0x02, 0x30, 0x30, 0x31, 0x31, 0x34, 0x32, 0x31, 0x30, 0x30, one, two, three, four, 0x31, 0x31, 0x20, 0x20, 0x20, 0x20, checksum2, checksum1, 0x0D];
+
+        // Uncomment to print volume array
+        // for (let i = 0; i < 23; i++) {
+        //     console.log(volume[i].toString(16).padStart(2, '0'));
+        // }
+
+        // Call write_command with volume array
+        // write_command(volume);
+        // Assuming dispencerSerial is accessible
+        await this.connection.write(Buffer.from(volume));
+    }
+
+    async cancelPreset() {
         this.debugLog("cancelPreset", "Cancel_Preset");
-        this.connection.send("Cancel_Preset");
+        await this.sendPreset(0.0);
     }
 
     async suspendSale() {
@@ -107,9 +165,12 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         await this.connection.write(this.stop);
     }
 
-    resumeSale() {
+    async resumeSale() {
         this.debugLog("resumeSale", "Resume_Sale");
-        this.connection.send("Resume_Sale");
+        await this.connection.write(this.terminate);
+        await this.delay(300);
+        await this.connection.write(this.start);
+        await this.delay(300);
     }
 
     async clearSale() {
@@ -119,27 +180,12 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
     hasExternalPump() {
         this.debugLog("hasExternalPump", "External_Pump");
-        this.connection.send("External_Pump");
-    }
-
-    readExternalPumpStatus() {
-        this.debugLog("readExternalPumpStatus", "External_Pump_Status");
-        this.connection.send("External_Pump_Status");
-    }
-
-    startExternalPump() {
-        this.debugLog("startExternalPump", "External_Pump_Start");
-        this.connection.send("External_Pump_Start");
-    }
-
-    stopExternalPump() {
-        this.debugLog("stopExternalPump", "External_Pump_Stop");
-        this.connection.send("External_Pump_Stop");
+        return "false";
     }
 
     readAuthorization() {
         this.debugLog("readAuthorization", "Read_Authorization");
-        this.connection.send("Read_Authorization");
+        this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
     }
 
     printReceipt(printObj: any) {
@@ -207,9 +253,9 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
 
         this.debugLog("printReceipt", `Print_Reciept=02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
-        this.connection.send(`Print_Reciept=02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
+        const printBuffer = Buffer.from(`02303031313438313030303930${printArr.join('0A')}0A0A2020202020`, 'hex');
+        this.connection.write(printBuffer);
     }
-
 
     processLegacyCommand(res: string) {
         this.debugLog("processLegacyCommand", res);
