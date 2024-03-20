@@ -14,7 +14,7 @@ export class BaseDispenser implements IDispenser {
     this.connection = socket;
     this.queue = queue(this.processTask.bind(this), 1); 
     // Adjust concurrency as needed
-    this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 200 }));
+    this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 300 }));
     // this.logger = new Logger({id: 'dispenser', useConsole: false});
   }
 
@@ -163,6 +163,12 @@ export class BaseDispenser implements IDispenser {
       return decimal >= 0
       ? binary.padStart(bitWidth, '0')
       : ('1' + binary).replace(/[01]/g, (bit: string) => (parseInt(bit, 10) ^ 1).toString(2));
+    }
+
+    delay(milliseconds: number) {
+      return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+      });
     }
 
     /**

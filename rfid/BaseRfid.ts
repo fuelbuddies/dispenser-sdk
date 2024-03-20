@@ -5,62 +5,22 @@ import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
 
 export class BaseRfid implements IRfid {
   connection: SerialPort;
-  queue: QueueObject<any>;
   innerByteTimeoutParser: InterByteTimeoutParser;
 
   constructor(socket: SerialPort) {
     this.connection = socket;
-    this.queue = queue(this.processRfidTask.bind(this), 1); 
     this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 200 }));
   }
 
-  processRfidTask(task: any, callback: any) {
-    const {bindFunction, callee, calleeArgs} = task;
-    this.innerByteTimeoutParser.once('data', (data: any): void => {
-      try {
-        if (bindFunction instanceof Function) {
-          callback(null, bindFunction.call(this, data.toString('hex'), calleeArgs, callee.name));
-        } else {
-          callback(null, data.toString('hex'));
-        }
-      } catch (e) {
-        console.log("error in try catch fn");
-        callback(e);
-      }
-    });
-    callee.call(this, calleeArgs || undefined);
-  }
-
-  execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-  }
-
-  executeInPriority(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.queue.unshift({ callee, bindFunction, calleeArgs }, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-  }
-
   /**
-   * reset queue
+   * listen to innerByteTimeoutParser data with a callback
+   * @param callback
+   * @returns void
    */
-  resetQueue(): void {
-    this.queue.kill();
-    this.queue = queue(this.processRfidTask.bind(this), 1);
+  listen(callback: (data: string) => void): void {
+    this.innerByteTimeoutParser.on('data', (data: any) => {
+      callback(data.toString('hex'));
+    });
   }
 
   /**

@@ -3,33 +3,49 @@
 import { BaseDispenser } from "./BaseDispenser";
 
 export class IsoilVegaTVersion10 extends BaseDispenser {
-    elockStatus() {
-        this.debugLog("elockStatus", "Lock_Status");
-        this.connection.send('Lock_Status');
-    }
+    private totalizerBuffer =        Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
+    private read_sale =              Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
+    private transaction_enable =     Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x34, 0x31, 0x31, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x20, 0x20, 0x20, 0x20, 0x39, 0x35, 0x0D]);
+    private read_preset =            Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
+    private start =                  Buffer.from([0x02, 0x30, 0x30, 0x31, 0x31, 0x34, 0x34, 0x20, 0x20, 0x20, 0x20, 0x43, 0x41, 0x0D]);
+    private preset_dummy =           Buffer.from([0x02, 0x30, 0x30, 0x31, 0x31, 0x34, 0x32, 0x31, 0x30, 0x30, 0x31, 0x32, 0x33, 0x34, 0x31, 0x31, 0x20, 0x20, 0x20, 0x20, 0x37, 0x36, 0x0D]);
+    private stop =                   Buffer.from([0x02, 0x30, 0x30, 0x31, 0x31, 0x34, 0x35, 0x31, 0x20, 0x20, 0x20, 0x20, 0x45, 0x44, 0x0D]);
+    private terminate =              Buffer.from([0x02, 0x30, 0x30, 0x31, 0x31, 0x34, 0x35, 0x30, 0x20, 0x20, 0x20, 0x20, 0x44, 0x44, 0x0D]);
+    private inbetween_close =        Buffer.from([0x02, 0x30, 0x30, 0x31, 0x31, 0x34, 0x36, 0x20, 0x20, 0x20, 0x20, 0x45, 0x41, 0x0D]);
+    private transaction_close =      Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x34, 0x37, 0x20, 0x20, 0x20, 0x20, 0x45, 0x41, 0x0D]);
+    private check_nozzle_totalizer = Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
+
+    // elockStatus() {
+    //     this.debugLog("elockStatus", "Lock_Status");
+    //     this.connection.send('Lock_Status');
+    // }
 
     checkType() {
-        this.connection.send("Dispenser");
+        return 'ISOILVEGATV10';
+    }
+    
+    getExternalPump() {
+        return "false";
     }
 
-    elockUnlock() {
-        this.debugLog("elockUnlock", "Lock_UnLock");
-        this.connection.send('Lock_UnLock');
-    }
+    // elockUnlock() {
+    //     this.debugLog("elockUnlock", "Lock_UnLock");
+    //     this.connection.send('Lock_UnLock');
+    // }
 
-    elockReset() {
-        this.debugLog("elockReset", "Lock_Reset");
-        this.connection.send('Lock_Reset');
-    }
+    // elockReset() {
+    //     this.debugLog("elockReset", "Lock_Reset");
+    //     this.connection.send('Lock_Reset');
+    // }
 
-    elockLock() {
-        this.debugLog("elockLock", "Lock_Lock");
-        this.connection.send('Lock_Lock');
-    }
+    // elockLock() {
+    //     this.debugLog("elockLock", "Lock_Lock");
+    //     this.connection.send('Lock_Lock');
+    // }
 
-    totalizer() {
+    async totalizer() {
         this.debugLog("totalizer", "Read_Totalizer");
-        this.connection.send('Read_Status');
+        await this.connection.write(this.totalizerBuffer);
     }
 
     readPreset() {
@@ -42,9 +58,9 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         this.connection.send('Read_Status'); // same command to get data on isoil
     }
 
-    readStatus() {
+    async readStatus() {
         this.debugLog("readStatus", "Read_Status");
-        this.connection.send("Read_Status"); // response needs some statuses to be hardcoded .. will see
+        await this.connection.write(this.check_nozzle_totalizer); // response needs some statuses to be hardcoded .. will see
     }
 
 
@@ -58,19 +74,22 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         //TBD        this.connection.send('Go_Local');
     }
 
-    startPump() {
+    async pumpStart() {
         this.debugLog("startPump", "Pump_Start");
-        this.connection.send('Pump_Start');
+        await this.connection.write(this.transaction_enable);
     }
 
-    stopPump() {
+    async pumpStop() {
         this.debugLog("stopPump", "Pump_Stop");
-        this.connection.send("Pump_Stop");
+        await this.connection.write(this.terminate);
+        await this.delay(300);
+        await this.connection.write(this.inbetween_close);
+        await this.delay(300);
     }
 
-    authorizeSale() {
+    async authorizeSale() {
         this.debugLog("authorizeSale", "Start");
-        this.connection.send("Authorize");
+        await this.connection.write(this.start);
     }
 
     setPreset(quantity: number) {
@@ -83,9 +102,9 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         this.connection.send("Cancel_Preset");
     }
 
-    suspendSale() {
+    async suspendSale() {
         this.debugLog("suspendSale", "Stop");
-        this.connection.send("Suspend_Sale");
+        await this.connection.write(this.stop);
     }
 
     resumeSale() {
@@ -93,9 +112,9 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         this.connection.send("Resume_Sale");
     }
 
-    clearSale() {
+    async clearSale() {
         this.debugLog("clearSale", "Clear_Sale");
-        this.connection.send('Clear_Sale');
+        await this.connection.write(this.transaction_close);
     }
 
     hasExternalPump() {

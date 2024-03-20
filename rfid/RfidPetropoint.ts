@@ -1,6 +1,7 @@
 //npm run esbuild-browser:watch
 
 import { BaseRfid } from "./BaseRfid";
+import { RfidResponse } from "./interface/IRfid";
 
 export class RfidPetropoint extends BaseRfid {
 
@@ -9,9 +10,15 @@ export class RfidPetropoint extends BaseRfid {
         return 'PETROPOINTHECTRONICS';
     }
 
-    rfidStatus() {
-        this.debugLog('rfidStatus', 'Status_RFID')
-        this.innerByteTimeoutParser.send('Status_RFID');
+    /** callback when there is data and process that data through processRFIDResonse before calling back */
+    bind(callback: (status: unknown, data: RfidResponse | "idle") => void): void {
+        this.listen((data: any) => {
+            try {
+                callback(null, this.processRFIDresponse(data.toString('hex')));
+            } catch (e) {
+                callback(e, "idle");
+            }
+        });
     }
 
     processRawRfidStatus(res: string) {
@@ -56,7 +63,7 @@ export class RfidPetropoint extends BaseRfid {
         return -1;
     }
 
-    processRFIDresponse(res: string) {
+    processRFIDresponse(res: string): RfidResponse | "idle" {
         this.debugLog('processRFIDresponse', res);
         const regex = /^02.*?0a/;
         const match = res.match(regex);
@@ -83,17 +90,5 @@ export class RfidPetropoint extends BaseRfid {
 
         this.debugLog('processRFIDresponse', "idle");
         return "idle";
-    }
-
-    isOnline(res: string): boolean {
-        this.debugLog('isOnline', res); 
-        const rfidresponse = this.processRawRfidStatus(res);
-        this.debugLog('isOnline', JSON.stringify(rfidresponse));
-        if(rfidresponse.length > 0) {
-            this.debugLog('isOnline', "true");
-            return true;
-        }
-        this.debugLog('isOnline', "false");
-        return false;
     }
 }
