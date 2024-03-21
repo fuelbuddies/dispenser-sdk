@@ -1,5 +1,5 @@
 import { SerialPort } from "serialport";
-import { IsoilVegaTVersion10 } from "../main";
+import { IsoilVegaTVersion10 } from "../dispenser/IsoilVegaTVersion10";
 import { findDispenserPort, attributeId, hardwareId } from '../utils/findDispenserPort';
 import { delay } from "../utils/delay";
 

@@ -1,5 +1,5 @@
 import { SerialPort } from "serialport";
-import { RfidPetropoint } from "../main";
+import { RfidPetropoint } from "../rfid/RfidPetropoint";
 import { findRfidPort, attributeId, hardwareId } from '../utils/findRfidPort';
 import { delay } from "../utils/delay";
 
