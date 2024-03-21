@@ -20,101 +20,101 @@ export class VeederEmr4 extends BaseDispenser {
     "ATC Error",
   ];
 
-  checkType() {
-    this.connection.send("Dispenser");
-  }
+  // checkType() {
+  //   this.connection.send("Dispenser");
+  // }
 
-  switchToRemote() {
-    this.connection.send("Go_Remote");
-  }
+  // switchToRemote() {
+  //   this.connection.send("Go_Remote");
+  // }
 
-  switchToLocal() {
-    this.connection.send("Go_Local");
-  }
+  // switchToLocal() {
+  //   this.connection.send("Go_Local");
+  // }
 
-  elockStatus() {
-    this.connection.send("Lock_Status");
-  }
+  // elockStatus() {
+  //   this.connection.send("Lock_Status");
+  // }
 
-  elockUnlock() {
-    this.connection.send("Lock_UnLock");
-  }
+  // elockUnlock() {
+  //   this.connection.send("Lock_UnLock");
+  // }
 
-  elockReset() {
-    this.connection.send("Lock_Reset");
-  }
+  // elockReset() {
+  //   this.connection.send("Lock_Reset");
+  // }
 
-  elockLock() {
-    this.connection.send("Lock_Lock");
-  }
+  // elockLock() {
+  //   this.connection.send("Lock_Lock");
+  // }
 
-  totalizer() {
-    this.connection.send("Totalizer");
-  }
+  // totalizer() {
+  //   this.connection.send("Totalizer");
+  // }
 
-  readStatus() {
-    this.connection.send("Read_Status");
-  }
+  // readStatus() {
+  //   this.connection.send("Read_Status");
+  // }
 
-  startPump() {
-    this.connection.send("Pump_Start");
-  }
+  // startPump() {
+  //   this.connection.send("Pump_Start");
+  // }
 
-  stopPump() {
-    this.connection.send("Pump_Stop");
-  }
+  // stopPump() {
+  //   this.connection.send("Pump_Stop");
+  // }
 
-  authorizeSale() {
-    this.connection.send("Authorize");
-  }
+  // authorizeSale() {
+  //   this.connection.send("Authorize");
+  // }
 
-  setPreset(quantity: number) {
-    this.connection.send(`Preset_QTY=${quantity}`);
-  }
+  // setPreset(quantity: number) {
+  //   this.connection.send(`Preset_QTY=${quantity}`);
+  // }
 
-  readPreset() {
-    this.connection.send("Read_Preset");
-  }
+  // readPreset() {
+  //   this.connection.send("Read_Preset");
+  // }
 
-  cancelPreset() {
-    this.connection.send("Cancel_Preset");
-  }
+  // cancelPreset() {
+  //   this.connection.send("Cancel_Preset");
+  // }
 
-  readSale() {
-    this.connection.send("Read_Sale");
-  }
+  // readSale() {
+  //   this.connection.send("Read_Sale");
+  // }
 
-  suspendSale() {
-    this.connection.send("Suspend_Sale");
-  }
+  // suspendSale() {
+  //   this.connection.send("Suspend_Sale");
+  // }
 
-  resumeSale() {
-    this.connection.send("Resume_Sale");
-  }
+  // resumeSale() {
+  //   this.connection.send("Resume_Sale");
+  // }
 
-  clearSale() {
-    this.connection.send("Clear_Sale");
-  }
+  // clearSale() {
+  //   this.connection.send("Clear_Sale");
+  // }
 
-  hasExternalPump() {
-    this.connection.send("External_Pump");
-  }
+  // hasExternalPump() {
+  //   this.connection.send("External_Pump");
+  // }
 
-  readExternalPumpStatus() {
-    this.connection.send("External_Pump_Status");
-  }
+  // readExternalPumpStatus() {
+  //   this.connection.send("External_Pump_Status");
+  // }
 
-  startExternalPump() {
-    this.connection.send("External_Pump_Start");
-  }
+  // startExternalPump() {
+  //   this.connection.send("External_Pump_Start");
+  // }
 
-  stopExternalPump() {
-    this.connection.send("External_Pump_Stop");
-  }
+  // stopExternalPump() {
+  //   this.connection.send("External_Pump_Stop");
+  // }
 
-  readAuthorization() {
-    this.connection.send("Read_Authorization");
-  }
+  // readAuthorization() {
+  //   this.connection.send("Read_Authorization");
+  // }
 
   printReceipt(printObj: any) {
     this.debugLog("printReceipt", printObj);

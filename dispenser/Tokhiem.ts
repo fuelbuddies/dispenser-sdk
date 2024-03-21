@@ -60,7 +60,7 @@ export class Tokhiem extends BaseDispenser {
         await this.connection.write(this.pump_start);
     }
 
-    async printReciept(receiptMessage) {}
+    async printReciept(receiptMessage: unknown) {}
     
     getType() {
         return 'TOKHIEM';

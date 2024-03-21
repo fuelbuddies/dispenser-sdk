@@ -1,8 +1,9 @@
 {
   "name": "@fuelbuddy/dispenser-sdk",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
-  "main": "main.ts",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
   "scripts": {
     "start": "node -r @swc-node/register main.ts",
     "test": "jest --detectOpenHandles --forceExit"
@@ -20,6 +21,7 @@
     "@types/async": "^3.2.24",
     "@types/jest": "^29.5.12",
     "@types/serialport": "^8.0.5",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "typescript": "^5.4.3"
   }
 }

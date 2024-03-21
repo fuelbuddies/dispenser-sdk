@@ -1,126 +1,124 @@
 import { BaseDispenser } from "./BaseDispenser";
 
 export class TCS3000 extends BaseDispenser {
-    elockStatus() {
-        this.debugLog("elockStatus", "Lock_Status");
-        this.connection.send('Lock_Status');
-    }
+    // // elockStatus() {
+    // //     this.debugLog("elockStatus", "Lock_Status");
+    // //     this.connection.send('Lock_Status');
+    // // }
 
-    checkType() {
-       this.connection.send("Dispenser");
-    }
+    // checkType() {
+    //    this.connection.send("Dispenser");
+    // }
 
-    elockUnlock() {
-        this.debugLog("elockUnlock", "Lock_UnLock");
-        this.connection.send('Lock_UnLock');
-    }
+    // // elockUnlock() {
+    // //     this.debugLog("elockUnlock", "Lock_UnLock");
+    // //     this.connection.send('Lock_UnLock');
+    // // }
 
-    elockReset() {
-        this.debugLog("elockReset", "Lock_Reset");
-        this.connection.send('Lock_Reset');
-    }
+    // // elockReset() {
+    // //     this.debugLog("elockReset", "Lock_Reset");
+    // //     this.connection.send('Lock_Reset');
+    // // }
 
-    elockLock() {
-        this.debugLog("elockLock", "Lock_Lock");
-        this.connection.send('Lock_Lock');
-    }
+    // // elockLock() {
+    // //     this.debugLog("elockLock", "Lock_Lock");
+    // //     this.connection.send('Lock_Lock');
+    // // }
 
-    totalizer() {
-        this.debugLog("totalizer", "Read_Totalizer");
-        this.connection.send('Totalizer');
-    }
+    // totalizer() {
+    //     this.debugLog("totalizer", "Read_Totalizer");
+    //     this.connection.send('Totalizer');
+    // }
 
-    readPreset() {
-        this.debugLog("readPreset", "Read_Status");
-        this.connection.send('Read_Status'); // same command to get data on isoil
-    }
+    // readPreset() {
+    //     this.debugLog("readPreset", "Read_Status");
+    //     this.connection.send('Read_Status'); // same command to get data on isoil
+    // }
 
-    readSale() {
-        this.debugLog("readSale", "Read_Sale");
-        this.connection.send('Read_Sale'); // same command to get data on isoil
-    }
+    // readSale() {
+    //     this.debugLog("readSale", "Read_Sale");
+    //     this.connection.send('Read_Sale'); // same command to get data on isoil
+    // }
 
-    readStatus() {
-        this.debugLog("readStatus", "Read_Status");
-        this.connection.send("Read_Status"); // response needs some statuses to be hardcoded .. will see
-    }
+    // readStatus() {
+    //     this.debugLog("readStatus", "Read_Status");
+    //     this.connection.send("Read_Status"); // response needs some statuses to be hardcoded .. will see
+    // }
 
-    switchToRemote() {
-        this.debugLog("switchToRemote", "Go_Remote");
-        //TBD        this.connection.send('Go_Remote');
-    }
+    // switchToRemote() {
+    //     this.debugLog("switchToRemote", "Go_Remote");
+    //     //TBD        this.connection.send('Go_Remote');
+    // }
 
-    switchToLocal() {
-        this.debugLog("switchToLocal", "Go_Local");
-        //TBD        this.connection.send('Go_Local');
-    }
+    // switchToLocal() {
+    //     this.debugLog("switchToLocal", "Go_Local");
+    //     //TBD        this.connection.send('Go_Local');
+    // }
 
-    startPump() {
-        this.debugLog("startPump", "Pump_Start");
-        this.connection.send('Pump_Start');
-    }
+    // startPump() {
+    //     this.debugLog("startPump", "Pump_Start");
+    //     this.connection.send('Pump_Start');
+    // }
 
-    stopPump() {
-        this.debugLog("stopPump", "Pump_Stop");
-        this.connection.send("Pump_Stop");
-    }
+    // stopPump() {
+    //     this.debugLog("stopPump", "Pump_Stop");
+    //     this.connection.send("Pump_Stop");
+    // }
 
-    authorizeSale() {
-        this.debugLog("authorizeSale", "Start");
-        this.connection.send("Authorize");
-    }
+    // authorizeSale() {
+    //     this.debugLog("authorizeSale", "Start");
+    //     this.connection.send("Authorize");
+    // }
 
-    setPreset(quantity: number) {
-        this.debugLog("setPreset", `Preset_QTY=${quantity}`);
-        this.connection.send(`Preset_QTY=${quantity}`);
-    }
+    // setPreset(quantity: number) {
+    //     this.debugLog("setPreset", `Preset_QTY=${quantity}`);
+    //     this.connection.send(`Preset_QTY=${quantity}`);
+    // }
 
-    cancelPreset() {
-        this.debugLog("cancelPreset", "Cancel_Preset");
-        this.connection.send("Cancel_Preset");
-    }
+    // cancelPreset() {
+    //     this.debugLog("cancelPreset", "Cancel_Preset");
+    //     this.connection.send("Cancel_Preset");
+    // }
 
-    suspendSale() {
-        this.debugLog("suspendSale", "Stop");
-        this.connection.send("Suspend_Sale");
-    }
+    // suspendSale() {
+    //     this.debugLog("suspendSale", "Stop");
+    //     this.connection.send("Suspend_Sale");
+    // }
 
-    resumeSale() {
-        this.debugLog("resumeSale", "Resume_Sale");
-        this.connection.send("Resume_Sale");
-    }
+    // resumeSale() {
+    //     this.debugLog("resumeSale", "Resume_Sale");
+    //     this.connection.send("Resume_Sale");
+    // }
 
-    clearSale() {
-        this.debugLog("clearSale", "Clear_Sale");
-        this.connection.send('Clear_Sale');
-    }
+    // clearSale() {
+    //     this.debugLog("clearSale", "Clear_Sale");
+    //     this.connection.send('Clear_Sale');
+    // }
 
-    hasExternalPump() {
-        this.debugLog("hasExternalPump", "External_Pump");
-        this.connection.send("External_Pump");
-    }
+    // hasExternalPump() {
+    //     this.debugLog("hasExternalPump", "External_Pump");
+    //     return "false";
+    // }
 
-    readExternalPumpStatus() {
-        this.debugLog("readExternalPumpStatus", "External_Pump_Status");
-        this.connection.send("External_Pump_Status");
-    }
+    // // readExternalPumpStatus() {
+    // //     this.debugLog("readExternalPumpStatus", "External_Pump_Status");
+    // //     this.connection.send("External_Pump_Status");
+    // // }
 
-    startExternalPump() {
-        this.debugLog("startExternalPump", "External_Pump_Start");
-        this.connection.send("External_Pump_Start");
-    }
+    // // startExternalPump() {
+    // //     this.debugLog("startExternalPump", "External_Pump_Start");
+    // //     this.connection.send("External_Pump_Start");
+    // // }
 
-    stopExternalPump() {
-        this.debugLog("stopExternalPump", "External_Pump_Stop");
-        this.connection.send("External_Pump_Stop");
-    }
+    // // stopExternalPump() {
+    // //     this.debugLog("stopExternalPump", "External_Pump_Stop");
+    // //     this.connection.send("External_Pump_Stop");
+    // // }
 
-    readAuthorization() {
-        this.debugLog("readAuthorization", "Read_Authorization");
-        this.connection.send("Read_Authorization");
-    }
-
-
+    // readAuthorization() {
+    //     this.debugLog("readAuthorization", "Read_Authorization");
+    //     this.connection.send("Read_Authorization");
+    // }
 
     processTotalizer(res: string) {
         this.debugLog("processTotalizer", res);

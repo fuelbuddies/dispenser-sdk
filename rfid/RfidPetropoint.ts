@@ -48,7 +48,6 @@ export class RfidPetropoint extends BaseRfid {
         this.debugLog('processTagId', res);
         if (res.length > 10) {
             const tagId = BigInt(res);
-            // @ts-expect-error ts-migrate(2554) FIXME: Expected 2 arguments, but got 1.
             this.debugLog('processTagId', JSON.stringify(tagId, function (key, value) {
                 if (typeof value === 'bigint') {
                   return value.toString();
@@ -77,7 +76,6 @@ export class RfidPetropoint extends BaseRfid {
                 tagId: (this.processTagId(rfidresponse[2]))
             }
     
-            // @ts-expect-error ts-migrate(2554) FIXME: Expected 2 arguments, but got 1.
             this.debugLog('processRFIDresponse', JSON.stringify(response, function (key, value) {
                 if (typeof value === 'bigint') {
                   return value.toString();
