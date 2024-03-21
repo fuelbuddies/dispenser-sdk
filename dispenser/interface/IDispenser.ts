@@ -5,6 +5,7 @@ export interface IDispenser {
   execute(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   executeInPriority(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   resetQueue(): void;
+  disconnect(callback: any): void;
   checkType?(): any;
   switchToRemote?(): any;
   switchToLocal?(): any;

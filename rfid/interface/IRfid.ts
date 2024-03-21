@@ -2,6 +2,7 @@ import { SerialPort } from 'serialport';
 
 export interface IRfid {
     connection: SerialPort;
+    disconnect(callback: any): void;
     execute?(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
     checkType?(): any;
     rfidType?(res: string): any;

@@ -12,10 +12,14 @@ export class BaseDispenser implements IDispenser {
 
   constructor(socket: SerialPort) {
     this.connection = socket;
-    this.queue = queue(this.processTask.bind(this), 1); 
+    this.queue = queue(this.processTask.bind(this), 1);
     // Adjust concurrency as needed
     this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 300 }));
     // this.logger = new Logger({id: 'dispenser', useConsole: false});
+  }
+
+  disconnect(callback: any): void {
+    this.connection.close(callback);
   }
 
   processTask(task: any, callback: any) {

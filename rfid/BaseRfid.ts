@@ -11,6 +11,10 @@ export class BaseRfid implements IRfid {
     this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 200 }));
   }
 
+  disconnect(callback: any): void {
+    this.connection.close(callback);
+  }
+
   /**
    * listen to innerByteTimeoutParser data with a callback
    * @param callback
