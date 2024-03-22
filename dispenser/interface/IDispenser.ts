@@ -15,8 +15,8 @@ export interface IDispenser {
   elockLock?(): any;
   totalizer?(): any;
   readStatus?(): any;
-  startPump?(): any;
-  stopPump?(): any;
+  pumpStart?(): any;
+  pumpStop?(): any;
   hasExternalPump?(): any;
   readExternalPumpStatus?(): any;
   startExternalPump?(): any;
