@@ -1,7 +1,8 @@
+import ModbusRTU from 'modbus-serial';
 import { SerialPort } from 'serialport';
 
 export interface IDispenser {
-  connection: SerialPort;
+  connection: SerialPort | ModbusRTU;
   execute(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   executeInPriority(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   resetQueue(): void;

@@ -1,4 +1,4 @@
-import { BaseDispenser } from "./BaseDispenser";
+import { BaseDispenser } from "./base/BaseDispenser";
 
 export class TCS3000 extends BaseDispenser {
     // // elockStatus() {

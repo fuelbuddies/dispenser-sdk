@@ -1,4 +1,4 @@
-import { BaseDispenser } from "./BaseDispenser";
+import { BaseDispenser } from "./base/BaseDispenser";
 
 export class VeederEmr4 extends BaseDispenser {
   private deliveryStatus: string[] = [

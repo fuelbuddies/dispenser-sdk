@@ -1,4 +1,4 @@
-import { IDispenser } from "./interface/IDispenser";
+import { IDispenser } from "../interface/IDispenser";
 import { QueueObject, queue } from 'async';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';

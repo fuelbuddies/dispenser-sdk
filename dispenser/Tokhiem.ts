@@ -1,4 +1,4 @@
-import { BaseDispenser } from "./BaseDispenser";
+import { BaseDispenser } from "./base/BaseDispenser";
 
 export class Tokhiem extends BaseDispenser {
     private totalizerBuffer       = Buffer.from([0x01, 0x41, 0x54, 0x7F, 0x6B]);

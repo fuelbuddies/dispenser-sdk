@@ -1,6 +1,6 @@
 //npm run esbuild-browser:watch
 
-import { BaseDispenser } from "./BaseDispenser";
+import { BaseDispenser } from "./base/BaseDispenser";
 
 export class IsoilVegaTVersion10 extends BaseDispenser {
     private totalizerBuffer =        Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
