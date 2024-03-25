@@ -11,18 +11,13 @@ export class ModBusDispenser implements IDispenser {
         this.queue = queue(this.processTask.bind(this), 1);
     }
     
-    async processTask(task: any, callback: any) {
+    async processTask(task: any) {
         const {bindFunction, callee, calleeArgs} = task;
         const data = await callee.call(this, calleeArgs || undefined);
-        try {
-            if (bindFunction instanceof Function) {
-                callback(null, bindFunction.call(this, data, calleeArgs, callee.name));
-            } else {
-                callback(null, data);
-            }
-        } catch (e) {
-            console.log("error in try catch fn");
-            callback(e);
+        if (bindFunction instanceof Function) {
+            return bindFunction.call(this, data, calleeArgs, callee.name);
+        } else {
+            return data;
         }
     }
     
