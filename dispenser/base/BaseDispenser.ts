@@ -1,4 +1,4 @@
-import { IDispenser } from "../interface/IDispenser";
+import { DispenserOptions, IDispenser } from "../interface/IDispenser";
 import { QueueObject, queue } from 'async';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
@@ -10,7 +10,7 @@ export class BaseDispenser implements IDispenser {
   innerByteTimeoutParser: InterByteTimeoutParser;
   // logger: Logger;
 
-  constructor(socket: SerialPort) {
+  constructor(socket: SerialPort, options?: DispenserOptions) {
     this.connection = socket;
     this.queue = queue(this.processTask.bind(this), 1);
     // Adjust concurrency as needed

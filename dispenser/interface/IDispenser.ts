@@ -63,3 +63,11 @@ export interface IDispenser {
   exportLogs?(): Promise<any>;
   downloadLogs?(): void;
 }
+
+
+export type DispenserOptions = {
+  dispenserType: string;
+  hardwareId: string;
+  attributeId: string;
+  baudRate?: number;
+};

@@ -71,11 +71,11 @@ describe('GateX', () => {
     //     expect(status).toBe(true);
     // });
 
-    // it('should return true on Authorize', async () => {
-    //     const status = await dispenser.execute(dispenser.authorizeSale, dispenser.processCommand);
-    //     await delay(4000);
-    //     expect(status).toBe(true);
-    // });
+    it('should return true on Authorize', async () => {
+        const status = await dispenser.execute(dispenser.authorizeSale, dispenser.processCommand);
+        await delay(4000);
+        expect(status).toBe(true);
+    });
 
     // it('should return true on suspendSale', async () => {
     //     await delay(4000);
@@ -83,11 +83,11 @@ describe('GateX', () => {
     //     expect(status).toBe(true);
     // });
 
-    // it('should return true on pumpStop', async () => {
-    //     const status = await dispenser.execute(dispenser.pumpStop, dispenser.processCommand);
-    //     await delay(4000);
-    //     expect(status).toBe(true);
-    // });
+    it('should return true on pumpStop', async () => {
+        const status = await dispenser.execute(dispenser.pumpStop, dispenser.processCommand);
+        await delay(4000);
+        expect(status).toBe(true);
+    });
 
     // it('should return true on clearSale', async () => {
     //     await delay(4000);

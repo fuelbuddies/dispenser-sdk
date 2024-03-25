@@ -1,4 +1,4 @@
-import { IDispenser } from "../interface/IDispenser";
+import { DispenserOptions, IDispenser } from "../interface/IDispenser";
 import ModbusRTU from "modbus-serial";
 import { QueueObject, queue } from 'async';
 
@@ -6,7 +6,7 @@ export class ModBusDispenser implements IDispenser {
     connection: ModbusRTU;
     queue: QueueObject<any>;
     
-    constructor(socket: ModbusRTU) {
+    constructor(socket: ModbusRTU, options?: DispenserOptions) {
         this.connection = socket;
         this.queue = queue(this.processTask.bind(this), 1);
     }
