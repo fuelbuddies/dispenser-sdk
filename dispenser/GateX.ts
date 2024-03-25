@@ -11,6 +11,7 @@ export class GateX extends ModBusDispenser {
     constructor(socket: ModbusRTU, options?: DispenserOptions) {
         super(socket, options);
         this.AuthorizeValveLine = new Line(this.chip, this.AuthorizeValveGPIO);
+        this.AuthorizeValveLine.requestOutputMode();
     }
 
     checkType() {
@@ -22,12 +23,10 @@ export class GateX extends ModBusDispenser {
     }
 
     authorizeSale() {
-        this.AuthorizeValveLine.requestOutputMode();
         this.AuthorizeValveLine.setValue(1);
     }
 
     pumpStop() {
-        this.AuthorizeValveLine.requestOutputMode();
         this.AuthorizeValveLine.setValue(0);
     }
 
