@@ -3,8 +3,8 @@ import { findDispenserPort } from '../utils/findDispenserPort';
 import { delay } from "../utils/delay";
 import ModbusRTU from "modbus-serial";
 
-const attributeId = '7523';
 const hardwareId = '1a86';
+const attributeId = '7523';
 
 describe('GateX', () => {
     let dispenser: GateX;
@@ -13,7 +13,9 @@ describe('GateX', () => {
     beforeEach(async () => {
         if(!serialPort) {
             serialPort = new ModbusRTU();
-            await serialPort.connectRTUBuffered(await findDispenserPort(hardwareId, attributeId), { baudRate: 9600 });
+            const path = await findDispenserPort(hardwareId, attributeId);
+            console.log(path);
+            await serialPort.connectRTUBuffered(path, { baudRate: 9600 });
             dispenser = new GateX(serialPort, { dispenserType: 'GateX', hardwareId, attributeId, baudRate: 9600, kFactor: 53.92859163 });
         }
     });
