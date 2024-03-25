@@ -14,7 +14,7 @@ describe('GateX', () => {
         if(!serialPort) {
             serialPort = new ModbusRTU();
             await serialPort.connectRTUBuffered(await findDispenserPort(hardwareId, attributeId), { baudRate: 9600 });
-            dispenser = new GateX(serialPort);
+            dispenser = new GateX(serialPort, { dispenserType: 'GateX', hardwareId, attributeId, baudRate: 9600, kFactor: 53.92859163 });
         }
     });
 
@@ -23,10 +23,10 @@ describe('GateX', () => {
         expect(kind).toBe('GATEX');
     });
 
-    // it('should return greater than 0 on checkTotalizer', async () => {
-    //     const totalizer = await dispenser.execute(dispenser.totalizer, dispenser.processTotalizer);
-    //     expect(totalizer).toBeGreaterThan(0);
-    // });
+    it('should return greater than 0 on checkTotalizer', async () => {
+        const totalizer = await dispenser.execute(dispenser.totalizer, dispenser.processTotalizer);
+        expect(totalizer).toBeGreaterThan(0);
+    });
 
     // it('should return status on readStatus', async () => {
     //     const status = await dispenser.execute(dispenser.readStatus, dispenser.processStatus);

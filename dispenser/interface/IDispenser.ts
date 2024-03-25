@@ -70,4 +70,5 @@ export type DispenserOptions = {
   hardwareId: string;
   attributeId: string;
   baudRate?: number;
+  kFactor?: number
 };
