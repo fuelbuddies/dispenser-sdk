@@ -42,32 +42,52 @@ export class GateX extends ModBusDispenser {
         return "false";
     }
 
-    authorizeSale() {
-        this.AuthorizeValveLine.setValue(1);
+    async authorizeSale() {
+        try {
+            await this.AuthorizeValveLine.setValue(1);
+            return "true";
+        } catch (error) {
+            console.error(error);
+            return "false";
+        }
     }
 
-    pumpStop() {
-        this.AuthorizeValveLine.setValue(0);
+    async pumpStop() {
+        try {
+            await this.AuthorizeValveLine.setValue(0);
+            return "true";
+        } catch (error) {
+            console.error(error);
+            return "false";
+        }
     }
 
     processCommand(res: string) {
-        return true;
+        if(res === "true") {
+            return true;
+        }
+
+        return false;
     }
 
     pumpStart() {
         // Not implemented
+        return "true";
     }
 
-    async readAuth() {
+    readAuth() {
         // Not implemented
+        return "true";
     }
 
-    async cancelPreset() {
+    cancelPreset() {
         // Not implemented
+        return "true";
     }
 
-    async resumeDispencer() {
+    resumeDispencer() {
         // Not implemented
+        return "true";
     }
     // ...
 }
