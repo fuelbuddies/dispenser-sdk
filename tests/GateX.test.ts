@@ -26,6 +26,7 @@ describe('GateX', () => {
 
     it('should return greater than 0 on checkTotalizer', async () => {
         const totalizer = await dispenser.execute(dispenser.totalizer, dispenser.processTotalizer);
+        console.log(totalizer);
         expect(totalizer).toBeGreaterThan(0);
     });
 
