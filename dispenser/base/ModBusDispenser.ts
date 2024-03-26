@@ -11,30 +11,17 @@ export class ModBusDispenser implements IDispenser {
         this.queue = queue(this.processTask.bind(this), 1);
     }
 
-    parseResponseToUint32(buffer: Buffer, isBigEndian: boolean): number {
-        // Check for invalid buffer size
-        if (buffer.length % 4 !== 0) {
-            throw new Error("Buffer length must be a multiple of 4 (4 bytes per uint32)");
+    hexToDecLittleEndian(hexString: string): number {
+        const bytes = hexString.trim().split(" "); // Split on spaces, remove leading/trailing spaces
+        let decimalValue = 0;
+
+        for (let i = 0; i < bytes.length; i++) {
+            const byte = bytes[i];
+            const decimalByte = parseInt(byte, 16); // Parse hex byte to decimal
+            decimalValue += decimalByte * Math.pow(256, bytes.length - 1 - i); // Add considering position
         }
 
-        const valueBytes = new Uint8Array(buffer);
-
-        // Combine bytes based on endianness
-        let unsignedInt32: number;
-        if (isBigEndian) {
-            unsignedInt32 = 0;
-            for (let i = 0; i < 2; i++) {
-                unsignedInt32 = (unsignedInt32 << 8) | valueBytes[i * 2];
-            }
-        } else {
-            unsignedInt32 = 0;
-            for (let i = 1; i >= 0; i--) {
-                unsignedInt32 |= valueBytes[i * 2];
-                unsignedInt32 = (unsignedInt32 >>> 8);
-            }
-        }
-
-        return unsignedInt32;
+        return decimalValue;
     }
 
     async processTask(task: any) {
