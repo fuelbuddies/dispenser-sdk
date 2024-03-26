@@ -51,32 +51,32 @@ describe('GateX', () => {
     // // // // //     expect(status.state).toBe('Stopped');
     // // // // // });
 
-    // it('should return true on pumpStart', async () => {
-    //     const status = await dispenser.execute(dispenser.pumpStart, dispenser.processCommand);
-    //     expect(status).toBe(true);
-    // });
+    it('should return true on pumpStart', async () => {
+        const status = await dispenser.execute(dispenser.pumpStart, dispenser.processCommand);
+        expect(status).toBe(true);
+    });
 
-    // it('should return true on sendPreset', async () => {
-    //     const status = await dispenser.execute(dispenser.setPreset, dispenser.processCommand, 69);
-    //     expect(status).toBe(true);
-    // });
+    it('should return true on sendPreset', async () => {
+        const status = await dispenser.execute(dispenser.setPreset, dispenser.processCommand, 69);
+        expect(status).toBe(true);
+    });
 
-    // it('should return true on readPreset', async () => {
-    //     const status = await dispenser.execute(dispenser.readPreset, dispenser.processReadPreset);
-    //     console.log(status);
-    //     expect(status).toBe(69);
-    // });
+    it('should return true on readPreset', async () => {
+        const status = await dispenser.execute(dispenser.readPreset, dispenser.processReadPreset);
+        console.log(status);
+        expect(status).toBe(69);
+    });
 
-    // it('should return true on cancelPreset', async () => {
-    //     const status = await dispenser.execute(dispenser.cancelPreset, dispenser.processCommand);
-    //     expect(status).toBe(true);
-    // });
+    it('should return true on cancelPreset', async () => {
+        const status = await dispenser.execute(dispenser.cancelPreset, dispenser.processCommand);
+        expect(status).toBe(true);
+    });
 
-    // it('should return true on Authorize', async () => {
-    //     const status = await dispenser.execute(dispenser.authorizeSale, dispenser.processCommand);
-    //     await delay(4000);
-    //     expect(status).toBe(true);
-    // });
+    it('should return true on Authorize', async () => {
+        const status = await dispenser.execute(dispenser.authorizeSale, dispenser.processCommand);
+        await delay(4000);
+        expect(status).toBe(true);
+    });
 
     // it('should return true on suspendSale', async () => {
     //     await delay(4000);
@@ -84,17 +84,17 @@ describe('GateX', () => {
     //     expect(status).toBe(true);
     // });
 
-    // it('should return true on pumpStop', async () => {
-    //     const status = await dispenser.execute(dispenser.pumpStop, dispenser.processCommand);
-    //     await delay(4000);
-    //     expect(status).toBe(true);
-    // });
+    it('should return true on pumpStop', async () => {
+        const status = await dispenser.execute(dispenser.pumpStop, dispenser.processCommand);
+        await delay(4000);
+        expect(status).toBe(true);
+    });
 
-    // it('should return true on clearSale', async () => {
-    //     await delay(4000);
-    //     const status = await dispenser.execute(dispenser.clearSale, dispenser.processCommand);
-    //     expect(status).toBe(true);
-    // });
+    it('should return true on clearSale', async () => {
+        await delay(4000);
+        const status = await dispenser.execute(dispenser.clearSale, dispenser.processCommand);
+        expect(status).toBe(true);
+    });
 
     // it('should return status on readStatus after pumpStart', async () => {
     //     const status = await dispenser.execute(dispenser.readStatus, dispenser.processStatus);

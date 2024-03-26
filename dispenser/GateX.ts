@@ -12,11 +12,13 @@ export class GateX extends ModBusDispenser {
     private slaveAddress = 1;
     private startingRegister = 10;
     private numRegisters = 2;
+    private preset: number;
 
     constructor(socket: ModbusRTU, options: DispenserOptions) {
         super(socket, options);
         let { kFactor } = options;
         this.kFactor = kFactor;
+        this.preset = 0;
         this.AuthorizeValveLine = new Line(this.chip, this.AuthorizeValveGPIO);
         this.AuthorizeValveLine.requestOutputMode();
     }
@@ -70,6 +72,10 @@ export class GateX extends ModBusDispenser {
         return false;
     }
 
+    processReadPreset(res: string) {
+        return parseInt(res);
+    }
+
     pumpStart() {
         // Not implemented
         return "true";
@@ -82,11 +88,29 @@ export class GateX extends ModBusDispenser {
 
     cancelPreset() {
         // Not implemented
+        this.preset = 0;
         return "true";
     }
 
     resumeDispencer() {
         // Not implemented
+        return "true";
+    }
+
+    setPreset(quantity: number) {
+        // Not implemented
+        this.preset = quantity
+        return "true";
+    }
+
+    readPreset() {
+        // Not implemented
+        return this.preset;
+    }
+
+    clearSale() {
+        // Not implemented
+        this.preset = 0;
         return "true";
     }
     // ...
