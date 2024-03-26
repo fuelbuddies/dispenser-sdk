@@ -13,9 +13,9 @@ describe('GateX', () => {
     beforeEach(async () => {
         if(!serialPort) {
             serialPort = new ModbusRTU();
-            // const path = await findDispenserPort(hardwareId, attributeId);
-            // console.log(path);
-            const path = '/dev/ttyUSB1';
+            const path = await findDispenserPort(hardwareId, attributeId);
+            console.log(path);
+            // const path = '/dev/ttyUSB1';
             await serialPort.connectRTUBuffered(path, { baudRate: 9600 });
             dispenser = new GateX(serialPort, { dispenserType: 'GateX', hardwareId, attributeId, baudRate: 9600, kFactor: 53.92859163 });
         }
