@@ -10,8 +10,8 @@ export class GateX extends ModBusDispenser {
     private kFactor: number | undefined;
 
     private slaveAddress = 1;
-    private startingRegister = 561;
-    private numRegisters = 3;
+    private startingRegister = 10;
+    private numRegisters = 2;
 
     constructor(socket: ModbusRTU, options: DispenserOptions) {
         super(socket, options);

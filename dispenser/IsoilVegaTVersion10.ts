@@ -633,6 +633,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
     isOrderComplete(res: string, quantity: number) {
         this.debugLog("isOrderComplete", res);
         const readsale = this.processReadSale(res);
+        const totalizer = this.processTotalizer(res);
 
         if (readsale > quantity - 1) {
             const response = {
@@ -641,6 +642,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
                 currentFlowRate: this.processFlowRate(res),
                 averageFlowRate: this.processAverageFlowRate(res),
                 batchNumber: this.processBatchNumber(res),
+                totalizer,
                 dispensedQty: this.toFixedNumber(readsale, 2)
             };
 
