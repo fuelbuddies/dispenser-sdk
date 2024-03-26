@@ -27,7 +27,7 @@ export class GateX extends ModBusDispenser {
     }
 
     processTotalizer(data: any) {
-        console.log(this.hexToDecLittleEndian(data.buffer));
+        console.log(this.parseResponseToUint32(data.buffer, true));
         return 0;
     }
 
