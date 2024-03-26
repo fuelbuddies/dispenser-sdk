@@ -31,7 +31,7 @@ export class GateX extends ModBusDispenser {
         if(!this.kFactor || this.kFactor < 0) {
             console.warn('K-Factor not set for this dispenser, you might get wrong totalizer value');
         }
-        return (pulse / (this.kFactor || 1)).toFixed(2);
+        return Number((pulse / (this.kFactor || 1)).toFixed(2));
     }
 
     checkType() {
