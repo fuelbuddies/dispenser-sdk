@@ -32,6 +32,7 @@ export class GateX extends ModBusDispenser {
         const pulses = data.buffer.toString('hex');
         console.log("pulses", pulses);
         const pulse = this.hexToDecLittleEndian(pulses);
+        console.log("pulse", pulse);
         if(!this.kFactor || this.kFactor < 0) {
             console.warn('K-Factor not set for this dispenser, you might get wrong totalizer value');
         }
