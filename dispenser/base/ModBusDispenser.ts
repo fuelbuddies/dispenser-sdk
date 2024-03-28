@@ -69,4 +69,13 @@ export class ModBusDispenser implements IDispenser {
     disconnect(callback: any): void {
         throw new Error("Method not implemented.");
     }
+
+    toFixedNumber(num: number, digits: number, base?: number) {
+        const pow = Math.pow(base || 10, digits);
+        return Math.round(num * pow) / pow;
+    }
+
+    debugLog(fnName: string, message: string) {
+        console.log(`[${fnName}] - ${message}`);
+    }
 }

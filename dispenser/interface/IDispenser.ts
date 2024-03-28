@@ -28,11 +28,11 @@ export interface IDispenser {
   readAuthorization?(): any;
   cancelPreset?(): any;
   readSale?(): any;
-  suspendSale?(): any
-  resumeSale?(): any
-  clearSale?(): any
-  printReceipt?(printObj: any): any
-  printOrder?(printObj: any): any
+  suspendSale?(): any;
+  resumeSale?(): any;
+  clearSale?(): any;
+  printReceipt?(printObj: any): any;
+  printOrder?(printObj: any): any;
   processStatus?(res: string): any;
   rfidType?(res: string): any;
   rfidStatus?(res: string): any;
@@ -41,8 +41,8 @@ export interface IDispenser {
   processStatusMapping?(status: string, statuses: any): any;
   processCommand?(res: string, args: any, fnName: string): any;
   processReadSale?(res: string): any;
-  processTotalizer?(res: string): any;
-  processTotalizerWithBatch?(res: string): any;
+  processTotalizer?(res: string): TotalizerResponse;
+  processTotalizerWithBatch?(res: string): TotalizerResponse;
   processReadPreset?(res: string): any;
   processResponse?(response: string[], exponentCut: number, mantessaCut: number): any;
   processExternalPump?(res: string): boolean;
@@ -72,3 +72,15 @@ export type DispenserOptions = {
   baudRate?: number;
   kFactor?: number
 };
+
+
+export type TotalizerResponse = {
+  totalizer: number;
+  batchNumber?: number
+  timestamp: number;
+}
+
+export type VolumeResponse = {
+  volume: number;
+  litersPerMinute: number;
+}

@@ -1,6 +1,7 @@
 //npm run esbuild-browser:watch
 
 import { BaseDispenser } from "./base/BaseDispenser";
+import { TotalizerResponse } from "./interface/IDispenser";
 
 export class IsoilVegaTVersion10 extends BaseDispenser {
     private totalizerBuffer =        Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
@@ -487,18 +488,22 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         return response;
     }
 
-    processTotalizer(res: string) {
+    processTotalizer(res: string): TotalizerResponse {
         this.debugLog("processTotalizer", res);
         const response = parseFloat((this.processRawReadStatus(res))[7].replace(',', '.'));
         this.debugLog("processTotalizer", JSON.stringify(response));
-        return response;
+        return {
+            totalizer: response,
+            timestamp: Date.now()
+        };
     }
 
-    processTotalizerWithBatch(res: string) {
+    processTotalizerWithBatch(res: string): TotalizerResponse {
         this.debugLog("processTotalizerWithBatch", res);
         const response = {
             totalizer: parseFloat((this.processRawReadStatus(res))[7].replace(',', '.')),
-            batchNumber: this.processBatchNumber(res) + 1 // called before pump start.. so +1
+            batchNumber: this.processBatchNumber(res) + 1, // called before pump start.. so +1
+            timestamp: Date.now()
         };
         this.debugLog("processTotalizerWithBatch", JSON.stringify(response));
         return response;
@@ -656,6 +661,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
             currentFlowRate: this.processFlowRate(res),
             averageFlowRate: this.processAverageFlowRate(res),
             batchNumber: this.processBatchNumber(res),
+            totalizer,
             dispensedQty: this.toFixedNumber(readsale, 2)
         };
 

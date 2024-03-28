@@ -1,4 +1,5 @@
 import { BaseDispenser } from "./base/BaseDispenser";
+import { TotalizerResponse } from "./interface/IDispenser";
 
 export class Tokhiem extends BaseDispenser {
     private totalizerBuffer       = Buffer.from([0x01, 0x41, 0x54, 0x7F, 0x6B]);
@@ -322,15 +323,17 @@ export class Tokhiem extends BaseDispenser {
    * @param res string
    * @returns
    */
-  processTotalizer(res: string) {
-    return this.processResponse(res.split("2e"), 16, 4);
+  processTotalizer(res: string): TotalizerResponse {
+    return {
+      totalizer: this.processResponse(res.split("2e"), 16, 4),
+      timestamp: Date.now(),
+    }
   }
 
-  processTotalizerWithBatch(res: string) {
-    return {
-      totalizer: this.processTotalizer(res),
-      batchNumber: this.processBatchNumber(res) + 1, // called before pump start.. so +1
-    };
+  processTotalizerWithBatch(res: string): TotalizerResponse {
+    let response = this.processTotalizer(res);
+    response.batchNumber = this.processBatchNumber(res) + 1;
+    return response;
   }
 
   processReadPreset(res: string) {
