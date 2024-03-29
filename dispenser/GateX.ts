@@ -33,7 +33,7 @@ export class GateX extends ModBusDispenser {
         return await this.totalizer();
     }
 
-    processTotalizerResponse(data: any): TotalizerResponse {
+    processTotalizerRes(data: any): TotalizerResponse {
         const pulse = this.hexToDecLittleEndian(data.buffer.toString('hex'));
         console.log("pulse", pulse);
         if(!this.kFactor || this.kFactor < 0) {
@@ -53,11 +53,11 @@ export class GateX extends ModBusDispenser {
     }
 
     processTotalizer(data: any) {
-        return this.processTotalizerResponse(data).totalizer;
+        return this.processTotalizerRes(data).totalizer;
     }
 
     isOrderComplete(res: any, quantity: number) {
-        const currentTotalizer = this.processTotalizerResponse(res);
+        const currentTotalizer = this.processTotalizerRes(res);
         const readsale = this.calculateVolume(this.startTotalizer, currentTotalizer);
         if (readsale.volume > quantity - 1) {
             const response = {
