@@ -128,6 +128,11 @@ export class BaseDispenser implements IDispenser {
       const exponent = (hex >> 23) & 0xFF;
       return sign * (hex & 0x7fffff | 0x800000) * 1.0 / Math.pow(2, 23) * Math.pow(2, (exponent - 127));
     }
+    
+    hexStringToByte(printText: string, needle: number): number {
+      const hexPair: string = printText.substring(needle, needle + 2); // More concise way to extract substring
+      return parseInt(hexPair, 16); // Use parseInt for hex conversion
+    }
 
     hexToNumber(str: string) {
       // Pad the string with zeroes to 16 characters.
