@@ -5,7 +5,7 @@ export interface IRfid {
   disconnect(callback: any): void;
   execute?(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   checkType?(): any;
-  bind(callback: (status: unknown, data: RfidResponse | "idle") => void): void
+  bind?(callback: (status: unknown, data: RfidResponse | "idle") => void): void
   rfidType?(res: string): any;
   rfidStatus?(res: string): any;
   processRFIDresponse?(res: string): any;
