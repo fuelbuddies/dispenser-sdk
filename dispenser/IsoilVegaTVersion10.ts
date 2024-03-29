@@ -1,8 +1,6 @@
 //npm run esbuild-browser:watch
 
 import { BaseDispenser } from "./base/BaseDispenser";
-import { TotalizerResponse } from "./interface/IDispenser";
-
 export class IsoilVegaTVersion10 extends BaseDispenser {
     private totalizerBuffer =        Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
     private read_sale =              Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
@@ -488,17 +486,14 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         return response;
     }
 
-    processTotalizer(res: string): TotalizerResponse {
+    processTotalizer(res: string) {
         this.debugLog("processTotalizer", res);
         const response = parseFloat((this.processRawReadStatus(res))[7].replace(',', '.'));
         this.debugLog("processTotalizer", JSON.stringify(response));
-        return {
-            totalizer: response,
-            timestamp: Date.now()
-        };
+        return response;
     }
 
-    processTotalizerWithBatch(res: string): TotalizerResponse {
+    processTotalizerWithBatch(res: string) {
         this.debugLog("processTotalizerWithBatch", res);
         const response = {
             totalizer: parseFloat((this.processRawReadStatus(res))[7].replace(',', '.')),

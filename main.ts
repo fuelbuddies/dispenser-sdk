@@ -4,12 +4,12 @@ import { GateX } from "./dispenser/GateX";
 import { RfidPetropoint } from "./rfid/RfidPetropoint";
 import { findDispenserPort } from "./utils/findDispenserPort";
 import { findRfidPort } from "./utils/findRfidPort";
-import { DispenserOptions, IDispenser, TotalizerResponse, VolumeResponse } from "./dispenser/interface/IDispenser";
+import { DispenserOptions, IDispenser } from "./dispenser/interface/IDispenser";
 import { SerialPort } from "serialport";
 import { IRfid, RfidOptions } from "./rfid/interface/IRfid";
 import ModbusRTU from "modbus-serial";
 
-export { IDispenser, IRfid, RfidOptions, DispenserOptions, VolumeResponse, TotalizerResponse};
+export { IDispenser, IRfid, RfidOptions, DispenserOptions};
 
 /* Factory for creating dispenser objects */
 export async function createDispenser(options: DispenserOptions): Promise<IDispenser> {

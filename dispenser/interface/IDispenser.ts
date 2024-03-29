@@ -41,8 +41,8 @@ export interface IDispenser {
   processStatusMapping?(status: string, statuses: any): any;
   processCommand?(res: string, args: any, fnName: string): any;
   processReadSale?(res: string): any;
-  processTotalizer?(res: string): TotalizerResponse;
-  processTotalizerWithBatch?(res: string): TotalizerResponse;
+  processTotalizer?(res: string): any;
+  processTotalizerWithBatch?(res: string): any;
   processReadPreset?(res: string): any;
   processResponse?(response: string[], exponentCut: number, mantessaCut: number): any;
   processExternalPump?(res: string): boolean;
