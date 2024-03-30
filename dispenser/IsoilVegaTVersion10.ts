@@ -47,14 +47,14 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         await this.connection.write(this.totalizerBuffer);
     }
 
-    readPreset() {
+    async readPreset() {
         this.debugLog("readPreset", "Read_Status");
-        this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
+        await this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
     }
 
-    readSale() {
+    async readSale() {
         this.debugLog("readSale", "Read_Status");
-        this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
+        await this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
     }
 
     async readStatus() {
@@ -565,10 +565,12 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         this.debugLog("isOrderComplete", res);
         const readsale = this.processReadSale(res);
         const totalizer = this.processTotalizer(res);
+        const status = this.processStatus(res);
 
         if (readsale > quantity - 1) {
             const response = {
                 status: true,
+                state: status,
                 percentage: this.toFixedNumber((readsale / quantity) * 100.00, 2),
                 currentFlowRate: this.processFlowRate(res),
                 averageFlowRate: this.processAverageFlowRate(res),
@@ -583,6 +585,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
         const response = {
             status: false,
+            state: status,
             percentage: this.toFixedNumber((readsale / quantity) * 100.00, 2),
             currentFlowRate: this.processFlowRate(res),
             averageFlowRate: this.processAverageFlowRate(res),
