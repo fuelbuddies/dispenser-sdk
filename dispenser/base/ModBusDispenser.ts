@@ -66,7 +66,7 @@ export class ModBusDispenser implements IDispenser {
     */
     resetQueue(): void {
         this.queue.kill();
-        this.queue = queue(this.processTask.bind(this), 1);
+        this.queue = queue(this.processTaskMTU.bind(this), 1);
     }
 
     disconnect(callback: any): void {
