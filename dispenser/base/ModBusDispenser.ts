@@ -70,7 +70,7 @@ export class ModBusDispenser implements IDispenser {
     }
 
     disconnect(callback: any): void {
-        throw new Error("Method not implemented.");
+        this.connection.close(callback);
     }
 
     toFixedNumber(num: number, digits: number, base?: number) {
