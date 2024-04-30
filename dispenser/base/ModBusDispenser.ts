@@ -8,7 +8,7 @@ export class ModBusDispenser implements IDispenser {
 
     constructor(socket: ModbusRTU, options?: DispenserOptions) {
         this.connection = socket;
-        this.queue = queue(this.processTask.bind(this), 1);
+        this.queue = queue(this.processTaskMTU.bind(this), 1);
     }
 
     hexToDecLittleEndian(hexString: string): number {
@@ -24,7 +24,7 @@ export class ModBusDispenser implements IDispenser {
         return decimalValue;
     }
 
-    async processTask(task: any) {
+    async processTaskMTU(task: any) {
         const {bindFunction, callee, calleeArgs} = task;
         const data = await callee.call(this, calleeArgs || undefined);
         if (bindFunction instanceof Function) {
