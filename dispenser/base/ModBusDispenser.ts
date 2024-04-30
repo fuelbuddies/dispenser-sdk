@@ -1,14 +1,14 @@
 import { DispenserOptions, IDispenser } from "../interface/IDispenser";
 import ModbusRTU from "modbus-serial";
-// import { QueueObject, queue } from 'async';
+import { QueueObject, queue } from 'async';
 
 export class ModBusDispenser implements IDispenser {
     connection: ModbusRTU;
-    // queue: QueueObject<any>;
+    queue: QueueObject<any>;
 
     constructor(socket: ModbusRTU, options?: DispenserOptions) {
         this.connection = socket;
-        // this.queue = queue(this.processTaskMTU.bind(this), 1);
+        this.queue = queue(this.processTaskMTU.bind(this), 1);
     }
 
     hexToDecLittleEndian(hexString: string): number {
@@ -37,48 +37,36 @@ export class ModBusDispenser implements IDispenser {
     }
 
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
-        return new Promise(async () => {
-            const data = await callee.call(this, calleeArgs || undefined);
-            if (bindFunction instanceof Function) {
-                const result = bindFunction.call(this, data, calleeArgs || undefined, callee.name);
-                console.log("bindFunction2", result);
-                return result;
-            } else {
-                return data;
-            }
+        return new Promise((resolve, reject) => {
+            this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
+                console.log("result", arguments);
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
         });
-
-        // return new Promise((resolve, reject) => {
-        //     this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
-        //         console.log("result", arguments);
-        //         if (err) {
-        //             reject(err);
-        //         } else {
-        //             resolve(result);
-        //         }
-        //     });
-        // });
     }
 
     executeInPriority(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {
-        return this.execute(callee, bindFunction, calleeArgs);
-        // return new Promise((resolve, reject) => {
-        //     this.queue.unshift({ callee, bindFunction, calleeArgs }, (err, result) => {
-        //         if (err) {
-        //             reject(err);
-        //         } else {
-        //             resolve(result);
-        //         }
-        //     });
-        // });
+        return new Promise((resolve, reject) => {
+            this.queue.unshift({ callee, bindFunction, calleeArgs }, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
     }
 
     /**
     * reset queue
     */
     resetQueue(): void {
-        // this.queue.kill();
-        // this.queue = queue(this.processTaskMTU.bind(this), 1);
+        this.queue.kill();
+        this.queue = queue(this.processTaskMTU.bind(this), 1);
     }
 
     disconnect(callback: any): void {
