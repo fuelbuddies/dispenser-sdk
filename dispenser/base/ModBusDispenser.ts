@@ -46,7 +46,7 @@ export class ModBusDispenser implements IDispenser {
                 } else {
                     resolve(data);
                 }
-            }).error((err: any) => {
+            }).catch((err: any) => {
                 reject(err);
             });
         });
