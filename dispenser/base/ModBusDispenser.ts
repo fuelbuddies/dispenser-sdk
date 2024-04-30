@@ -28,7 +28,9 @@ export class ModBusDispenser implements IDispenser {
         const {bindFunction, callee, calleeArgs} = task;
         const data = await callee.call(this, calleeArgs || undefined);
         if (bindFunction instanceof Function) {
-            return bindFunction.call(this, data, calleeArgs || undefined, callee.name);
+            const result = bindFunction.call(this, data, calleeArgs || undefined, callee.name);
+            console.log("bindFunction", result);
+            return result;
         } else {
             return data;
         }
