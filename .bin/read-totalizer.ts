@@ -1,12 +1,14 @@
 #!/usr/bin/env ts-node
 
 import { createDispenser } from '../main';
-import { getConfigFromEnv } from '../utils/envParser';
+import {getConfigFromEnv} from '../utils/envParser';
 
-async function main() {
-    const dispenser = await createDispenser(getConfigFromEnv());
-    const totalizer = await dispenser.execute(dispenser.totalizer, dispenser.processTotalizer)
-    return totalizer;
-}
+console.log(getConfigFromEnv());
 
-console.log(main());
+createDispenser(getConfigFromEnv()).then((dispenser) => {
+    console.log(dispenser);
+    dispenser.execute(dispenser.totalizer, dispenser.processTotalizer).then((totalizer) => {
+        console.log(totalizer);
+        process.exit(0);
+    });
+});
