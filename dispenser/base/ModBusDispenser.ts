@@ -37,6 +37,7 @@ export class ModBusDispenser implements IDispenser {
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
         return new Promise((resolve, reject) => {
             this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
+                console.log("result", arguments);
                 if (err) {
                     reject(err);
                 } else {
