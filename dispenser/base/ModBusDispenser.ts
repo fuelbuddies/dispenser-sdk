@@ -37,11 +37,11 @@ export class ModBusDispenser implements IDispenser {
     }
 
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async () => {
             const data = await callee.call(this, calleeArgs || undefined);
             if (bindFunction instanceof Function) {
                 const result = bindFunction.call(this, data, calleeArgs || undefined, callee.name);
-                console.log("bindFunction", result);
+                console.log("bindFunction2", result);
                 return result;
             } else {
                 return data;
