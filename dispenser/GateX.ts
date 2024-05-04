@@ -263,7 +263,7 @@ export class GateX extends ModBusDispenser {
 
     printOrder(printText: string): boolean {
         if(!this.printer) {
-            return false;
+            throw new Error('Printer is required for GateX dispenser');
         }
 
         const buffer = Buffer.from(printText, 'hex');
