@@ -256,7 +256,7 @@ export class GateX extends ModBusDispenser {
         printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
 
         this.debugLog("printReceipt", `${printArr.join('0A')}0A0A2020202020`);
-        this.printOrder(`${printArr.join('0A')}0A0A2020202020`);
+        return this.printOrder(`${printArr.join('0A')}0A0A0A0A0A1D564100`);
     }
 
     printOrder(printText: string): boolean {
