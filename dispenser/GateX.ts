@@ -2,6 +2,7 @@ import { Chip, Line } from 'node-libgpiod';
 import { ModBusDispenser } from "./base/ModBusDispenser";
 import ModbusRTU from "modbus-serial";
 import { DispenserOptions, TotalizerResponse, VolumeResponse } from './interface/IDispenser';
+import { SerialPort } from 'serialport';
 
 export class GateX extends ModBusDispenser {
     private AuthorizeValveGPIO: number = 26;
@@ -15,8 +16,8 @@ export class GateX extends ModBusDispenser {
     private numRegisters = 2;
     private preset: number;
 
-    constructor(socket: ModbusRTU, options: DispenserOptions) {
-        super(socket, options);
+    constructor(socket: ModbusRTU, printer: SerialPort, options: DispenserOptions) {
+        super(socket, printer, options);
         let { kFactor } = options;
         this.kFactor = kFactor;
         this.preset = 0;
@@ -188,6 +189,104 @@ export class GateX extends ModBusDispenser {
             litersPerMinute: volumeDifference / timeDifferenceInMinutes
         };
     }
+
+
+    printReceipt(printObj: any) {
+        const printWidth = 33;
+        const printArr = [];
+
+        this.debugLog("printReceipt", JSON.stringify(printObj));
+
+        if (printObj?.isReceiptRequired) {
+            printArr.push(this.str2hex(this.centerAlignValue("****  CUSTOMER COPY  ****", printWidth)));
+            printArr.push('0A');
+            printArr.push(this.str2hex(this.centerAlignValue("FUELBUDDY FUEL SUPPLY LLC", printWidth)));
+            printArr.push('0A');
+            printArr.push(this.str2hex(this.rightAlignValue("BOWSER No", printObj?.vehicleRegistrationNumber, printWidth)));
+            printArr.push(this.str2hex(this.rightAlignValue("ASSET No", printObj?.registrationNumber, printWidth)));
+            printArr.push(this.str2hex(this.rightAlignValue("DATE", (new Date(printObj?.orderDate)).toLocaleDateString(), printWidth)));
+            printArr.push('0A');
+            printArr.push(this.str2hex(this.rightAlignValue("DRIVER", printObj?.driverCode, printWidth)));
+            printArr.push(this.str2hex(this.rightAlignValue("CUSTOMER", printObj?.customerCode, printWidth)));
+            printArr.push(this.str2hex(this.rightAlignValue("ORDER No", printObj?.orderCode, printWidth)));
+            printArr.push('0A');
+            printArr.push(this.str2hex(this.rightAlignValue("Batch No", printObj?.batchCode, printWidth)));
+            printArr.push(this.str2hex(this.rightAlignValue("START TIME", (new Date(printObj?.startTime)).toLocaleTimeString(), printWidth)));
+            printArr.push(this.str2hex(this.rightAlignValue("END TIME", (new Date(printObj?.endTime)).toLocaleTimeString(), printWidth)));
+            printArr.push('0A');
+            printArr.push(this.str2hex(this.rightAlignValue("PRODUCT", printObj?.productName, printWidth)));
+            printArr.push('0A');
+            printArr.push(this.str2hex(this.rightAlignValue("DELIVERED", printObj?.quantity, printWidth)));
+            printArr.push(this.str2hex(this.rightAlignValue("START TOT.", printObj?.startTotalizer, printWidth)));
+            printArr.push(this.str2hex(this.rightAlignValue("END TOT.", printObj?.endTotalizer, printWidth)));
+            if (printObj?.odometerReading) {
+                printArr.push(this.str2hex(this.rightAlignValue("ODOMETER", printObj?.odometerReading, printWidth)));
+            }
+            printArr.push('0A');
+            printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
+            printArr.push('0A');
+            printArr.push('0A');
+        }
+
+        printArr.push(this.str2hex(this.centerAlignValue("****  PRINT COPY  ****", printWidth)));
+        printArr.push('0A');
+        printArr.push(this.str2hex(this.centerAlignValue("FUELBUDDY FUEL SUPPLY LLC", printWidth)));
+        printArr.push('0A');
+        printArr.push(this.str2hex(this.rightAlignValue("BOWSER No", printObj?.vehicleRegistrationNumber, printWidth)));
+        printArr.push(this.str2hex(this.rightAlignValue("ASSET No", printObj?.registrationNumber, printWidth)));
+        printArr.push(this.str2hex(this.rightAlignValue("DATE", (new Date(printObj?.orderDate)).toLocaleDateString(), printWidth)));
+        printArr.push('0A');
+        printArr.push(this.str2hex(this.rightAlignValue("DRIVER ID", printObj?.driverCode, printWidth)));
+        printArr.push(this.str2hex(this.rightAlignValue("CUSTOMER ID", printObj?.customerCode, printWidth)));
+        printArr.push(this.str2hex(this.rightAlignValue("ORDER No", printObj?.orderCode, printWidth)));
+        printArr.push('0A');
+        printArr.push(this.str2hex(this.rightAlignValue("Batch No", printObj?.batchCode, printWidth)));
+        printArr.push(this.str2hex(this.rightAlignValue("START TIME", (new Date(printObj?.startTime)).toLocaleTimeString(), printWidth)));
+        printArr.push(this.str2hex(this.rightAlignValue("END TIME", (new Date(printObj?.endTime)).toLocaleTimeString(), printWidth)));
+        printArr.push('0A');
+        printArr.push(this.str2hex(this.rightAlignValue("PRODUCT", printObj?.productName, printWidth)));
+        printArr.push('0A');
+        printArr.push(this.str2hex(this.rightAlignValue("DELIVERED", printObj?.quantity, printWidth)));
+        printArr.push(this.str2hex(this.rightAlignValue("START TOT.", printObj?.startTotalizer, printWidth)));
+        printArr.push(this.str2hex(this.rightAlignValue("END TOT.", printObj?.endTotalizer, printWidth)));
+        if (printObj?.odometerReading) {
+            printArr.push(this.str2hex(this.rightAlignValue("ODOMETER", printObj?.odometerReading, printWidth)));
+        }
+        printArr.push('0A');
+        printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
+
+        this.debugLog("printReceipt", `02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
+        this.printOrder(`02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
+    }
+
+    printOrder(printText: string): boolean {
+        let i: number;
+        let checksum: number = 0;
+
+        if(!this.printer) {
+            return false;
+        }
+
+        for (i = 0; i < printText.length; i += 2) {
+          checksum += this.hexStringToByte(printText, i);
+        }
+
+        checksum %= 256;
+
+        const checksumHex: string = checksum.toString(16).padStart(2, "0"); // More concise way to get hex string
+
+        const checksum1: number = checksumHex.charCodeAt(0);
+        const checksum2: number = checksumHex.charCodeAt(1);
+
+        // Send each character of the hex string over serial
+        for (i = 0; i < printText.length; i += 2) {
+          this.printer.write(this.hexStringToByte(printText, i));
+        }
+
+        this.printer.write(checksum2);
+        this.printer.write(checksum1);
+        return this.printer.write(0x0d);
+      }
 
 
     // ...

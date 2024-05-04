@@ -8,7 +8,7 @@ export { IDispenser, IRfid, RfidOptions, DispenserOptions};
 
 /* Factory for creating dispenser objects */
 export async function createDispenser(options: DispenserOptions): Promise<IDispenser> {
-    const { dispenserType, hardwareId, attributeId, baudRate = 9600 } = options;
+    const { dispenserType, hardwareId, attributeId, baudRate = 9600, printer } = options;
     switch (dispenserType) {
         case 'Tokhiem':
             const DispenserType = await import('./dispenser/Tokhiem');
@@ -21,7 +21,9 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
             const ModbusRTU = await import('modbus-serial');
             const serialPort = new ModbusRTU.default();
             await serialPort.connectRTUBuffered(await findDispenserPort(hardwareId, attributeId), { baudRate: baudRate });
-            return new GateX.GateX(serialPort, options);
+            if(!printer) throw new Error('Printer is required for GateX dispenser');
+            const printerPort = new SerialPort({path: await findDispenserPort(printer.hardwareId, printer.attributeId), baudRate: printer.baudRate || 9600});
+            return new GateX.GateX(serialPort, printerPort, options);
         default:
             throw new Error('Invalid dispenser type');
     }

@@ -2,26 +2,57 @@ import { GateX } from "../dispenser/GateX";
 import { findDispenserPort } from '../utils/findDispenserPort';
 import { delay } from "../utils/delay";
 import ModbusRTU from "modbus-serial";
+import { SerialPort } from "serialport";
 
 const hardwareId = '0403';
 const attributeId = '6001';
 
+const printerHardwareId = '067b';
+const printerAttributeId = '2303';
+
 describe('GateX', () => {
     let dispenser: GateX;
     let serialPort: ModbusRTU;
+    let printerPort: SerialPort;
 
     beforeEach(async () => {
         if(!serialPort) {
             serialPort = new ModbusRTU();
             const path = await findDispenserPort(hardwareId, attributeId);
+            printerPort = new SerialPort({path: await findDispenserPort(printerHardwareId, printerAttributeId), baudRate: 9600 });            
             await serialPort.connectRTUBuffered(path, { baudRate: 9600 });
-            dispenser = new GateX(serialPort, { dispenserType: 'GateX', hardwareId, attributeId, baudRate: 9600, kFactor: 3692953.6 });
+            dispenser = new GateX(serialPort, printerPort, { dispenserType: 'GateX', hardwareId, attributeId, baudRate: 9600, kFactor: 3692953.6 });
         }
     });
 
     it('should return GateX on checkType', () => {
         const kind = dispenser.checkType();
         expect(kind).toBe('GATEX');
+    });
+
+    it('should return true on print', async () => {
+        const printObj = {
+            "customerCode": null,
+            "driverCode": 7777,
+            "endBatchCode": null,
+            "endTime": "2024-05-04T08:16:00.194462",
+            "endTotalizer": "246",
+            "orderCode": 113175,
+            "productName": "Diesel",
+            "orderDate": "2024-04-26T01:00:00",
+            "quantity": 123,
+            "startBatchCode": null,
+            "startTime": "2024-05-04T08:15:53.215324",
+            "registrationNumber": "TUAbu Dhabi98676",
+            "vehicleRegistrationNumber": "9818",
+            "startTotalizer": "123",
+            "odometerReading": "123456789123",
+            "unitOfMeasure": "litre",
+            "isReceiptRequired": true
+        };
+
+        const status = await dispenser.executeInPriority(dispenser.printReceipt, dispenser.processCommand, printObj);   
+        expect(status).toBe(true);
     });
 
     it('should return greater than 0 on checkTotalizer', async () => {

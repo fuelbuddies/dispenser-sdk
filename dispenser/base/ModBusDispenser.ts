@@ -1,14 +1,17 @@
-import { DispenserOptions, IDispenser } from "../interface/IDispenser";
+import { DispenserOptions, IDispenser, PrinterOptions } from "../interface/IDispenser";
 import ModbusRTU from "modbus-serial";
 // import { QueueObject, queue } from 'async';
+import { SerialPort } from 'serialport';
+import { AutoDetectTypes } from '@serialport/bindings-cpp';
 
 export class ModBusDispenser implements IDispenser {
     connection: ModbusRTU;
-    // queue: QueueObject<any>;
+    printer?: SerialPort<AutoDetectTypes>;
 
-    constructor(socket: ModbusRTU, options?: DispenserOptions) {
+
+    constructor(socket: ModbusRTU, printer?: SerialPort, options?: DispenserOptions) {
         this.connection = socket;
-        // this.queue = queue(this.processTaskMTU.bind(this), 1);
+        this.printer = printer;
     }
 
     hexToDecLittleEndian(hexString: string): number {
@@ -50,37 +53,10 @@ export class ModBusDispenser implements IDispenser {
                 reject(err);
             });
         });
-        // return new Promise((resolve, reject) => {
-        //     this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
-        //         console.log("result", arguments);
-        //         if (err) {
-        //             reject(err);
-        //         } else {
-        //             resolve(result);
-        //         }
-        //     });
-        // });
     }
 
     executeInPriority(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {
         return this.execute(callee, bindFunction, calleeArgs);
-        // return new Promise((resolve, reject) => {
-        //     this.queue.unshift({ callee, bindFunction, calleeArgs }, (err, result) => {
-        //         if (err) {
-        //             reject(err);
-        //         } else {
-        //             resolve(result);
-        //         }
-        //     });
-        // });
-    }
-
-    /**
-    * reset queue
-    */
-    resetQueue(): void {
-        // this.queue.kill();
-        // this.queue = queue(this.processTaskMTU.bind(this), 1);
     }
 
     disconnect(callback: any): void {
@@ -95,4 +71,55 @@ export class ModBusDispenser implements IDispenser {
     debugLog(fnName: string, message: string) {
         console.log(`[${fnName}] - ${message}`);
     }
+
+    /**
+     * Convert String to HEX
+     * @param num
+     * @returns
+     */
+    str2hex(num: string) {
+        let str = '';
+        for (let i = 0; i < num.length; i++) {
+          str += num.charCodeAt(i).toString(16);
+        }
+        return str;
+      }
+
+      /**
+       * right align value in a string.
+       * @param label
+       * @param value
+       * @param totalWidth
+       * @returns
+       */
+      rightAlignValue = (label: string, valueStr: string, totalWidth: number) => {
+          console.log('[rightAlignValue]', label, valueStr, totalWidth);
+          const value = valueStr ? valueStr + "" : 'N/A';
+          const labelWidth = label.length;
+          const valueWidth = value.length;
+          const spacesToAdd = totalWidth - labelWidth - valueWidth;
+
+          const alignedString = label + ' '.repeat(spacesToAdd) + value;
+          return alignedString;
+      }
+
+      /**
+       * Center Align Value in a string
+       * @param value
+       * @param totalWidth
+       */
+      centerAlignValue = (value: string, totalWidth: number) => {
+          const valueWidth = value.length;
+          const spacesToAdd = totalWidth - valueWidth;
+          const leftSpaces = Math.floor(spacesToAdd / 2);
+          const rightSpaces = spacesToAdd - leftSpaces;
+
+          const alignedString = ' '.repeat(leftSpaces) + value + ' '.repeat(rightSpaces);
+          return alignedString;
+      }
+
+      hexStringToByte(printText: string, needle: number): number {
+        const hexPair: string = printText.substring(needle, needle + 2); // More concise way to extract substring
+        return parseInt(hexPair, 16); // Use parseInt for hex conversion
+      }
 }

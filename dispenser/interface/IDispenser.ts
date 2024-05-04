@@ -5,7 +5,7 @@ export interface IDispenser {
   connection: SerialPort | ModbusRTU;
   execute(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   executeInPriority(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
-  resetQueue(): void;
+  resetQueue?(): void;
   disconnect(callback: any): void;
   checkType?(): any;
   switchToRemote?(): any;
@@ -71,6 +71,14 @@ export type DispenserOptions = {
   attributeId: string;
   baudRate?: number;
   kFactor?: number
+  printer?: PrinterOptions;
+};
+
+export type PrinterOptions = {
+  printerType: string;
+  hardwareId: string;
+  attributeId: string;
+  baudRate?: number;
 };
 
 
