@@ -260,34 +260,12 @@ export class GateX extends ModBusDispenser {
     }
 
     printOrder(printText: string): boolean {
-        let i: number;
-        // let checksum: number = 0;
-
         if(!this.printer) {
             return false;
         }
 
-        // for (i = 0; i < printText.length; i += 2) {
-        //   checksum += this.hexStringToByte(printText, i);
-        // }
-
-        // checksum %= 256;
-
-        // const checksumHex: string = checksum.toString(16).padStart(2, "0"); // More concise way to get hex string
-
-        // const checksum1: number = checksumHex.charCodeAt(0);
-        // const checksum2: number = checksumHex.charCodeAt(1);
-
-        let written = false;
-        // Send each character of the hex string over serial
-        for (i = 0; i < printText.length; i += 2) {
-          written = this.printer.write(this.hexStringToByte(printText, i));
-        }
-
-        return written;
-        // this.printer.write(checksum2);
-        // this.printer.write(checksum1);
-        // return this.printer.write(0x0d);
+        const buffer = Buffer.from(printText, 'hex');
+        return this.printer.write(buffer);
       }
 
 
