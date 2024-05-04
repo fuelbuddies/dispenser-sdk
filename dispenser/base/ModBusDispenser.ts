@@ -69,7 +69,6 @@ export class ModBusDispenser implements IDispenser {
                 callback();
             });
         });
-
     }
 
     toFixedNumber(num: number, digits: number, base?: number) {
