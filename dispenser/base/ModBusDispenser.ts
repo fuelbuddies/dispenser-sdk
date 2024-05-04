@@ -60,7 +60,16 @@ export class ModBusDispenser implements IDispenser {
     }
 
     disconnect(callback: any): void {
-        this.connection.close(callback);
+        this.connection.close(() => {
+            if (!this.printer) {
+                return callback();
+            }
+
+            this.printer.close(() => {
+                callback();
+            });
+        });
+
     }
 
     toFixedNumber(num: number, digits: number, base?: number) {
