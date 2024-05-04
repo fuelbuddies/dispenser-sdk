@@ -255,37 +255,39 @@ export class GateX extends ModBusDispenser {
         printArr.push('0A');
         printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
 
-        this.debugLog("printReceipt", `02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
-        this.printOrder(`02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
+        this.debugLog("printReceipt", `${printArr.join('0A')}0A0A2020202020`);
+        this.printOrder(`${printArr.join('0A')}0A0A2020202020`);
     }
 
     printOrder(printText: string): boolean {
         let i: number;
-        let checksum: number = 0;
+        // let checksum: number = 0;
 
         if(!this.printer) {
             return false;
         }
 
-        for (i = 0; i < printText.length; i += 2) {
-          checksum += this.hexStringToByte(printText, i);
-        }
+        // for (i = 0; i < printText.length; i += 2) {
+        //   checksum += this.hexStringToByte(printText, i);
+        // }
 
-        checksum %= 256;
+        // checksum %= 256;
 
-        const checksumHex: string = checksum.toString(16).padStart(2, "0"); // More concise way to get hex string
+        // const checksumHex: string = checksum.toString(16).padStart(2, "0"); // More concise way to get hex string
 
-        const checksum1: number = checksumHex.charCodeAt(0);
-        const checksum2: number = checksumHex.charCodeAt(1);
+        // const checksum1: number = checksumHex.charCodeAt(0);
+        // const checksum2: number = checksumHex.charCodeAt(1);
 
+        let written = false;
         // Send each character of the hex string over serial
         for (i = 0; i < printText.length; i += 2) {
-          this.printer.write(this.hexStringToByte(printText, i));
+          written = this.printer.write(this.hexStringToByte(printText, i));
         }
 
-        this.printer.write(checksum2);
-        this.printer.write(checksum1);
-        return this.printer.write(0x0d);
+        return written;
+        // this.printer.write(checksum2);
+        // this.printer.write(checksum1);
+        // return this.printer.write(0x0d);
       }
 
 
