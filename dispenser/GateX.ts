@@ -228,6 +228,8 @@ export class GateX extends ModBusDispenser {
             printArr.push('0A');
         }
 
+        printArr.push('0A0A1D5641000A0A');
+
         printArr.push(this.str2hex(this.centerAlignValue("****  PRINT COPY  ****", printWidth)));
         printArr.push('0A');
         printArr.push(this.str2hex(this.centerAlignValue("FUELBUDDY FUEL SUPPLY LLC", printWidth)));
@@ -255,8 +257,8 @@ export class GateX extends ModBusDispenser {
         printArr.push('0A');
         printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
 
-        this.debugLog("printReceipt", `${printArr.join('0A')}0A0A2020202020`);
-        return this.printOrder(`${printArr.join('0A')}0A0A0A0A0A1D564100`);
+        this.debugLog("printReceipt", `${printArr.join('0A')}0A0A0A1D564100`);
+        return this.printOrder(`${printArr.join('0A')}0A0A0A1D564100`);
     }
 
     printOrder(printText: string): boolean {
