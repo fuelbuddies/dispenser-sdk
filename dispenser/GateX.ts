@@ -264,7 +264,8 @@ export class GateX extends ModBusDispenser {
         }
 
         const buffer = Buffer.from(printText, 'hex');
-        return this.printer.write(buffer);
+        this.printer.write(buffer);
+        return true;
     }
 
 
