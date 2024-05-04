@@ -3,8 +3,9 @@ import { findRfidPort } from "./utils/findRfidPort";
 import { DispenserOptions, IDispenser } from "./dispenser/interface/IDispenser";
 import { SerialPort } from "serialport";
 import { IRfid, RfidOptions } from "./rfid/interface/IRfid";
+import { getConfigFromEnv, getRFIDConfigFromEnv } from './utils/envParser';
 
-export { IDispenser, IRfid, RfidOptions, DispenserOptions};
+export { IDispenser, IRfid, RfidOptions, DispenserOptions, getConfigFromEnv, getRFIDConfigFromEnv};
 
 /* Factory for creating dispenser objects */
 export async function createDispenser(options: DispenserOptions): Promise<IDispenser> {

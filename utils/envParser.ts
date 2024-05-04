@@ -1,4 +1,4 @@
-import { DispenserOptions } from "../main";
+import { DispenserOptions, RfidOptions } from "../main";
 
 export function getConfigFromEnv() {
     const dispenserConfig: DispenserOptions = {
@@ -23,4 +23,13 @@ export function getConfigFromEnv() {
     }
 
     return dispenserConfig;
+}
+
+export function getRFIDConfigFromEnv(): RfidOptions {
+    return {
+        rfidType: process.env.VITE_MAIN_RFID_TYPE || "",
+        attributeId: process.env.VITE_MAIN_RFID_ATTRIBUTE_ID || "",
+        hardwareId: process.env.VITE_MAIN_RFID_HARDWARE_ID || "",
+        baudRate: parseInt(process.env.VITE_MAIN_RFID_BAUD_RATE || "9600"),
+    } as RfidOptions;
 }
