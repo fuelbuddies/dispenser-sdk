@@ -6,9 +6,10 @@
   "types": "dist/main.d.ts",
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "tsc --build",
-    "pub": "rm -rf dist && tsc --build && npm version patch",
+    "build": "tsc --build && npm run copy",
+    "pub": "rm -rf dist && npm run build && npm version patch",
     "start": "node -r @swc-node/register main.ts",
+    "copy": "mkdir -p dist/dispenser/base/scripts && cp -R dispenser/base/scripts dist/dispenser/base && chmod +x dist/dispenser/base/scripts/**/*.sh",
     "test": "jest --detectOpenHandles --forceExit"
   },
   "author": "",
