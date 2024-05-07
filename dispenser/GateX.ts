@@ -29,6 +29,10 @@ export class GateX extends ModBusDispenser {
         return await this.totalizer();
     }
 
+    async readStatus() {
+        return (await this.executeShellScriptAndCheck('scripts/GateX/status.sh')) ? "true" : "false";
+    }
+
     processTotalizerRes(data: any): TotalizerResponse {
         const pulse = this.hexToDecLittleEndian(data.buffer.toString('hex'));
         console.log("pulse", pulse);
@@ -51,6 +55,16 @@ export class GateX extends ModBusDispenser {
     processTotalizer(data: any) {
         console.log(arguments);
         return this.processTotalizerRes(data).totalizer;
+    }
+
+    isIdle(res: string) {
+        this.debugLog("isSaleCloseable", "true");
+        return res.trim() === 'false';
+    }
+
+    isSaleCloseable() {
+        this.debugLog("isSaleCloseable", "true");
+        return true;
     }
 
     isOrderComplete(res: any, quantity: number) {
