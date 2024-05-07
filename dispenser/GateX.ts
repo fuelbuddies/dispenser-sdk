@@ -18,8 +18,6 @@ export class GateX extends ModBusDispenser {
         let { kFactor } = options;
         this.kFactor = kFactor;
         this.preset = 0;
-        this.AuthorizeValveLine = new Line(this.chip, this.AuthorizeValveGPIO);
-        this.AuthorizeValveLine.requestOutputMode();
     }
 
     async totalizer() {
