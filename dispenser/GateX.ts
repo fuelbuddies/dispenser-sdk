@@ -1,4 +1,3 @@
-import { Chip, Line } from 'node-libgpiod';
 import { ModBusDispenser } from "./base/ModBusDispenser";
 import ModbusRTU from "modbus-serial";
 import { DispenserOptions, TotalizerResponse, VolumeResponse } from './interface/IDispenser';
@@ -6,8 +5,6 @@ import { SerialPort } from 'serialport';
 
 export class GateX extends ModBusDispenser {
     private AuthorizeValveGPIO: number = 26;
-    private chip: Chip = new Chip(0);
-    private AuthorizeValveLine: Line;
     private kFactor: number | undefined;
     private startTotalizer: TotalizerResponse | undefined;
 
@@ -100,21 +97,19 @@ export class GateX extends ModBusDispenser {
 
     async authorizeSale() {
         try {
-            await this.AuthorizeValveLine.setValue(1);
-            return "true";
+            return await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh');
         } catch (error) {
             console.error(error);
-            return "false";
+            return false;
         }
     }
 
     async pumpStop() {
         try {
-            await this.AuthorizeValveLine.setValue(0);
-            return "true";
+            return await this.executeShellScriptAndCheck('scripts/GateX/unauthorize.sh');;
         } catch (error) {
             console.error(error);
-            return "false";
+            return false;
         }
     }
 
