@@ -39,6 +39,6 @@ export async function createRfid(options: RfidOptions): Promise<IRfid> {
             const RfidPetropoint = await import('./rfid/RfidPetropoint');
             return new RfidPetropoint.RfidPetropoint(serialPort);
         default:
-            throw new Error('Invalid dispenser type');
+            throw new Error('Invalid rfid type');
     }
 }
