@@ -513,6 +513,18 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         return false;
     }
 
+    isPrinterAvailable(res: string): boolean {
+        this.debugLog("isPrinterAvailable", res);
+        const status = this.processStatus(res);
+        this.debugLog("isPrinterAvailable", JSON.stringify(status));
+        if (status.localPrinting == 'Printer ON LINE') {
+            this.debugLog("isPrinterAvailable", "true");
+            return true;
+        }
+        this.debugLog("isPrinterAvailable", "false");
+        return false;
+    }
+
     isPresetVerified(res: string, quantity: number) {
         this.debugLog("isPresetVerified", res);
         const presetValue = this.processReadPreset(res);

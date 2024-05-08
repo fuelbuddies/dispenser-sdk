@@ -58,6 +58,7 @@ export interface IDispenser {
   isNozzleOnHook?(res: string): boolean;
   isNozzleOffHook?(res: string): boolean;
   isOnline?(res: string): boolean;
+  isPrinterAvailable?(res: string): boolean;
   cutStringFromLast?(str: string, cutLength: number, cutFromLast: boolean): any;
   hex2a?(hex: string): string;
   hex2bin?(data: string): string;

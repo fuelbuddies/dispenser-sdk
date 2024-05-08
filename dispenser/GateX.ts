@@ -169,6 +169,11 @@ export class GateX extends ModBusDispenser {
         return "true";
     }
 
+    isPrinterAvailable(res: string): boolean {
+        return true;
+    }
+
+
     readPreset() {
         return this.preset;
     }
@@ -277,7 +282,6 @@ export class GateX extends ModBusDispenser {
         this.printer.write(buffer);
         return true;
     }
-
 
     // ...
 }
