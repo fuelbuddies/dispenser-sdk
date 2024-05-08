@@ -10,7 +10,7 @@ export function getConfigFromEnv() {
 
     // Optionally, you can add more properties to the object if they exist in the environment variables
     if (process.env.VITE_MAIN_DISPENSER_K_FACTOR) {
-        dispenserConfig.kFactor = parseInt(process.env.VITE_MAIN_DISPENSER_K_FACTOR);
+        dispenserConfig.kFactor = Number(process.env.VITE_MAIN_DISPENSER_K_FACTOR);
     }
 
     if(process.env.VITE_MAIN_PRINTER_TYPE) {
