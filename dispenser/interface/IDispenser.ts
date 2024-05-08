@@ -85,7 +85,7 @@ export type PrinterOptions = {
 
 export type TotalizerResponse = {
   totalizer: number;
-  batchNumber?: number
+  batchNumber?: number;
   timestamp: number;
 }
 

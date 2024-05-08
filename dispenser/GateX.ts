@@ -42,8 +42,9 @@ export class GateX extends ModBusDispenser {
 
         var totalizer = {
             totalizer: Number((pulse / (this.kFactor || 1)).toFixed(2)),
+            batchNumber: pulse,
             timestamp: Date.now()
-        };
+        } as TotalizerResponse;
 
         if(!this.startTotalizer) {
             this.startTotalizer = totalizer;
@@ -76,7 +77,7 @@ export class GateX extends ModBusDispenser {
                 percentage: this.toFixedNumber((readsale.volume / quantity) * 100.00, 2),
                 currentFlowRate: readsale.litersPerMinute,
                 averageFlowRate: readsale.litersPerMinute,
-                batchNumber: this.startTotalizer?.totalizer || 0,
+                batchNumber: this.startTotalizer?.batchNumber || 0,
                 totalizer: currentTotalizer.totalizer,
                 dispensedQty: this.toFixedNumber(readsale.volume, 2)
             };
@@ -90,7 +91,7 @@ export class GateX extends ModBusDispenser {
             percentage: this.toFixedNumber((readsale.volume / quantity) * 100.00, 2),
             currentFlowRate: readsale.litersPerMinute,
             averageFlowRate: readsale.litersPerMinute,
-            batchNumber: this.startTotalizer?.totalizer || 0,
+            batchNumber: this.startTotalizer?.batchNumber || 0,
             totalizer: currentTotalizer.totalizer,
             dispensedQty: this.toFixedNumber(readsale.volume, 2)
         };
