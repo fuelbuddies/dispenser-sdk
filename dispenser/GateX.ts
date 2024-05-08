@@ -196,7 +196,7 @@ export class GateX extends ModBusDispenser {
         const volumeDifference = currentTotalizer.totalizer - previousTotalizer.totalizer;
         return {
             volume: Number((volumeDifference).toFixed(2)),
-            litersPerMinute: volumeDifference / timeDifferenceInMinutes
+            litersPerMinute: Number((volumeDifference / timeDifferenceInMinutes).toFixed(2))
         };
     }
 
