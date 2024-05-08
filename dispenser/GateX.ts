@@ -125,6 +125,15 @@ export class GateX extends ModBusDispenser {
         }
     }
 
+    async suspendSale() {
+        this.debugLog("suspendSale", "Stop");
+        return await this.pumpStop();
+    }
+
+    isSaleSuspended(res: string) {
+        return res === "true";
+    }
+
     processCommand(res: string) {
         if(res === "true") {
             return true;

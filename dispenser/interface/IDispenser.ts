@@ -53,6 +53,7 @@ export interface IDispenser {
   isDispensing?(res: string): boolean;
   isIdle?(res: string): boolean;
   isSaleCloseable?(res: string): boolean;
+  isSaleSuspended?(res: string): boolean;
   isOrderComplete?(res: string, quantity: number): any;
   isNozzleOnHook?(res: string): boolean;
   isNozzleOffHook?(res: string): boolean;

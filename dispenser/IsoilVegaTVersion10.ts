@@ -554,6 +554,19 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         return true;
     }
 
+    isSaleSuspended(res: string) {
+        this.debugLog("isSaleSuspended", res);
+        const status = this.processStatus(res);
+        this.debugLog("isDispensing", JSON.stringify(status));
+        if (status.flowOfProduct == 'No flow' && status.requestOfStartDelivery == 'Request present') {
+            this.debugLog("isSaleSuspended", "true");
+            return true;
+        }
+        this.debugLog("isSaleSuspended", "false");
+        return false;
+
+    }
+
     /**
      * isOrderComplete
      *
