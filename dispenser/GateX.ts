@@ -132,7 +132,7 @@ export class GateX extends ModBusDispenser {
     }
 
     isSaleSuspended(res: string) {
-        return res === "true";
+        return res === "false"; // GPIO pin is low now if solinoid is closed.
     }
 
     processCommand(res: string) {
