@@ -41,7 +41,7 @@ export class GateX extends ModBusDispenser {
         }
 
         var totalizer = {
-            totalizer: pulse,
+            totalizer: Number((pulse / (this.kFactor || 1)).toFixed(2)),
             timestamp: Date.now()
         };
 
@@ -138,39 +138,32 @@ export class GateX extends ModBusDispenser {
     }
 
     pumpStart() {
-        // Not implemented
         return "true";
     }
 
     readAuth() {
-        // Not implemented
         return "true";
     }
 
     cancelPreset() {
-        // Not implemented
         this.preset = 0;
         return "true";
     }
 
     resumeDispencer() {
-        // Not implemented
         return "true";
     }
 
     setPreset(quantity: number) {
-        // Not implemented
         this.preset = quantity
         return "true";
     }
 
     readPreset() {
-        // Not implemented
         return this.preset;
     }
 
     clearSale() {
-        // Not implemented
         this.preset = 0;
         this.startTotalizer = undefined;
         return "true";
@@ -192,7 +185,7 @@ export class GateX extends ModBusDispenser {
         // Calculate the volume difference (assuming totalizer represents volume)
         const volumeDifference = currentTotalizer.totalizer - previousTotalizer.totalizer;
         return {
-            volume: Number((volumeDifference / (this.kFactor || 1)).toFixed(2)),
+            volume: Number((volumeDifference).toFixed(2)),
             litersPerMinute: volumeDifference / timeDifferenceInMinutes
         };
     }
