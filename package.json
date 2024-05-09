@@ -1,6 +1,6 @@
 {
   "name": "@fuelbuddy/dispenser-sdk",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
