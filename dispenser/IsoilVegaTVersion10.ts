@@ -59,6 +59,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
     async readStatus() {
         this.debugLog("readStatus", "Read_Status");
+        if(!this.connection.isOpen) return "";
         await this.connection.write(this.check_nozzle_totalizer); // response needs some statuses to be hardcoded .. will see
     }
 

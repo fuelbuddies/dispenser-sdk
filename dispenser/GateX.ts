@@ -68,6 +68,10 @@ export class GateX extends ModBusDispenser {
         return true;
     }
 
+    isOnline() {
+        return this.connection.isOpen;
+    }
+
     isOrderComplete(res: any, quantity: number) {
         const currentTotalizer = this.processTotalizerRes(res);
         const readsale = this.calculateVolume(this.startTotalizer, currentTotalizer);
@@ -170,7 +174,7 @@ export class GateX extends ModBusDispenser {
     }
 
     isPrinterAvailable(res: string): boolean {
-        return true;
+        return this.printer?.isOpen || false;
     }
 
 
