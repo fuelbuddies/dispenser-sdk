@@ -12,7 +12,10 @@ export class ReadPulseCounter extends StepBody {
         const pulseCounter = await this.client.readHoldingRegisters(this.pulseRegister, 2);
         this.previousPulseCount = this.pulseCount;
         this.pulseCount = pulseCounter.buffer.readUInt32BE(0);
-        // console.log(`Pulse Count: ${this.pulseCount}`);
+        console.log(`Pulse Count: ${this.previousPulseCount} : ${this.pulseCount}`);
+        if(this.pulseCount < this.previousPulseCount) {
+            console.log("Overflow Detected");
+        }
         return ExecutionResult.next();
     }
 }
