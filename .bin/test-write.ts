@@ -7,8 +7,8 @@ const baudRate = 9600;
 const address = '/dev/ttyUSB1';
 const deviceId = 1;
 
-const overflowRegister = 8;
-const overflowCount = 0;
+var overflowRegister = 8;
+var overflowCount = 0;
 
 async function run() {
     const client = new ModbusRTU();
@@ -19,7 +19,7 @@ async function run() {
     await client.readHoldingRegisters(overflowRegister, 1).then((data) => {
         console.log("Overflow Register: ", data.buffer.readUInt16BE(0));
     });
-    const writeRegister = await client.writeRegister(this.overflowRegister, ++this.overflowCount);
+    const writeRegister = await client.writeRegister(overflowRegister, ++overflowCount);
     console.log("writeRegister" ,writeRegister);
     console.log("Incremented Overflow Register");
     await client.readHoldingRegisters(overflowRegister, 1).then((data) => {
