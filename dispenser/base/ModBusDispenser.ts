@@ -16,14 +16,13 @@ export class ModBusDispenser implements IDispenser {
         this.printer = printer;
         this.connection = new Promise<Seneca>(async () => {
             var config = configureWorkflow();
-            config.useLogger(new ConsoleLogger());
+            // config.useLogger(new ConsoleLogger());
             var host = config.getHost();
             host.registerWorkflow(Z10DIN_Workflow);
             await host.start();
 
             socket.workId = await host.startWorkflow("z10d1n-world", 1, socket);
             console.log("Workflow started with id: " + socket.workId);
-
             return socket;
         });
     }

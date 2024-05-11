@@ -7,7 +7,7 @@ export class IncrementOverflowRegister extends StepBody {
     public overflowCount: number = 0;
 
     public async run(context: StepExecutionContext): Promise<ExecutionResult> {
-        console.log("Increment Overflow");
+        // console.log("Increment Overflow");
         await this.client.writeRegister(this.overflowRegister, ++this.overflowCount);
         return ExecutionResult.next();
     }

@@ -7,11 +7,11 @@ export class ReadOverflowRegister extends StepBody {
     public overflowCount: number = 0;
 
     public async run(context: StepExecutionContext): Promise<ExecutionResult> {
-        console.log("Read Overflow Register: ", this.overflowRegister);
+        // console.log("Read Overflow Register: ", this.overflowRegister);
         const overflowCounter = await this.client.readHoldingRegisters(this.overflowRegister, 1);
         console.log(overflowCounter);
         this.overflowCount = overflowCounter.buffer.readUint16BE(0);
-        console.log(`Overflow Count: ${this.overflowCount}`);
+        // console.log(`Overflow Count: ${this.overflowCount}`);
         return ExecutionResult.next();
     }
 }
