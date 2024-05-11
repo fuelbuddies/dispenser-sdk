@@ -1,5 +1,4 @@
-import { DispenserOptions, IDispenser, PrinterOptions } from "../interface/IDispenser";
-import ModbusRTU from "modbus-serial";
+import { DispenserOptions, IDispenser } from "../interface/IDispenser";
 // import { QueueObject, queue } from 'async';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
@@ -17,7 +16,7 @@ export class ModBusDispenser implements IDispenser {
     constructor(socket: Seneca, printer?: SerialPort, options?: DispenserOptions) {
         this.printer = printer;
         this.config = configureWorkflow();
-        // config.useLogger(new ConsoleLogger());
+        this.config.useLogger(new ConsoleLogger());
         const host = this.config.getHost();
         this.host = host;
         this.host.registerWorkflow(Z10DIN_Workflow);
