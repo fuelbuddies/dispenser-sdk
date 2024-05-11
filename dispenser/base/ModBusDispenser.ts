@@ -14,16 +14,18 @@ export class ModBusDispenser implements IDispenser {
 
     constructor(socket: Seneca, printer?: SerialPort, options?: DispenserOptions) {
         this.printer = printer;
-        this.connection = new Promise<Seneca>(async () => {
+        this.connection = new Promise<Seneca>((resolve) => {
             var config = configureWorkflow();
             // config.useLogger(new ConsoleLogger());
             var host = config.getHost();
             host.registerWorkflow(Z10DIN_Workflow);
-            await host.start();
-
-            socket.workId = await host.startWorkflow("z10d1n-world", 1, socket);
-            console.log("Workflow started with id: " + socket.workId);
-            return socket;
+            host.start().then(() => {
+                host.startWorkflow("z10d1n-world", 1, socket).then((workId) => {
+                    socket.workId = workId
+                    console.log("Workflow started with id: " + workId);
+                    resolve(socket);
+                });
+            });
         });
     }
 
