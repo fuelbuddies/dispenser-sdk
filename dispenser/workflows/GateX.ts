@@ -32,8 +32,8 @@ export class Seneca {
       this.pulseRegister = modbusOptions?.pulseRegister || 10;
     }
 
-    async readPulse() {
-      return (4294967296 * await this.overflowCount) + await this.pulseCount;
+    readPulse() {
+      return (4294967296 * this.overflowCount) + this.pulseCount;
     }
 }
 
