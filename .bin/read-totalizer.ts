@@ -6,8 +6,11 @@ import { findDispenserPort } from '../utils/findDispenserPort';
 
 const configuration = getConfigFromEnv();
 console.log(configuration);
-const dispenserPath = await findDispenserPort(configuration.hardwareId, configuration.attributeId);
-console.log("Dispenser found at: ", dispenserPath);
+async function main () {
+    const dispenserPath = await findDispenserPort(configuration.hardwareId, configuration.attributeId);
+    console.log("Dispenser found at: ", dispenserPath);
+}
+main();
 createDispenser(getConfigFromEnv()).then((dispenser) => {
     // console.log(dispenser);
     dispenser.execute(dispenser.totalizer, dispenser.processTotalizer).then((totalizer) => {
