@@ -1,5 +1,6 @@
 import ModbusRTU from "modbus-serial";
 import { ExecutionResult, StepBody, StepExecutionContext } from "workflow-es";
+import { debugLog } from "../../../utils/debugLog";
 
 export class InitializeSeleca extends StepBody {
     public deviceId: number = 1;
@@ -9,11 +10,11 @@ export class InitializeSeleca extends StepBody {
     public client: ModbusRTU = new ModbusRTU();
 
     public async run(context: StepExecutionContext): Promise<ExecutionResult> {
-        // console.log("Connecting to Seneca");
+        debugLog("InitializeSeleca","Connecting to Seneca");
         this.client.setID(this.deviceId);
         this.client.setTimeout(this.timeout);
         await this.client.connectRTUBuffered(this.address, { baudRate: this.baudRate });
-        // console.log("Connected to Seneca");
+        debugLog("InitializeSeleca", "Connected to Seneca");
         return ExecutionResult.next();
     }
 }

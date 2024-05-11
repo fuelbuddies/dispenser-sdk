@@ -1,5 +1,6 @@
 import ModbusRTU from "modbus-serial";
 import { ExecutionResult, StepBody, StepExecutionContext } from "workflow-es";
+import { debugLog } from "../../../utils/debugLog";
 
 export class ReadPulseCounter extends StepBody {
     public client: ModbusRTU = new ModbusRTU();
@@ -11,9 +12,9 @@ export class ReadPulseCounter extends StepBody {
         const pulseCounter = await this.client.readHoldingRegisters(this.pulseRegister, 2);
         this.previousPulseCount = this.pulseCount;
         this.pulseCount = pulseCounter.buffer.readUInt32BE(0);
-        if(this.pulseCount < this.previousPulseCount) {
-            console.log("===== Overflow Detected ======");
-        }
+
+        if(this.pulseCount < this.previousPulseCount) debugLog('ReadPulseCounter', "<< ===== Overflow Detected ===== >>");
+
         return ExecutionResult.next();
     }
 }

@@ -1,14 +1,10 @@
 import { ExecutionResult, StepBody, StepExecutionContext } from "workflow-es";
+import { debugLog } from "../../../utils/debugLog";
 
 export class LogMessage extends StepBody {
     public message: string | undefined;    
-
-    public debugLog(fnName: string, message: string) {
-        console.log(`[${fnName}] - ${message}`);
-    }
-
     public run(context: StepExecutionContext): Promise<ExecutionResult> {
-        this.debugLog('LogMessage -', this.message || "Blank message!!!");
+        debugLog('LogMessage', this.message || "Please give Tintin samosa and ask for error!!!");
         return ExecutionResult.next();
     }
 }

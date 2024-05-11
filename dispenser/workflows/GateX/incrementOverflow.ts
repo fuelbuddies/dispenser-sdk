@@ -1,5 +1,6 @@
 import ModbusRTU from "modbus-serial";
 import { ExecutionResult, StepBody, StepExecutionContext } from "workflow-es";
+import { debugLog } from "../../../utils/debugLog";
 
 export class IncrementOverflowRegister extends StepBody {
     public client: ModbusRTU = new ModbusRTU();
@@ -7,11 +8,11 @@ export class IncrementOverflowRegister extends StepBody {
     public overflowCount: number = 0;
 
     public async run(context: StepExecutionContext): Promise<ExecutionResult> {
-        console.log("Increment Overflow");
-        console.log("Overflow Register: ", this.overflowCount);
+        debugLog("IncrementOverflowRegister", "Increment Overflow");
+        debugLog("Overflow Register: ", JSON.stringify(this.overflowCount));
 
         const response = await this.client.writeRegister(this.overflowRegister, ++this.overflowCount);
-        console.log("Incremented Overflow Register", response);
+        debugLog("Incremented Overflow Register", JSON.stringify(response));
         return ExecutionResult.next();
     }
 }
