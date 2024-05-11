@@ -6,19 +6,22 @@ import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { execFile } from 'child_process';
 import * as path from 'path';
 import { Seneca, Z10DIN_Workflow } from "../workflows/GateX";
-import { ConsoleLogger, configureWorkflow } from "workflow-es";
+import { ConsoleLogger, IWorkflowHost, WorkflowConfig, configureWorkflow } from "workflow-es";
 
 export class ModBusDispenser implements IDispenser {
     connection: Promise<Seneca>;
     printer?: SerialPort<AutoDetectTypes>;
+    config: WorkflowConfig;
+    host: IWorkflowHost;
 
     constructor(socket: Seneca, printer?: SerialPort, options?: DispenserOptions) {
         this.printer = printer;
+        this.config = configureWorkflow();
+        // config.useLogger(new ConsoleLogger());
+        const host = this.config.getHost();
+        this.host = host;
+        this.host.registerWorkflow(Z10DIN_Workflow);
         this.connection = new Promise<Seneca>((resolve) => {
-            var config = configureWorkflow();
-            // config.useLogger(new ConsoleLogger());
-            var host = config.getHost();
-            host.registerWorkflow(Z10DIN_Workflow);
             host.start().then(() => {
                 host.startWorkflow("z10d1n-world", 1, socket).then((workId) => {
                     socket.workId = workId
@@ -75,7 +78,12 @@ export class ModBusDispenser implements IDispenser {
     }
 
     async disconnect(callback: any) {
-        (await (this.connection)).client.close(() => {
+        const connection = await this.connection;
+        connection.client.close(async () => {
+            if (connection.workId) {
+                await this.host.terminateWorkflow(connection.workId);
+            }
+
             if (!this.printer) {
                 return callback();
             }
