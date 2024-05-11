@@ -59,6 +59,7 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
         .while((data) => data.overflowCount < 65536).do((sequence) => sequence
             .startWith(ReadPulseCounter)
                 .input((step, data) => step.client = data.client)
+                .input((step, data) => step.pulseCount = data.pulseCount)
                 .output((step, data) => data.pulseCount = step.pulseCount)
                 .output((step, data) => data.previousPulseCount = step.previousPulseCount))
             .if((data) => data.pulseCount < data.previousPulseCount).do((sequence) => sequence
