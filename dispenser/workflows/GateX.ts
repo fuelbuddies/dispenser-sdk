@@ -55,7 +55,10 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
         .then(ReadOverflowRegister)
             .input((step, data) => step.client = data.client)
             .input((step, data) => step.overflowRegister = data.overflowRegister)
-            .output((step, data) => data.overflowCount = step.overflowCount)
+            .output((step, data) => data.overflowCount = step.overflowCount))
+        .onError(WorkflowErrorHandling.Retry, 1000)
+        .then(LogMessage)
+            .input((step, data) => step.message = `Overflow count initalized with: ${data.overflowCount}`)
         // Overflow register is a 32-bit register that increments every time the pulse counter overflows
         .while((data) => data.overflowCount < 65536).do((sequence) => sequence
             .startWith(LogMessage)
@@ -76,8 +79,7 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
                 .input((step, data) => step.overflowCount = data.overflowCount)
                 .output((step, data) => data.overflowCount = step.overflowCount))
             .then(LogMessage)
-                .input((step, data) => step.message = `Overflow Count: ${data.overflowCount}`)))
-        .onError(WorkflowErrorHandling.Retry, 1000)
+                .input((step, data) => step.message = `Overflow Count: ${data.overflowCount}`))
         .then(GoodbyeWorld);
     }
 }
