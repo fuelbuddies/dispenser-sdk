@@ -77,17 +77,21 @@ export class ModBusDispenser implements IDispenser {
     }
 
     async disconnect(callback: any) {
+        this.debugLog("disconnect", "Requesting disconnection from Seneca")
         const connection = await this.connection;
         connection.client.close(async () => {
             if (connection.workId) {
+                this.debugLog("disconnect", "Terminating workflow");
                 await this.host.terminateWorkflow(connection.workId);
             }
 
             if (!this.printer) {
+                this.debugLog("disconnect", "No printer connection found");
                 return callback();
             }
 
             this.printer.close(() => {
+                this.debugLog("disconnect", "Printer connection closed");
                 callback();
             });
         });

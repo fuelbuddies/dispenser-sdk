@@ -79,8 +79,7 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
                 .input((step, data) => step.overflowCount = data.overflowCount)
                 .output((step, data) => data.overflowCount = step.overflowCount))
             .then(LogMessage)
-                .input((step, data) => step.message = `Overflow Count: ${data.overflowCount}`)
-            .delay((data) => 400))
+                .input((step, data) => step.message = `Overflow Count: ${data.overflowCount}`))
         .then(GoodbyeWorld);
     }
 }
