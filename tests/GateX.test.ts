@@ -1,8 +1,8 @@
 import { GateX } from "../dispenser/GateX";
 import { findDispenserPort } from '../utils/findDispenserPort';
 import { delay } from "../utils/delay";
-import ModbusRTU from "modbus-serial";
 import { SerialPort } from "serialport";
+import { Seneca } from "../dispenser/workflows/GateX";
 
 const hardwareId = '0403';
 const attributeId = '6001';
@@ -12,15 +12,14 @@ const printerAttributeId = '2303';
 
 describe('GateX', () => {
     let dispenser: GateX;
-    let serialPort: ModbusRTU;
+    let serialPort: Seneca;
     let printerPort: SerialPort;
 
     beforeEach(async () => {
         if(!serialPort) {
-            serialPort = new ModbusRTU();
-            const path = await findDispenserPort(hardwareId, attributeId);
+            serialPort = new Seneca({ modbus: {deviceId: 1, timeout: 1000, overflowRegister: 8, pulseRegister: 10}, baudRate: 9600, dispenserType: 'GateX', hardwareId, attributeId});
+            serialPort.address = await findDispenserPort(hardwareId, attributeId);
             printerPort = new SerialPort({path: await findDispenserPort(printerHardwareId, printerAttributeId), baudRate: 9600 });            
-            await serialPort.connectRTUBuffered(path, { baudRate: 9600 });
             dispenser = new GateX(serialPort, printerPort, { dispenserType: 'GateX', hardwareId, attributeId, baudRate: 9600, kFactor: 3692953.6 });
         }
     });
