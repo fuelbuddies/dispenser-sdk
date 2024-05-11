@@ -1,8 +1,9 @@
 import ModbusRTU from 'modbus-serial';
 import { SerialPort } from 'serialport';
+import { Seneca } from '../workflows/GateX';
 
 export interface IDispenser {
-  connection: SerialPort | ModbusRTU;
+  connection: SerialPort | Promise<Seneca>;
   execute(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   executeInPriority(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   resetQueue?(): void;
@@ -72,9 +73,17 @@ export type DispenserOptions = {
   hardwareId: string;
   attributeId: string;
   baudRate?: number;
-  kFactor?: number
+  kFactor?: number;
   printer?: PrinterOptions;
+  modbus?: ModbusOptions;
 };
+
+export type ModbusOptions = {
+  timeout: number;
+  deviceId: number;
+  overflowRegister: number;
+  pulseRegister: number;
+}
 
 export type PrinterOptions = {
   printerType: string;

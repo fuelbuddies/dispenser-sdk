@@ -4,6 +4,8 @@ import { DispenserOptions, IDispenser } from "./dispenser/interface/IDispenser";
 import { SerialPort } from "serialport";
 import { IRfid, RfidOptions } from "./rfid/interface/IRfid";
 import { getConfigFromEnv, getRFIDConfigFromEnv } from './utils/envParser';
+import { Seneca } from "./dispenser/workflows/GateX";
+import { delay } from "./utils/delay";
 
 export { IDispenser, IRfid, RfidOptions, DispenserOptions, getConfigFromEnv, getRFIDConfigFromEnv};
 
@@ -19,12 +21,13 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
             return new IsoilVegaTVersion10.IsoilVegaTVersion10(new SerialPort({path: await findDispenserPort(hardwareId, attributeId), baudRate: baudRate }), options);
         case 'GateX':
             const GateX = await import('./dispenser/GateX');
-            const ModbusRTU = await import('modbus-serial');
-            const serialPort = new ModbusRTU.default();
-            await serialPort.connectRTUBuffered(await findDispenserPort(hardwareId, attributeId), { baudRate: baudRate });
+            const serialPort = new Seneca(options);
+            serialPort.address = await findDispenserPort(hardwareId, attributeId);
             if(!printer) throw new Error('Printer is required for GateX dispenser');
             const printerPort = new SerialPort({path: await findDispenserPort(printer.hardwareId, printer.attributeId), baudRate: printer.baudRate || 9600});
-            return new GateX.GateX(serialPort, printerPort, options);
+            const gatex = new GateX.GateX(serialPort, printerPort, options);
+            await delay(5000);
+            return gatex;
         default:
             throw new Error('Invalid dispenser type');
     }

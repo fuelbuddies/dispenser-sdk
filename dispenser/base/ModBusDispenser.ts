@@ -5,15 +5,27 @@ import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { execFile } from 'child_process';
 import * as path from 'path';
+import { Seneca, Z10DIN_Workflow } from "../workflows/GateX";
+import { ConsoleLogger, configureWorkflow } from "workflow-es";
 
 export class ModBusDispenser implements IDispenser {
-    connection: ModbusRTU;
+    connection: Promise<Seneca>;
     printer?: SerialPort<AutoDetectTypes>;
 
-
-    constructor(socket: ModbusRTU, printer?: SerialPort, options?: DispenserOptions) {
-        this.connection = socket;
+    constructor(socket: Seneca, printer?: SerialPort, options?: DispenserOptions) {
         this.printer = printer;
+        this.connection = new Promise<Seneca>(async () => {
+            var config = configureWorkflow();
+            config.useLogger(new ConsoleLogger());
+            var host = config.getHost();
+            host.registerWorkflow(Z10DIN_Workflow);
+            await host.start();
+
+            socket.workId = await host.startWorkflow("z10d1n-world", 1, socket);
+            console.log("Workflow started with id: " + socket.workId);
+
+            return socket;
+        });
     }
 
     hexToDecLittleEndian(hexString: string): number {
@@ -43,9 +55,9 @@ export class ModBusDispenser implements IDispenser {
 
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
         return new Promise((resolve, reject) => {
-            Promise.resolve(callee.call(this, calleeArgs || undefined)).then((data: any) => {
+            Promise.resolve(callee.call(this, calleeArgs || undefined)).then(async (data: any) => {
                 if (bindFunction instanceof Function) {
-                    const result = bindFunction.call(this, data, calleeArgs || undefined, callee.name);
+                    const result = await bindFunction.call(this, data, calleeArgs || undefined, callee.name);
                     console.log("bindFunction", result);
                     resolve(result);
                 } else {
@@ -61,8 +73,8 @@ export class ModBusDispenser implements IDispenser {
         return this.execute(callee, bindFunction, calleeArgs);
     }
 
-    disconnect(callback: any): void {
-        this.connection.close(() => {
+    async disconnect(callback: any) {
+        (await (this.connection)).client.close(() => {
             if (!this.printer) {
                 return callback();
             }

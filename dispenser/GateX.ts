@@ -1,19 +1,16 @@
 import { ModBusDispenser } from "./base/ModBusDispenser";
-import ModbusRTU from "modbus-serial";
 import { DispenserOptions, TotalizerResponse, VolumeResponse } from './interface/IDispenser';
 import { SerialPort } from 'serialport';
+import { Seneca } from "./workflows/GateX";
 
 export class GateX extends ModBusDispenser {
     private AuthorizeValveGPIO: number = 26;
     private kFactor: number | undefined;
     private startTotalizer: TotalizerResponse | undefined;
 
-    private slaveAddress = 1;
-    private startingRegister = 10;
-    private numRegisters = 2;
     private preset: number;
 
-    constructor(socket: ModbusRTU, printer: SerialPort, options: DispenserOptions) {
+    constructor(socket: Seneca, printer: SerialPort, options: DispenserOptions) {
         super(socket, printer, options);
         let { kFactor } = options;
         this.kFactor = kFactor;
@@ -21,8 +18,7 @@ export class GateX extends ModBusDispenser {
     }
 
     async totalizer() {
-        await this.connection.setID(this.slaveAddress);
-        return await this.connection.readHoldingRegisters(this.startingRegister, this.numRegisters);
+        return (await this.connection).readPulse();
     }
 
     async readSale() {
@@ -69,7 +65,7 @@ export class GateX extends ModBusDispenser {
     }
 
     isOnline() {
-        return this.connection.isOpen;
+        return true;
     }
 
     isOrderComplete(res: any, quantity: number) {

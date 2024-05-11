@@ -22,6 +22,16 @@ export function getConfigFromEnv() {
         };
     }
 
+
+    if(process.env.VITE_MAIN_MODBUS_TYPE) {
+        dispenserConfig.modbus = {
+            timeout: parseInt(process.env.VITE_MAIN_MODBUS_TIMEOUT || '1000'),
+            deviceId: parseInt(process.env.VITE_MAIN_MODBUS_DEVICE_ID || '1'),
+            overflowRegister: parseInt(process.env.VITE_MAIN_MODBUS_OVERFLOW_REGISTER || '8'),
+            pulseRegister: parseInt(process.env.VITE_MAIN_MODBUS_PULSE_REGISTER || '10'),
+        };
+    }
+
     return dispenserConfig;
 }
 
