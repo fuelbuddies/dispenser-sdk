@@ -1,3 +1,5 @@
+#!/usr/bin/env ts-node
+
 import ModbusRTU from "modbus-serial";
 
 const timeout = 1000;
