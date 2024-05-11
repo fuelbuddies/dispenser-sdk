@@ -50,7 +50,7 @@ export class ModBusDispenser implements IDispenser {
         const data = await callee.call(this, calleeArgs || undefined);
         if (bindFunction instanceof Function) {
             const result = bindFunction.call(this, data, calleeArgs || undefined, callee.name);
-            console.log("bindFunction", result);
+            this.debugLog("bindFunction", JSON.stringify(result));
             return result;
         } else {
             return data;
@@ -62,7 +62,7 @@ export class ModBusDispenser implements IDispenser {
             Promise.resolve(callee.call(this, calleeArgs || undefined)).then(async (data: any) => {
                 if (bindFunction instanceof Function) {
                     const result = await bindFunction.call(this, data, calleeArgs || undefined, callee.name);
-                    console.log("bindFunction", result);
+                    this.debugLog("bindFunction", JSON.stringify(result));
                     resolve(result);
                 } else {
                     resolve(data);
@@ -157,7 +157,7 @@ export class ModBusDispenser implements IDispenser {
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
         const absoluteScriptPath = path.join(__dirname, scriptPath);
-        console.log('Executing script: ', absoluteScriptPath);
+        this.debugLog('Executing script: ', absoluteScriptPath);
 
         return new Promise((resolve, reject) => {
             execFile(absoluteScriptPath, (error, stdout, stderr) => {

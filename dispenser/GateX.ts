@@ -30,9 +30,9 @@ export class GateX extends ModBusDispenser {
     }
 
     processTotalizerRes(pulse: any): TotalizerResponse {
-        console.log("pulse", pulse);
+        this.debugLog("pulse", JSON.stringify(pulse));
         if(!this.kFactor || this.kFactor < 0) {
-            console.warn('K-Factor not set for this dispenser, you might get wrong totalizer value');
+            this.debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value', 'error');
         }
 
         var totalizer = {
@@ -44,12 +44,12 @@ export class GateX extends ModBusDispenser {
         if(!this.startTotalizer) {
             this.startTotalizer = totalizer;
         }
-        console.log("totalizer", totalizer);
+        this.debugLog("totalizer", JSON.stringify(totalizer));
         return totalizer;
     }
 
     processTotalizer(data: any) {
-        console.log(arguments);
+        this.debugLog("processTotalizer", JSON.stringify(arguments));
         return this.processTotalizerRes(data).totalizer;
     }
 

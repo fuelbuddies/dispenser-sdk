@@ -69,7 +69,7 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
                 .input((step, data) => step.message = `Pulse Count: ${data.previousPulseCount} : ${data.pulseCount}`)
             .if((data) => data.pulseCount < data.previousPulseCount).do((then) => then
                 .startWith(LogMessage)
-                    .input((step, data) => step.message = "Running Overflow Sequence")
+                    .input((step, data) => step.message = `Running Overflow Sequence with Overflow Count: ${data.overflowCount}`)
                 .then(IncrementOverflowRegister)
                 .input((step, data) => step.client = data.client)
                 .input((step, data) => step.overflowRegister = data.overflowRegister)
