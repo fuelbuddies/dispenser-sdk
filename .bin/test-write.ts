@@ -23,7 +23,7 @@ async function run() {
     console.log("writeRegister" ,writeRegister);
     console.log("Incremented Overflow Register");
     await client.readHoldingRegisters(overflowRegister, 1).then((data) => {
-        console.log("Overflow Register: ", data.buffer.readBigInt64BE(0));
+        console.log("Overflow Register: ", data.buffer.readUInt16BE(0));
     });
 }
 
