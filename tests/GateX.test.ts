@@ -17,7 +17,7 @@ describe('GateX', () => {
 
     beforeEach(async () => {
         if(!serialPort) {
-            serialPort = new Seneca({ modbus: {deviceId: 1, timeout: 1000, overflowRegister: 8, pulseRegister: 10}, baudRate: 9600, dispenserType: 'GateX', hardwareId, attributeId});
+            serialPort = new Seneca({ modbus: {deviceId: 1, timeout: 1000, overflowRegister: 8, pulseRegister: 10, debug: true}, baudRate: 9600, dispenserType: 'GateX', hardwareId, attributeId});
             serialPort.address = await findDispenserPort(hardwareId, attributeId);
             printerPort = new SerialPort({path: await findDispenserPort(printerHardwareId, printerAttributeId), baudRate: 9600 });            
             dispenser = new GateX(serialPort, printerPort, { dispenserType: 'GateX', hardwareId, attributeId, baudRate: 9600, kFactor: 3692953.6 });
