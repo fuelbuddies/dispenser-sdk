@@ -81,6 +81,7 @@ export type ModbusOptions = {
   deviceId: number;
   overflowRegister: number;
   pulseRegister: number;
+  debug: boolean;
 }
 
 export type PrinterOptions = {

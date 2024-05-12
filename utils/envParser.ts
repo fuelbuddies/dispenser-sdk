@@ -29,6 +29,7 @@ export function getConfigFromEnv() {
             deviceId: parseInt(process.env.VITE_MAIN_MODBUS_DEVICE_ID || '1'),
             overflowRegister: parseInt(process.env.VITE_MAIN_MODBUS_OVERFLOW_REGISTER || '8'),
             pulseRegister: parseInt(process.env.VITE_MAIN_MODBUS_PULSE_REGISTER || '10'),
+            debug: process.env.VITE_MAIN_MODBUS_DEBUG === 'true'
         };
     }
 
