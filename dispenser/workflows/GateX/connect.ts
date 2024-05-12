@@ -13,7 +13,7 @@ export class InitializeSeleca extends StepBody {
         debugLog("InitializeSeleca","Connecting to Seneca");
         this.client.setID(this.deviceId);
         this.client.setTimeout(this.timeout);
-        await this.client.connectRTUBuffered(this.address, { baudRate: this.baudRate });
+        await this.client.connectRTU(this.address, { baudRate: this.baudRate });
         debugLog("InitializeSeleca", "Connected to Seneca");
         return ExecutionResult.next();
     }
