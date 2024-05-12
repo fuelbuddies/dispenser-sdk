@@ -1,7 +1,7 @@
 import { WorkflowBase, WorkflowBuilder, WorkflowErrorHandling } from "workflow-es";
 import { GoodbyeWorld } from "./GateX/goodbye";
 import { HelloWorld } from "./GateX/hello";
-import { InitializeSeleca } from "./GateX/connect";
+import { InitializeSeleca, ReInitializeSeleca } from "./GateX/connect";
 import ModbusRTU from "modbus-serial";
 import { ReadOverflowRegister } from "./GateX/readOverflow";
 import { ReadPulseCounter } from "./GateX/countPulse";
@@ -61,25 +61,37 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
             .input((step, data) => step.message = `Overflow count initalized with: ${data.overflowCount}`)
         // Overflow register is a 32-bit register that increments every time the pulse counter overflows
         .while((data) => data.overflowCount < 65536).do((sequence) => sequence
-            .startWith(LogMessage)
-                .input((step) => step.message = "Running Read Pulse Sequence")
-            .then(ReadPulseCounter)
-                .input((step, data) => step.client = data.client)
-                .input((step, data) => step.pulseCount = data.pulseCount)
-                .output((step, data) => data.pulseCount = step.pulseCount)
-                .output((step, data) => data.previousPulseCount = step.previousPulseCount)
-            .then(LogMessage)
-                .input((step, data) => step.message = `Pulse Count: ${data.previousPulseCount} : ${data.pulseCount}`)
-            .if((data) => data.pulseCount < data.previousPulseCount).do((then) => then
+        .startWith(LogMessage)
+            .input((step) => step.message = "Reading Pulse Loop")
+            .saga((sequence) => sequence
                 .startWith(LogMessage)
-                    .input((step, data) => step.message = `Running Overflow Sequence with Overflow Count: ${data.overflowCount}`)
-                .then(IncrementOverflowRegister)
-                .input((step, data) => step.client = data.client)
-                .input((step, data) => step.overflowRegister = data.overflowRegister)
-                .input((step, data) => step.overflowCount = data.overflowCount)
-                .output((step, data) => data.overflowCount = step.overflowCount))
-            .then(LogMessage)
-                .input((step, data) => step.message = `Overflow Count: ${data.overflowCount}`))
+                    .input((step) => step.message = "Reading Pulse Counter")
+                .then(ReadPulseCounter)
+                    .input((step, data) => step.client = data.client)
+                    .input((step, data) => step.pulseCount = data.pulseCount)
+                    .output((step, data) => data.pulseCount = step.pulseCount)
+                    .output((step, data) => data.previousPulseCount = step.previousPulseCount)
+                .compensateWithSequence(comp => comp
+                    .startWith(LogMessage)
+                        .input((step) => step.message = "Reinitializing Pulse Counter")    
+                    .then(ReInitializeSeleca)
+                        .input((step, data) => step.deviceId = data.deviceId)
+                        .input((step, data) => step.timeout = data.timeout)
+                        .input((step, data) => step.address = data.address)
+                        .input((step, data) => step.client = data.client)
+                        .output((step, data) => data.client = step.client))
+                .then(LogMessage)
+                    .input((step, data) => step.message = `Pulse Count: ${data.previousPulseCount} : ${data.pulseCount}`)
+                .if((data) => data.pulseCount < data.previousPulseCount).do((then) => then
+                    .startWith(LogMessage)
+                        .input((step, data) => step.message = `Running Overflow Sequence with Overflow Count: ${data.overflowCount}`)
+                    .then(IncrementOverflowRegister)
+                    .input((step, data) => step.client = data.client)
+                    .input((step, data) => step.overflowRegister = data.overflowRegister)
+                    .input((step, data) => step.overflowCount = data.overflowCount)
+                    .output((step, data) => data.overflowCount = step.overflowCount))
+                .then(LogMessage)
+                    .input((step, data) => step.message = `Overflow Count: ${data.overflowCount}`)))
         .then(GoodbyeWorld);
     }
 }
