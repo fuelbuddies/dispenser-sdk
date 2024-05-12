@@ -1,3 +1,4 @@
+import { debugLog } from "../utils/debugLog";
 import { BaseDispenser } from "./base/BaseDispenser";
 
 export class VeederEmr4 extends BaseDispenser {
@@ -117,7 +118,7 @@ export class VeederEmr4 extends BaseDispenser {
   // }
 
   printReceipt(printObj: any) {
-    this.debugLog("printReceipt", printObj);
+    debugLog("printReceipt", printObj);
     // this.connection.send("Print_Receipt");
   }
 
@@ -217,23 +218,23 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   processFlowRate(res: string) {
-    this.debugLog("processFlowRate", res);
+    debugLog("processFlowRate", res);
     // const response = parseInt(this.hex2a(res.slice(-82, -70)));
-    // this.debugLog("processFlowRate", JSON.stringify(response));
+    // debugLog("processFlowRate", JSON.stringify(response));
     return 0;
   }
 
   processAverageFlowRate(res: string) {
-    this.debugLog("processAverageFlowRate", res);
+    debugLog("processAverageFlowRate", res);
     // const response = parseInt(this.hex2a(res.slice(-70, -58)));
-    // this.debugLog("processAverageFlowRate", JSON.stringify(response));
+    // debugLog("processAverageFlowRate", JSON.stringify(response));
     return 0;
   }
 
   processBatchNumber(res: string) {
-    this.debugLog("processBatchNumber", res);
+    debugLog("processBatchNumber", res);
     // const response = parseInt(this.hex2a(res.slice(-58, -46)));
-    // this.debugLog("processBatchNumber", JSON.stringify(0));
+    // debugLog("processBatchNumber", JSON.stringify(0));
     return 0;
   }
 

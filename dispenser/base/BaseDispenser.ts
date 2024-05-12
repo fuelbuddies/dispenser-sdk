@@ -3,6 +3,7 @@ import { QueueObject, queue } from 'async';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout'
+import { debugLog } from "../../utils/debugLog";
 
 export class BaseDispenser implements IDispenser {
   connection: SerialPort<AutoDetectTypes>;
@@ -32,7 +33,7 @@ export class BaseDispenser implements IDispenser {
           callback(null, data.toString('hex'));
         }
       } catch (e) {
-        console.log("error in try catch fn");
+        debugLog("processTask", "error in try catch fn");
         callback(e);
       }
     });
@@ -162,10 +163,6 @@ export class BaseDispenser implements IDispenser {
       return Math.round(num * pow) / pow;
     }
 
-    debugLog(fnName: string, message: string) {
-      console.log(`[${fnName}] - ${message}`);
-    }
-
     decimalToBinaryTwosComplement(decimal: number, bitWidth: number) {
       const absValue = Math.abs(decimal);
       const binary = absValue.toString(2).padStart(bitWidth - 1, '0');
@@ -201,7 +198,7 @@ export class BaseDispenser implements IDispenser {
      * @returns
      */
     rightAlignValue = (label: string, valueStr: string, totalWidth: number) => {
-        console.log('[rightAlignValue]', label, valueStr, totalWidth);
+        debugLog('rightAlignValue', `${label}, ${valueStr}, ${totalWidth}`);
         const value = valueStr ? valueStr + "" : 'N/A';
         const labelWidth = label.length;
         const valueWidth = value.length;

@@ -2,6 +2,7 @@ import { ModBusDispenser } from "./base/ModBusDispenser";
 import { DispenserOptions, TotalizerResponse, VolumeResponse } from './interface/IDispenser';
 import { SerialPort } from 'serialport';
 import { Seneca } from "./workflows/GateX";
+import { debugLog } from "../utils/debugLog";
 
 export class GateX extends ModBusDispenser {
     private AuthorizeValveGPIO: number = 26;
@@ -30,9 +31,9 @@ export class GateX extends ModBusDispenser {
     }
 
     processTotalizerRes(pulse: any): TotalizerResponse {
-        this.debugLog("pulse", JSON.stringify(pulse));
+        debugLog("pulse", JSON.stringify(pulse));
         if(!this.kFactor || this.kFactor < 0) {
-            this.debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value', 'error');
+            debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value', 'error');
         }
 
         var totalizer = {
@@ -44,22 +45,22 @@ export class GateX extends ModBusDispenser {
         if(!this.startTotalizer) {
             this.startTotalizer = totalizer;
         }
-        this.debugLog("totalizer", JSON.stringify(totalizer));
+        debugLog("totalizer", JSON.stringify(totalizer));
         return totalizer;
     }
 
     processTotalizer(data: any) {
-        this.debugLog("processTotalizer", JSON.stringify(arguments));
+        debugLog("processTotalizer", JSON.stringify(arguments));
         return this.processTotalizerRes(data).totalizer;
     }
 
     isIdle(res: string) {
-        this.debugLog("isSaleCloseable", "true");
+        debugLog("isSaleCloseable", "true");
         return res.trim() === 'false';
     }
 
     isSaleCloseable() {
-        this.debugLog("isSaleCloseable", "true");
+        debugLog("isSaleCloseable", "true");
         return true;
     }
 
@@ -81,7 +82,7 @@ export class GateX extends ModBusDispenser {
                 dispensedQty: this.toFixedNumber(readsale.volume, 2)
             };
 
-            this.debugLog("isOrderComplete", JSON.stringify(response));
+            debugLog("isOrderComplete", JSON.stringify(response));
             return response;
         }
 
@@ -95,7 +96,7 @@ export class GateX extends ModBusDispenser {
             dispensedQty: this.toFixedNumber(readsale.volume, 2)
         };
 
-        this.debugLog("isOrderComplete", JSON.stringify(response));
+        debugLog("isOrderComplete", JSON.stringify(response));
         return response;
     }
 
@@ -126,7 +127,7 @@ export class GateX extends ModBusDispenser {
     }
 
     async suspendSale() {
-        this.debugLog("suspendSale", "Stop");
+        debugLog("suspendSale", "Stop");
         return await this.pumpStop();
     }
 
@@ -209,7 +210,7 @@ export class GateX extends ModBusDispenser {
         const printWidth = 40;
         const printArr = [];
 
-        this.debugLog("printReceipt", JSON.stringify(printObj));
+        debugLog("printReceipt", JSON.stringify(printObj));
 
         if (printObj?.isReceiptRequired) {
             printArr.push(this.str2hex(this.centerAlignValue("****  CUSTOMER COPY  ****", printWidth)));
@@ -268,7 +269,7 @@ export class GateX extends ModBusDispenser {
         printArr.push('0A');
         printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
 
-        this.debugLog("printReceipt", `${printArr.join('0A')}0A0A1D564200`);
+        debugLog("printReceipt", `${printArr.join('0A')}0A0A1D564200`);
         return this.printOrder(`${printArr.join('0A')}0A0A1D564200`);
     }
 

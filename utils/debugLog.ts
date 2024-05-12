@@ -1,3 +1,3 @@
-export function debugLog(fnName: string, message: string) {
-    console.log(`[${fnName}] - ${message}`);
+export function debugLog(message: string, data: any) {
+  console.log(`[${new Date().toISOString()}] ${message}: ${JSON.stringify(data)}`);
 }

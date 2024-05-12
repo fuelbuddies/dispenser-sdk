@@ -1,12 +1,13 @@
 //npm run esbuild-browser:watch
 
+import { debugLog } from "../utils/debugLog";
 import { BaseRfid } from "./BaseRfid";
 import { RfidResponse } from "./interface/IRfid";
 
 export class RfidPetropoint extends BaseRfid {
 
     checkType() {
-        this.debugLog('rfidType', 'RFID')
+        debugLog('rfidType', 'RFID')
         return 'PETROPOINTHECTRONICS';
     }
 
@@ -22,33 +23,33 @@ export class RfidPetropoint extends BaseRfid {
     }
 
     processRawRfidStatus(res: string) {
-        this.debugLog('processRawRfidStatus', res);
+        debugLog('processRawRfidStatus', res);
         const response = this.hex2a(res).split(",");
-        this.debugLog('processRawRfidStatus', JSON.stringify(response));
+        debugLog('processRawRfidStatus', JSON.stringify(response));
         return response;
     }
 
     processTagstatus(res: string) {
-        this.debugLog('processTagstatus', res);
+        debugLog('processTagstatus', res);
 
         if (res.endsWith("002")) {
-            this.debugLog('processTagstatus', "TagInRange");
+            debugLog('processTagstatus', "TagInRange");
             return "TagInRange";
         }
         if (res.endsWith("005")) {
-            this.debugLog('processTagstatus', "TagNotInRange");
+            debugLog('processTagstatus', "TagNotInRange");
             return "TagNotInRange";
         }
 
-        this.debugLog('processTagstatus', "Idle");
+        debugLog('processTagstatus', "Idle");
         return "Idle";
     }
 
     processTagId(res: string) {
-        this.debugLog('processTagId', res);
+        debugLog('processTagId', res);
         if (res.length > 10) {
             const tagId = BigInt(res);
-            this.debugLog('processTagId', JSON.stringify(tagId, function (key, value) {
+            debugLog('processTagId', JSON.stringify(tagId, function (key, value) {
                 if (typeof value === 'bigint') {
                   return value.toString();
                 } else {
@@ -58,17 +59,17 @@ export class RfidPetropoint extends BaseRfid {
             return tagId;
         }
 
-        this.debugLog('processTagId', "Invalid TagId");
+        debugLog('processTagId', "Invalid TagId");
         return -1;
     }
 
     processRFIDresponse(res: string): RfidResponse | "idle" {
-        this.debugLog('processRFIDresponse', res);
+        debugLog('processRFIDresponse', res);
         const regex = /^02.*?0a/;
         const match = res.match(regex);
         if (match) {
             const rfidresponse = this.processRawRfidStatus(match[0]);
-            this.debugLog('processRFIDresponse', JSON.stringify(rfidresponse));
+            debugLog('processRFIDresponse', JSON.stringify(rfidresponse));
 
             const response = {
                 tagStatus: ((this.processTagstatus(rfidresponse[0]))),
@@ -76,7 +77,7 @@ export class RfidPetropoint extends BaseRfid {
                 tagId: (this.processTagId(rfidresponse[2]))
             }
     
-            this.debugLog('processRFIDresponse', JSON.stringify(response, function (key, value) {
+            debugLog('processRFIDresponse', JSON.stringify(response, function (key, value) {
                 if (typeof value === 'bigint') {
                   return value.toString();
                 } else {
@@ -86,7 +87,7 @@ export class RfidPetropoint extends BaseRfid {
             return response;
         }
 
-        this.debugLog('processRFIDresponse', "idle");
+        debugLog('processRFIDresponse', "idle");
         return "idle";
     }
 }

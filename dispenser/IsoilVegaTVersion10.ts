@@ -1,5 +1,6 @@
 //npm run esbuild-browser:watch
 
+import { debugLog } from "../utils/debugLog";
 import { BaseDispenser } from "./base/BaseDispenser";
 export class IsoilVegaTVersion10 extends BaseDispenser {
     private totalizerBuffer =        Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
@@ -15,7 +16,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
     private check_nozzle_totalizer = Buffer.from([0x02, 0x30, 0x30, 0x31, 0x30, 0x33, 0x30, 0x30, 0x30, 0x30, 0x20, 0x20, 0x20, 0x20, 0x36, 0x33, 0x0D]);
 
     // elockStatus() {
-    //     this.debugLog("elockStatus", "Lock_Status");
+    //     debugLog("elockStatus", "Lock_Status");
     //     this.connection.send('Lock_Status');
     // }
 
@@ -28,59 +29,59 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
     }
 
     // elockUnlock() {
-    //     this.debugLog("elockUnlock", "Lock_UnLock");
+    //     debugLog("elockUnlock", "Lock_UnLock");
     //     this.connection.send('Lock_UnLock');
     // }
 
     // elockReset() {
-    //     this.debugLog("elockReset", "Lock_Reset");
+    //     debugLog("elockReset", "Lock_Reset");
     //     this.connection.send('Lock_Reset');
     // }
 
     // elockLock() {
-    //     this.debugLog("elockLock", "Lock_Lock");
+    //     debugLog("elockLock", "Lock_Lock");
     //     this.connection.send('Lock_Lock');
     // }
 
     async totalizer() {
-        this.debugLog("totalizer", "Read_Totalizer");
+        debugLog("totalizer", "Read_Totalizer");
         await this.connection.write(this.totalizerBuffer);
     }
 
     async readPreset() {
-        this.debugLog("readPreset", "Read_Status");
+        debugLog("readPreset", "Read_Status");
         await this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
     }
 
     async readSale() {
-        this.debugLog("readSale", "Read_Status");
+        debugLog("readSale", "Read_Status");
         await this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
     }
 
     async readStatus() {
-        this.debugLog("readStatus", "Read_Status");
+        debugLog("readStatus", "Read_Status");
         if(!this.connection.isOpen) return "";
         await this.connection.write(this.check_nozzle_totalizer); // response needs some statuses to be hardcoded .. will see
     }
 
 
     switchToRemote() {
-        this.debugLog("switchToRemote", "Go_Remote");
+        debugLog("switchToRemote", "Go_Remote");
         //TBD        this.connection.send('Go_Remote');
     }
 
     switchToLocal() {
-        this.debugLog("switchToLocal", "Go_Local");
+        debugLog("switchToLocal", "Go_Local");
         //TBD        this.connection.send('Go_Local');
     }
 
     async pumpStart() {
-        this.debugLog("startPump", "Pump_Start");
+        debugLog("startPump", "Pump_Start");
         await this.connection.write(this.transaction_enable);
     }
 
     async pumpStop() {
-        this.debugLog("stopPump", "Pump_Stop");
+        debugLog("stopPump", "Pump_Stop");
         await this.connection.write(this.terminate);
         await this.delay(300);
         await this.connection.write(this.inbetween_close);
@@ -88,12 +89,12 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
     }
 
     async authorizeSale() {
-        this.debugLog("authorizeSale", "Start");
+        debugLog("authorizeSale", "Start");
         await this.connection.write(this.start);
     }
 
     async setPreset(quantity: number) {
-        this.debugLog("setPreset", `Preset_QTY=${quantity}`);
+        debugLog("setPreset", `Preset_QTY=${quantity}`);
         await this.sendPreset(quantity);
     }
 
@@ -156,17 +157,17 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
     }
 
     async cancelPreset() {
-        this.debugLog("cancelPreset", "Cancel_Preset");
+        debugLog("cancelPreset", "Cancel_Preset");
         await this.sendPreset(0.0);
     }
 
     async suspendSale() {
-        this.debugLog("suspendSale", "Stop");
+        debugLog("suspendSale", "Stop");
         await this.connection.write(this.stop);
     }
 
     async resumeSale() {
-        this.debugLog("resumeSale", "Resume_Sale");
+        debugLog("resumeSale", "Resume_Sale");
         await this.connection.write(this.terminate);
         await this.delay(300);
         await this.connection.write(this.start);
@@ -174,37 +175,37 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
     }
 
     async clearSale() {
-        this.debugLog("clearSale", "Clear_Sale");
+        debugLog("clearSale", "Clear_Sale");
         await this.connection.write(this.transaction_close);
     }
 
     hasExternalPump() {
-        this.debugLog("hasExternalPump", "External_Pump");
+        debugLog("hasExternalPump", "External_Pump");
         return "false";
     }
 
     readAuthorization() {
-        this.debugLog("readAuthorization", "Read_Authorization");
+        debugLog("readAuthorization", "Read_Authorization");
         this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
     }
 
     processLegacyCommand(res: string) {
-        this.debugLog("processLegacyCommand", res);
+        debugLog("processLegacyCommand", res);
 
         if (!res.includes("59")) {
-            this.debugLog("processLegacyCommand", "Command failed! check for status");
+            debugLog("processLegacyCommand", "Command failed! check for status");
             throw Error("Command failed! check for status")
         }
 
-        this.debugLog("processLegacyCommand", "Command success")
+        debugLog("processLegacyCommand", "Command success")
         return true;
     }
 
     processResponseRaw(response: string[], exponentCut: number, mantessaCut: number) {
-        this.debugLog("processResponseRaw", response.join('\n'));
+        debugLog("processResponseRaw", response.join('\n'));
 
         if (response.length < 2) {
-            this.debugLog("processResponseRaw", "Incompatible response");
+            debugLog("processResponseRaw", "Incompatible response");
             throw new Error("Incompatible response");
         }
 
@@ -212,7 +213,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         const mantessa = this.hex2a(this.cutStringFromLast(response[1], mantessaCut, false));
 
         const returnString = `${exponent}.${mantessa}`;
-        this.debugLog("processResponseRaw", returnString);
+        debugLog("processResponseRaw", returnString);
         return returnString;
     }
 
@@ -224,178 +225,178 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
      * @returns
      */
     processResponse(response: string[], exponentCut: number, mantessaCut: number) {
-        this.debugLog("processResponse", response.join('\n'));
+        debugLog("processResponse", response.join('\n'));
         const responseRaw = this.processResponseRaw(response, exponentCut, mantessaCut);
-        this.debugLog("processResponse", JSON.stringify(responseRaw));
+        debugLog("processResponse", JSON.stringify(responseRaw));
         return parseFloat(responseRaw);
     }
 
     processCommand(res: string) {
-        this.debugLog("processCommand", res);
+        debugLog("processCommand", res);
         if (!res.slice(0, -8).endsWith("3030")) {
-            this.debugLog("processCommand", "Command failed! check for status");
+            debugLog("processCommand", "Command failed! check for status");
             throw Error("Command failed! check for status")
         }
 
-        this.debugLog("processCommand", "Command success");
+        debugLog("processCommand", "Command success");
         return true;
     }
 
     processRequestOfStartDelivery(res: string) {
-        this.debugLog("processRequestOfStartDelivery", res);
+        debugLog("processRequestOfStartDelivery", res);
 
         if (res.slice(0, 38).endsWith("30")) {
-            this.debugLog("processRequestOfStartDelivery", "Not present");
+            debugLog("processRequestOfStartDelivery", "Not present");
             return "Not present";
         }
         else if (res.slice(0, 38).endsWith("31")) {
-            this.debugLog("processRequestOfStartDelivery", "Request present");
+            debugLog("processRequestOfStartDelivery", "Request present");
             return "Request present";
         }
         else {
-            this.debugLog("processRequestOfStartDelivery", "Command failed! check for status");
+            debugLog("processRequestOfStartDelivery", "Command failed! check for status");
             return Error("Command failed! check for status");
         }
     }
 
     processStatusOfRemoteStop(res: string) {
-        this.debugLog("processStatusOfRemoteStop", res);
+        debugLog("processStatusOfRemoteStop", res);
         if (res.slice(0, -34).endsWith("30")) {
-            this.debugLog("processStatusOfRemoteStop", "Not active");
+            debugLog("processStatusOfRemoteStop", "Not active");
             return "Not active";
         }
         else if (res.slice(0, -34).endsWith("31")) {
-            this.debugLog("processStatusOfRemoteStop", "Active");
+            debugLog("processStatusOfRemoteStop", "Active");
             return "Active";
         }
         else {
-            this.debugLog("processStatusOfRemoteStop", "Command failed! check for status");
+            debugLog("processStatusOfRemoteStop", "Command failed! check for status");
             return Error("Command failed! check for status");
         }
     }
 
     processStatusOfLocalPrinting(res: string) {
-        this.debugLog("processStatusOfRemoteStop", res);
+        debugLog("processStatusOfRemoteStop", res);
         if (res.slice(0, -526).endsWith("30")) {
-            this.debugLog("processStatusOfRemoteStop", "Printer not enabled");
+            debugLog("processStatusOfRemoteStop", "Printer not enabled");
             return "Printer not enabled";
         }
         else if (res.slice(0, -526).endsWith("31")) {
-            this.debugLog("processStatusOfRemoteStop", "Printer ON LINE");
+            debugLog("processStatusOfRemoteStop", "Printer ON LINE");
             return "Printer ON LINE";
         }
         else if (res.slice(0, -526).endsWith("32")) {
-            this.debugLog("processStatusOfRemoteStop", "No paper");
+            debugLog("processStatusOfRemoteStop", "No paper");
             return "No paper";
         }
         else if (res.slice(0, -526).endsWith("33")) {
-            this.debugLog("processStatusOfRemoteStop", "Printer OFF LINE");
+            debugLog("processStatusOfRemoteStop", "Printer OFF LINE");
             return "Printer OFF LINE";
         }
         else if (res.slice(0, -526).endsWith("34")) {
-            this.debugLog("processStatusOfRemoteStop", "Printer BUSY");
+            debugLog("processStatusOfRemoteStop", "Printer BUSY");
             return "Printer BUSY";
         }
         else if (res.slice(0, -526).endsWith("35")) {
-            this.debugLog("processStatusOfRemoteStop", "Printing in progress");
+            debugLog("processStatusOfRemoteStop", "Printing in progress");
             return "Printing in progress";
         }
         else if (res.slice(0, -526).endsWith("36")) {
-            this.debugLog("processStatusOfRemoteStop", "Print aborted");
+            debugLog("processStatusOfRemoteStop", "Print aborted");
             return "Print aborted";
         }
         else if (res.slice(0, -526).endsWith("37")) {
-            this.debugLog("processStatusOfRemoteStop", "Data not available");
+            debugLog("processStatusOfRemoteStop", "Data not available");
             return "Data not available";
         }
         else {
-            this.debugLog("processStatusOfRemoteStop", "Command failed! check for status");
+            debugLog("processStatusOfRemoteStop", "Command failed! check for status");
             return Error("Command failed! check for status");
         }
     }
 
 
     processStatusOfBatch(res: string) {
-        this.debugLog("processStatusOfBatch", res);
+        debugLog("processStatusOfBatch", res);
         if (res.slice(0, -32).endsWith("30")) {
-            this.debugLog("processStatusOfBatch", "Batch not active");
+            debugLog("processStatusOfBatch", "Batch not active");
             return "Batch not active";
         }
         else if (res.slice(0, -32).endsWith("31")) {
-            this.debugLog("processStatusOfBatch", "Delivery in progress");
+            debugLog("processStatusOfBatch", "Delivery in progress");
             return "Delivery in progress";
         }
         else if (res.slice(0, -32).endsWith("32")) {
-            this.debugLog("processStatusOfBatch", "Delivery stopped");
+            debugLog("processStatusOfBatch", "Delivery stopped");
             return "Delivery stopped";
         }
         else if (res.slice(0, -32).endsWith("33")) {
-            this.debugLog("processStatusOfBatch", "Delivery completed");
+            debugLog("processStatusOfBatch", "Delivery completed");
             return "Request of store data of batch";
         }
         else {
-            this.debugLog("processStatusOfBatch", "Command failed! check for status");
+            debugLog("processStatusOfBatch", "Command failed! check for status");
             throw Error("Command failed! check for status")
         }
     }
 
     processFlowOfProduct(res: string) {
-        this.debugLog("processFlowOfProduct", res);
+        debugLog("processFlowOfProduct", res);
         if (res.slice(0, -30).endsWith("30")) {
-            this.debugLog("processFlowOfProduct", "No flow");
+            debugLog("processFlowOfProduct", "No flow");
             return "No flow";
         }
         else if (res.slice(0, -30).endsWith("31")) {
-            this.debugLog("processFlowOfProduct", "Flow in progress");
+            debugLog("processFlowOfProduct", "Flow in progress");
             return "flow in pogress";
         }
         else {
-            this.debugLog("processFlowOfProduct", "Command failed! check for status");
+            debugLog("processFlowOfProduct", "Command failed! check for status");
             return Error("Command failed! check for status");
         }
     }
     processStatusOfStopBatch(res: string) {
-        this.debugLog("processStatusOfStopBatch", res);
+        debugLog("processStatusOfStopBatch", res);
         if (res.slice(0, -28).endsWith("30")) {
-            this.debugLog("processStatusOfStopBatch", "No stop");
+            debugLog("processStatusOfStopBatch", "No stop");
             return "No stop";
         }
         else if (res.slice(0, -28).endsWith("31")) {
-            this.debugLog("processStatusOfStopBatch", "Stop by operator");
+            debugLog("processStatusOfStopBatch", "Stop by operator");
             return "Stop by operator";
         }
         else if (res.slice(0, -28).endsWith("32")) {
-            this.debugLog("processStatusOfStopBatch", "Stop by remote");
+            debugLog("processStatusOfStopBatch", "Stop by remote");
             return "Stop for faulting of power supply";
         }
         else if (res.slice(0, -28).endsWith("34")) {
-            this.debugLog("processStatusOfStopBatch", "Stop by permissive absence");
+            debugLog("processStatusOfStopBatch", "Stop by permissive absence");
             return "Stop by permissive absence";
         }
         else if (res.slice(0, -28).endsWith("35")) {
-            this.debugLog("processStatusOfStopBatch", "Stop by system alarm");
+            debugLog("processStatusOfStopBatch", "Stop by system alarm");
             return "Stop by system alarm";
         }
         else if (res.slice(0, -28).endsWith("36")) {
-            this.debugLog("processStatusOfStopBatch", "Stop by meter alarm");
+            debugLog("processStatusOfStopBatch", "Stop by meter alarm");
             return "Stop by meter alarm";
         }
         else if (res.slice(0, -28).endsWith("37")) {
-            this.debugLog("processStatusOfStopBatch", "Stop by weight & measure switch absence");
+            debugLog("processStatusOfStopBatch", "Stop by weight & measure switch absence");
             return "Stop by weight & measure switch absence";
         }
         else if (res.slice(0, -28).endsWith("38")) {
-            this.debugLog("processStatusOfStopBatch", "Remote to local commutation");
+            debugLog("processStatusOfStopBatch", "Remote to local commutation");
             return "Remote to local commutation";
         }
         else {
-            this.debugLog("processStatusOfStopBatch", "Command failed! check for status");
+            debugLog("processStatusOfStopBatch", "Command failed! check for status");
             return Error("Command failed! check for status");
         }
     }
 
     processStatus(res: string) {
-        this.debugLog("processStatus", res);
+        debugLog("processStatus", res);
 
         const response = {
             requestOfStartDelivery: this.processRequestOfStartDelivery(res),
@@ -406,176 +407,176 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
             stopOfBatch: this.processStatusOfStopBatch(res)
         }
 
-        this.debugLog("processStatus", JSON.stringify(response));
+        debugLog("processStatus", JSON.stringify(response));
         return response;
     }
 
     processRawReadStatus(res: string) {
-        this.debugLog("processRawReadStatus", res);
+        debugLog("processRawReadStatus", res);
 
         const response = this.hex2a(res).split(" ").filter((e) => { return e ? true : false; });
-        this.debugLog("processRawReadStatus", JSON.stringify(response));
+        debugLog("processRawReadStatus", JSON.stringify(response));
         return response;
     }
 
     processTotalizer(res: string) {
-        this.debugLog("processTotalizer", res);
+        debugLog("processTotalizer", res);
         const response = parseFloat((this.processRawReadStatus(res))[7].replace(',', '.'));
-        this.debugLog("processTotalizer", JSON.stringify(response));
+        debugLog("processTotalizer", JSON.stringify(response));
         return response;
     }
 
     processTotalizerWithBatch(res: string) {
-        this.debugLog("processTotalizerWithBatch", res);
+        debugLog("processTotalizerWithBatch", res);
         const response = {
             totalizer: parseFloat((this.processRawReadStatus(res))[7].replace(',', '.')),
             batchNumber: this.processBatchNumber(res) + 1, // called before pump start.. so +1
             timestamp: Date.now()
         };
-        this.debugLog("processTotalizerWithBatch", JSON.stringify(response));
+        debugLog("processTotalizerWithBatch", JSON.stringify(response));
         return response;
     }
 
     processReadSale(res: string) {
-        this.debugLog("processReadSale", res);
+        debugLog("processReadSale", res);
         const response = parseFloat((this.processRawReadStatus(res))[12].replace(',', '.'));
-        this.debugLog("processReadSale", JSON.stringify(response));
+        debugLog("processReadSale", JSON.stringify(response));
         return response;
     }
 
     processReadPreset(res: string) {
-        this.debugLog("processReadPreset", res);
+        debugLog("processReadPreset", res);
         const response = parseFloat((this.processRawReadStatus(res))[11].slice(0, -2));
-        this.debugLog("processReadPreset", JSON.stringify(response));
+        debugLog("processReadPreset", JSON.stringify(response));
         return response;
     }
 
     processFlowRate(res: string) {
-        this.debugLog("processFlowRate", res);
+        debugLog("processFlowRate", res);
         const response = parseInt(this.hex2a(res.slice(-82, -70)));
-        this.debugLog("processFlowRate", JSON.stringify(response));
+        debugLog("processFlowRate", JSON.stringify(response));
         return response;
     }
 
     processAverageFlowRate(res: string) {
-        this.debugLog("processAverageFlowRate", res);
+        debugLog("processAverageFlowRate", res);
         const response = parseInt(this.hex2a(res.slice(-70, -58)));
-        this.debugLog("processAverageFlowRate", JSON.stringify(response));
+        debugLog("processAverageFlowRate", JSON.stringify(response));
         return response;
     }
 
     processBatchNumber(res: string) {
-        this.debugLog("processBatchNumber", res);
+        debugLog("processBatchNumber", res);
         const response = parseInt(this.hex2a(res.slice(242, 254)));
-        this.debugLog("processBatchNumber", JSON.stringify(response));
+        debugLog("processBatchNumber", JSON.stringify(response));
         return response;
     }
 
     hasChecksBeforePumpStart() {
-        this.debugLog("hasChecksBeforePumpStart", "false");
+        debugLog("hasChecksBeforePumpStart", "false");
         return false;
     }
     isPumpStopped(res: string) {
-        this.debugLog("isPumpStopped", res);
+        debugLog("isPumpStopped", res);
         const status = this.processStatus(res);
-        this.debugLog("isPumpStopped", JSON.stringify(status));
+        debugLog("isPumpStopped", JSON.stringify(status));
         if (status.requestOfStartDelivery == 'Request present') {
-            this.debugLog("isPumpStopped", "false");
+            debugLog("isPumpStopped", "false");
             return false;
         }
 
-        this.debugLog("isPumpStopped", "true");
+        debugLog("isPumpStopped", "true");
         return true;
     }
 
     isReadyForPreset() {
-        this.debugLog("isReadyForPreset", "true");
+        debugLog("isReadyForPreset", "true");
         return true;
     }
 
     isNozzleOnHook() {
-        this.debugLog("isNozzleOnHook", "true");
+        debugLog("isNozzleOnHook", "true");
         return true;
     }
 
     isNozzleOffHook() {
-        this.debugLog("isNozzleOffHook", "true");
+        debugLog("isNozzleOffHook", "true");
         return true;
     }
 
     isOnline(res: string): boolean {
-        this.debugLog("isOnline", res);
+        debugLog("isOnline", res);
         const readStatuses = this.processRawReadStatus(res);
         if (readStatuses.length > 0) {
-            this.debugLog("isOnline", "true");
+            debugLog("isOnline", "true");
             return true;
         }
-        this.debugLog("isOnline", "false");
+        debugLog("isOnline", "false");
         return false;
     }
 
     isPrinterAvailable(res: string): boolean {
-        this.debugLog("isPrinterAvailable", res);
+        debugLog("isPrinterAvailable", res);
         const status = this.processStatus(res);
-        this.debugLog("isPrinterAvailable", JSON.stringify(status));
+        debugLog("isPrinterAvailable", JSON.stringify(status));
         if (status.localPrinting == 'Printer ON LINE') {
-            this.debugLog("isPrinterAvailable", "true");
+            debugLog("isPrinterAvailable", "true");
             return true;
         }
-        this.debugLog("isPrinterAvailable", "false");
+        debugLog("isPrinterAvailable", "false");
         return false;
     }
 
     isPresetVerified(res: string, quantity: number) {
-        this.debugLog("isPresetVerified", res);
+        debugLog("isPresetVerified", res);
         const presetValue = this.processReadPreset(res);
         if (quantity == presetValue) {
-            this.debugLog("isPresetVerified", "true");
+            debugLog("isPresetVerified", "true");
             return true;
         }
-        this.debugLog("isPresetVerified", "false");
+        debugLog("isPresetVerified", "false");
         return false;
 
     }
 
     isDispensing(res: string) {
-        this.debugLog("isDispensing", res);
+        debugLog("isDispensing", res);
         const status = this.processStatus(res);
-        this.debugLog("isDispensing", JSON.stringify(status));
+        debugLog("isDispensing", JSON.stringify(status));
         if (status.flowOfProduct == 'No flow' || status.remoteStop == 'Active') {
-            this.debugLog("isDispensing", "false");
+            debugLog("isDispensing", "false");
             return false;
         }
-        this.debugLog("isDispensing", "true");
+        debugLog("isDispensing", "true");
         return true;
     }
 
     isIdle(res: string) {
-        this.debugLog("isIdle", res);
+        debugLog("isIdle", res);
         const status = this.processStatus(res);
-        this.debugLog("isDispensing", JSON.stringify(status));
+        debugLog("isDispensing", JSON.stringify(status));
         if (status.flowOfProduct == 'No flow' && status.statusOfBatch == 'Batch not active' && status.requestOfStartDelivery == 'Not present') {
-            this.debugLog("isDispensing", "false");
+            debugLog("isDispensing", "false");
             return true;
         }
-        this.debugLog("isDispensing", "true");
+        debugLog("isDispensing", "true");
         return false;
     }
 
     isSaleCloseable() {
-        this.debugLog("isSaleCloseable", "true");
+        debugLog("isSaleCloseable", "true");
         return true;
     }
 
     isSaleSuspended(res: string) {
-        this.debugLog("isSaleSuspended", res);
+        debugLog("isSaleSuspended", res);
         const status = this.processStatus(res);
-        this.debugLog("isDispensing", JSON.stringify(status));
+        debugLog("isDispensing", JSON.stringify(status));
         if (status.flowOfProduct == 'No flow' && status.requestOfStartDelivery == 'Request present') {
-            this.debugLog("isSaleSuspended", "true");
+            debugLog("isSaleSuspended", "true");
             return true;
         }
-        this.debugLog("isSaleSuspended", "false");
+        debugLog("isSaleSuspended", "false");
         return false;
 
     }
@@ -588,7 +589,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
      * @returns
      */
     isOrderComplete(res: string, quantity: number) {
-        this.debugLog("isOrderComplete", res);
+        debugLog("isOrderComplete", res);
         const readsale = this.processReadSale(res);
         const totalizer = this.processTotalizer(res);
         const status = this.processStatus(res);
@@ -605,7 +606,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
                 dispensedQty: this.toFixedNumber(readsale, 2)
             };
 
-            this.debugLog("isOrderComplete", JSON.stringify(response));
+            debugLog("isOrderComplete", JSON.stringify(response));
             return response;
         }
 
@@ -620,7 +621,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
             dispensedQty: this.toFixedNumber(readsale, 2)
         };
 
-        this.debugLog("isOrderComplete", JSON.stringify(response));
+        debugLog("isOrderComplete", JSON.stringify(response));
         return response;
     }
 
@@ -628,7 +629,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         const printWidth = 33;
         const printArr = [];
 
-        this.debugLog("printReceipt", JSON.stringify(printObj));
+        debugLog("printReceipt", JSON.stringify(printObj));
 
         if (printObj?.isReceiptRequired) {
             printArr.push(this.str2hex(this.centerAlignValue("****  CUSTOMER COPY  ****", printWidth)));
@@ -688,7 +689,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         printArr.push('0A');
         printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
 
-        this.debugLog("printReceipt", `02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
+        debugLog("printReceipt", `02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
         this.printOrder(`02303031313438313030303930${printArr.join('0A')}0A0A2020202020`);
     }
 
