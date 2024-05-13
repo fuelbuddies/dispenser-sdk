@@ -16,6 +16,7 @@ export class Seneca {
     public baudRate: number;
     public deviceId: number;
     public overflowCount: number = 0;
+    public overflowOffset: number = 0;
     public pulseCount: number = 0;
     public previousPulseCount: number = 0;
     public workId: string | undefined;
@@ -34,7 +35,7 @@ export class Seneca {
     }
 
     readPulse() {
-      return (4294967296 * this.overflowCount) + this.pulseCount;
+      return this.overflowOffset + this.pulseCount;
     }
 }
 
@@ -55,6 +56,7 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
         .then(ReadOverflowRegister)
             .input((step, data) => step.client = data.client)
             .input((step, data) => step.overflowRegister = data.overflowRegister)
+            .output((step, data) => data.overflowOffset = step.overflowOffset)
             .output((step, data) => data.overflowCount = step.overflowCount))
         .onError(WorkflowErrorHandling.Retry, 1000)
         .then(LogMessage)
@@ -88,7 +90,9 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
                     .then(IncrementOverflowRegister)
                     .input((step, data) => step.client = data.client)
                     .input((step, data) => step.overflowRegister = data.overflowRegister)
+                    .input((step, data) => step.overflowOffset = data.overflowOffset)
                     .input((step, data) => step.overflowCount = data.overflowCount)
+                    .output((step, data) => data.overflowOffset = step.overflowOffset)
                     .output((step, data) => data.overflowCount = step.overflowCount))
                 .then(LogMessage)
                     .input((step, data) => step.message = `Overflow Count: ${data.overflowCount}`)))
