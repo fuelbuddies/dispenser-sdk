@@ -7,6 +7,7 @@ import { getConfigFromEnv, getRFIDConfigFromEnv } from './utils/envParser';
 import { Seneca } from "./dispenser/workflows/GateX";
 import { delay } from "./utils/delay";
 import { debugLog } from "./utils/debugLog";
+import { findPrinterPort } from "./utils/findPrinterPort";
 
 export { IDispenser, IRfid, RfidOptions, DispenserOptions, getConfigFromEnv, getRFIDConfigFromEnv};
 
@@ -30,7 +31,7 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
             serialPort.address = await findDispenserPort(hardwareId, attributeId);
             debugLog('Dispenser found at: ', serialPort.address);
             if(!printer) throw new Error('Printer is required for GateX dispenser');
-            const GateXPrinterPath = await findDispenserPort(printer.hardwareId, printer.attributeId);
+            const GateXPrinterPath = await findPrinterPort(printer.hardwareId, printer.attributeId);
             debugLog('Printer found at: ', GateXPrinterPath);
             const printerPort = new SerialPort({path: GateXPrinterPath, baudRate: printer.baudRate || 9600});
             const gatex = new GateX.GateX(serialPort, printerPort, options);
