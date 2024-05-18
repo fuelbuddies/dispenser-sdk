@@ -1,17 +1,12 @@
 #!/usr/bin/env ts-node
 
 import { createDispenser } from '../main';
+import { debugLog } from '../utils/debugLog';
 import {getConfigFromEnv} from '../utils/envParser';
-import { findDispenserPort } from '../utils/findDispenserPort';
 
 const configuration = getConfigFromEnv();
-console.log(configuration);
-async function main () {
-    const dispenserPath = await findDispenserPort(configuration.hardwareId, configuration.attributeId);
-    console.log("Dispenser found at: ", dispenserPath);
-}
-main();
-createDispenser(getConfigFromEnv()).then((dispenser) => {
+debugLog('Configuration: ', configuration);
+createDispenser(configuration).then((dispenser) => {
     // console.log(dispenser);
     dispenser.execute(dispenser.totalizer, dispenser.processTotalizer).then((totalizer) => {
         dispenser.disconnect(() => {

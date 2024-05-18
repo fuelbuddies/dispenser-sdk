@@ -6,6 +6,7 @@ import { IRfid, RfidOptions } from "./rfid/interface/IRfid";
 import { getConfigFromEnv, getRFIDConfigFromEnv } from './utils/envParser';
 import { Seneca } from "./dispenser/workflows/GateX";
 import { delay } from "./utils/delay";
+import { debugLog } from "./utils/debugLog";
 
 export { IDispenser, IRfid, RfidOptions, DispenserOptions, getConfigFromEnv, getRFIDConfigFromEnv};
 
@@ -15,16 +16,23 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
     switch (dispenserType) {
         case 'Tokhiem':
             const DispenserType = await import('./dispenser/Tokhiem');
-            return new DispenserType.Tokhiem(new SerialPort({path: await findDispenserPort(hardwareId, attributeId), baudRate: baudRate }), options);
+            const tokhiemUsbPath = await findDispenserPort(hardwareId, attributeId);
+            debugLog('Dispenser found at: ', tokhiemUsbPath);
+            return new DispenserType.Tokhiem(new SerialPort({path: tokhiemUsbPath, baudRate: baudRate }), options);
         case 'IsoilVegaTVersion10':
             const IsoilVegaTVersion10 = await import('./dispenser/IsoilVegaTVersion10');
-            return new IsoilVegaTVersion10.IsoilVegaTVersion10(new SerialPort({path: await findDispenserPort(hardwareId, attributeId), baudRate: baudRate }), options);
+            const ISoilUsbPath = await findDispenserPort(hardwareId, attributeId);
+            debugLog('Dispenser found at: ', ISoilUsbPath);
+            return new IsoilVegaTVersion10.IsoilVegaTVersion10(new SerialPort({path: ISoilUsbPath, baudRate: baudRate }), options);
         case 'GateX':
             const GateX = await import('./dispenser/GateX');
             const serialPort = new Seneca(options);
             serialPort.address = await findDispenserPort(hardwareId, attributeId);
+            debugLog('Dispenser found at: ', serialPort.address);
             if(!printer) throw new Error('Printer is required for GateX dispenser');
-            const printerPort = new SerialPort({path: await findDispenserPort(printer.hardwareId, printer.attributeId), baudRate: printer.baudRate || 9600});
+            const GateXPrinterPath = await findDispenserPort(printer.hardwareId, printer.attributeId);
+            debugLog('Printer found at: ', GateXPrinterPath);
+            const printerPort = new SerialPort({path: GateXPrinterPath, baudRate: printer.baudRate || 9600});
             const gatex = new GateX.GateX(serialPort, printerPort, options);
             await delay(5000);
             return gatex;

@@ -1,11 +1,13 @@
 #!/usr/bin/env ts-node
 
 import { createDispenser } from '../main';
+import { debugLog } from '../utils/debugLog';
 import {getConfigFromEnv} from '../utils/envParser';
 
-console.log(getConfigFromEnv());
+const configuration = getConfigFromEnv();
+debugLog('Configuration: ', configuration);
 
-createDispenser(getConfigFromEnv()).then((dispenser) => {
+createDispenser(configuration).then((dispenser) => {
     // console.log(dispenser);
     dispenser.execute(dispenser.authorizeSale, dispenser.processCommand).then((totalizer) => {
         dispenser.disconnect(() => {
