@@ -71,6 +71,7 @@ export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
                 .then(ReadPulseCounter)
                     .input((step, data) => step.client = data.client)
                     .input((step, data) => step.pulseCount = data.pulseCount)
+                    .input((step, data) => step.pulseRegister = data.pulseRegister)
                     .output((step, data) => data.pulseCount = step.pulseCount)
                     .output((step, data) => data.previousPulseCount = step.previousPulseCount)
                 .compensateWithSequence(comp => comp
