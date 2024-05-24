@@ -19,7 +19,9 @@ export class GateX extends ModBusDispenser {
     }
 
     async totalizer() {
+        debugLog('totalizer', 'awaiting connection');
         const seneca = await this.connection;
+        debugLog('totalizer', 'awaiting readPulse');
         return await seneca.readPulse();
     }
 
