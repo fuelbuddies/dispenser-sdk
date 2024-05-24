@@ -104,12 +104,8 @@ export class Seneca {
     }
 
     async readPulse() {
-      debugLog('ReadPulse', "Awaiting overflow count offset");
-      const overflowCountOffset = await this.getOverflowOffsetAsync();
-      debugLog('ReadPulse', "Awaiting pulse count");
-      const pulseCount = await this.getPulseCountAsync();
-      debugLog('ReadPulse', `Overflow Count: ${overflowCountOffset} : Pulse Count: ${pulseCount}`);
-      return overflowCountOffset + pulseCount;
+      debugLog('ReadPulse', `Overflow Count: ${this.overflowOffset} : Pulse Count: ${this.pulseCount}`);
+      return this.overflowOffset + this.pulseCount;
     }
 }
 
