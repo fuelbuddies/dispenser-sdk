@@ -19,7 +19,8 @@ export class GateX extends ModBusDispenser {
     }
 
     async totalizer() {
-        return (await this.connection).readPulse();
+        const connection = await this.connection;
+        return await connection.readPulse();
     }
 
     async readSale() {

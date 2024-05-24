@@ -8,6 +8,8 @@ import { ReadPulseCounter } from "./GateX/countPulse";
 import { IncrementOverflowRegister } from "./GateX/incrementOverflow";
 import { DispenserOptions } from "../interface/IDispenser";
 import { LogMessage } from "./common/logMessage";
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { debugLog } from "../../utils/debugLog";
 
 export class Seneca {
     public client: ModbusRTU;
@@ -15,10 +17,10 @@ export class Seneca {
     public address: string = "COM9";
     public baudRate: number;
     public deviceId: number;
-    public overflowCount: number = 0;
-    public overflowOffset: number = 0;
-    public pulseCount: number = 0;
-    public previousPulseCount: number = 0;
+    private _overflowCount: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+    private _overflowOffset: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+    private _pulseCount: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+    private _previousPulseCount: BehaviorSubject<number> = new BehaviorSubject<number>(0);
     public workId: string | undefined;
 
     public overflowRegister: number = 8; // 16-bit register that increments every time the pulse counter overflows
@@ -34,8 +36,78 @@ export class Seneca {
       this.pulseRegister = modbusOptions?.pulseRegister || 10;
     }
 
-    readPulse() {
-      return this.overflowOffset + this.pulseCount;
+    // Observable getters
+    get overflowCount$() {
+        return this._overflowCount.asObservable();
+    }
+
+    get overflowOffset$() {
+        return this._overflowOffset.asObservable();
+    }
+
+    get pulseCount$() {
+        return this._pulseCount.asObservable();
+    }
+
+    get previousPulseCount$() {
+        return this._previousPulseCount.asObservable();
+    }
+
+    // Synchronous setters and getters
+    set overflowCount(val: number) {
+        this._overflowCount.next(val);
+    }
+
+    get overflowCount() {
+        return this._overflowCount.getValue();
+    }
+
+    set overflowOffset(val: number) {
+        this._overflowOffset.next(val);
+    }
+
+    get overflowOffset() {
+        return this._overflowOffset.getValue();
+    }
+
+    set pulseCount(val: number) {
+        this._pulseCount.next(val);
+    }
+
+    get pulseCount() {
+        return this._pulseCount.getValue();
+    }
+
+    set previousPulseCount(val: number) {
+        this._previousPulseCount.next(val);
+    }
+
+    get previousPulseCount() {
+        return this._previousPulseCount.getValue();
+    }
+
+    // Asynchronous getters using async/await
+    async getOverflowCountAsync(): Promise<number> {
+        return await lastValueFrom(this._overflowCount.asObservable());
+    }
+
+    async getOverflowOffsetAsync(): Promise<number> {
+        return await lastValueFrom(this._overflowOffset.asObservable());
+    }
+
+    async getPulseCountAsync(): Promise<number> {
+        return await lastValueFrom(this._pulseCount.asObservable());
+    }
+
+    async getPreviousPulseCountAsync(): Promise<number> {
+        return await lastValueFrom(this._previousPulseCount.asObservable());
+    }
+
+    async readPulse() {
+      const overflowCountOffset = await this.getOverflowOffsetAsync();
+      const pulseCount = await this.getPulseCountAsync();
+      debugLog('ReadPulse', `Overflow Count: ${overflowCountOffset} : Pulse Count: ${pulseCount}`);
+      return overflowCountOffset + pulseCount;
     }
 }
 
