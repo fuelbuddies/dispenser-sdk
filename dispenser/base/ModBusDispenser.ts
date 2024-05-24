@@ -17,7 +17,7 @@ export class ModBusDispenser implements IDispenser {
     constructor(socket: Seneca, printer?: SerialPort, options?: DispenserOptions) {
         this.printer = printer;
         this.config = configureWorkflow();
-        this.config.useLogger(new ConsoleLogger());
+        if(options?.modbus?.debug) this.config.useLogger(new ConsoleLogger());
         const host = this.config.getHost();
         this.host = host;
         this.host.registerWorkflow(Z10DIN_Workflow);
