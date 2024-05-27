@@ -7,16 +7,18 @@ const wfc_locks: Set<string> = new Set();
 export class SingleNodeLockProvider implements IDistributedLockProvider {
     
     public async aquireLock(id: string): Promise<boolean> {
-        debugLog('LockProvider', `Aquiring lock for ${id}`)
+        debugLog('LockProvider', `Aquiring lock for ${id}`);
         if (wfc_locks.has(id)) {
+            debugLog('LockProvider', `Lock for ${id} already exists`);
             return false;
         }
         wfc_locks.add(id);
+        debugLog('LockProvider', `Lock for ${id} aquired`);
         return true;       
     }
 
     public async releaseLock(id: string): Promise<void> {  
-        debugLog('LockProvider', `Releasing lock for ${id}`)      
+        debugLog('LockProvider', `Releasing lock for ${id}`);      
         wfc_locks.delete(id);
     }
 }
