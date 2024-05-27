@@ -7,6 +7,7 @@ import * as path from 'path';
 import { Seneca, Z10DIN_Workflow } from "../workflows/GateX";
 import { ConsoleLogger, IWorkflowHost, WorkflowConfig, configureWorkflow } from "workflow-es";
 import { debugLog } from "../../utils/debugLog";
+import { SingleNodeLockProvider } from "../workflows/provider/single-node-lock-provider";
 
 export class ModBusDispenser implements IDispenser {
     connection: Promise<Seneca>;
@@ -18,6 +19,7 @@ export class ModBusDispenser implements IDispenser {
         this.printer = printer;
         this.config = configureWorkflow();
         if(options?.modbus?.debug) this.config.useLogger(new ConsoleLogger());
+        this.config.useLockManager(new SingleNodeLockProvider());
         const host = this.config.getHost();
         this.host = host;
         this.host.registerWorkflow(Z10DIN_Workflow);
