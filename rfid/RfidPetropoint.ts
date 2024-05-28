@@ -1,13 +1,15 @@
 //npm run esbuild-browser:watch
 
-import { debugLog } from "../utils/debugLog";
+import debug from 'debug';
 import { BaseRfid } from "./BaseRfid";
 import { RfidResponse } from "./interface/IRfid";
+
+const debugLog = debug('dispenser:rfid-petropoint');
 
 export class RfidPetropoint extends BaseRfid {
 
     checkType() {
-        debugLog('rfidType', 'RFID')
+        debugLog('rfidType: %s', 'RFID')
         return 'PETROPOINTHECTRONICS';
     }
 
@@ -23,25 +25,25 @@ export class RfidPetropoint extends BaseRfid {
     }
 
     processRawRfidStatus(res: string) {
-        debugLog('processRawRfidStatus', res);
+        debugLog('processRawRfidStatus: %s', res);
         const response = this.hex2a(res).split(",");
-        debugLog('processRawRfidStatus', JSON.stringify(response));
+        debugLog('processRawRfidStatus: %o', response);
         return response;
     }
 
     processTagstatus(res: string) {
-        debugLog('processTagstatus', res);
+        debugLog('processTagstatus: %s', res);
 
         if (res.endsWith("002")) {
-            debugLog('processTagstatus', "TagInRange");
+            debugLog('processTagstatus: %s', "TagInRange");
             return "TagInRange";
         }
         if (res.endsWith("005")) {
-            debugLog('processTagstatus', "TagNotInRange");
+            debugLog('processTagstatus: %s', "TagNotInRange");
             return "TagNotInRange";
         }
 
-        debugLog('processTagstatus', "Idle");
+        debugLog('processTagstatus: %s', "Idle");
         return "Idle";
     }
 
@@ -49,7 +51,7 @@ export class RfidPetropoint extends BaseRfid {
         debugLog('processTagId', res);
         if (res.length > 10) {
             const tagId = BigInt(res);
-            debugLog('processTagId', JSON.stringify(tagId, function (key, value) {
+            debugLog('processTagId: %s', JSON.stringify(tagId, function (key, value) {
                 if (typeof value === 'bigint') {
                   return value.toString();
                 } else {
@@ -59,17 +61,17 @@ export class RfidPetropoint extends BaseRfid {
             return tagId;
         }
 
-        debugLog('processTagId', "Invalid TagId");
+        debugLog('processTagId: %s', "Invalid TagId");
         return -1;
     }
 
     processRFIDresponse(res: string): RfidResponse | "idle" {
-        debugLog('processRFIDresponse', res);
+        debugLog('processRFIDresponse: %s', res);
         const regex = /^02.*?0a/;
         const match = res.match(regex);
         if (match) {
             const rfidresponse = this.processRawRfidStatus(match[0]);
-            debugLog('processRFIDresponse', JSON.stringify(rfidresponse));
+            debugLog('processRFIDresponse: %o', rfidresponse);
 
             const response = {
                 tagStatus: ((this.processTagstatus(rfidresponse[0]))),
@@ -77,7 +79,7 @@ export class RfidPetropoint extends BaseRfid {
                 tagId: (this.processTagId(rfidresponse[2]))
             }
     
-            debugLog('processRFIDresponse', JSON.stringify(response, function (key, value) {
+            debugLog('processRFIDresponse: %s', JSON.stringify(response, function (key, value) {
                 if (typeof value === 'bigint') {
                   return value.toString();
                 } else {
@@ -87,7 +89,7 @@ export class RfidPetropoint extends BaseRfid {
             return response;
         }
 
-        debugLog('processRFIDresponse', "idle");
+        debugLog('processRFIDresponse: %s', "idle");
         return "idle";
     }
 }

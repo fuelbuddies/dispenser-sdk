@@ -2,8 +2,8 @@ import { ModBusDispenser } from "./base/ModBusDispenser";
 import { DispenserOptions, TotalizerResponse, VolumeResponse } from './interface/IDispenser';
 import { SerialPort } from 'serialport';
 import { Seneca } from "./workflows/GateX";
-import { debugLog } from "../utils/debugLog";
-
+import debug from 'debug';
+const debugLog = debug('dispenser:GateX');
 export class GateX extends ModBusDispenser {
     private AuthorizeValveGPIO: number = 26;
     private kFactor: number | undefined;
@@ -19,9 +19,9 @@ export class GateX extends ModBusDispenser {
     }
 
     async totalizer() {
-        debugLog('totalizer', 'awaiting connection');
+        debugLog('totalizer: %s', 'awaiting connection');
         const seneca = await this.connection;
-        debugLog('totalizer', 'awaiting readPulse');
+        debugLog('totalizer: %s', 'awaiting readPulse');
         return await seneca.readPulse();
     }
 
@@ -34,9 +34,9 @@ export class GateX extends ModBusDispenser {
     }
 
     processTotalizerRes(pulse: any): TotalizerResponse {
-        debugLog("pulse", JSON.stringify(pulse));
+        debugLog("pulse: %o", pulse);
         if(!this.kFactor || this.kFactor < 0) {
-            debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value', 'error');
+            debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value: %s', 'error');
         }
 
         var totalizer = {
@@ -48,27 +48,27 @@ export class GateX extends ModBusDispenser {
         if(!this.startTotalizer) {
             this.startTotalizer = totalizer;
         }
-        debugLog("totalizer", JSON.stringify(totalizer));
+        debugLog("totalizer: %o", totalizer);
         return totalizer;
     }
 
     processTotalizer(data: any) {
-        debugLog("processTotalizer", JSON.stringify(arguments));
+        debugLog("processTotalizer: %o", arguments);
         return this.processTotalizerRes(data).totalizer;
     }
 
     processTotalizerWithBatch(data: any): TotalizerResponse {
-        debugLog("processTotalizerWithBatch", JSON.stringify(arguments));
+        debugLog("processTotalizerWithBatch: %o", arguments);
         return this.processTotalizerRes(data);
     }
 
     isIdle(res: string) {
-        debugLog("isSaleCloseable", "true");
+        debugLog("isSaleCloseable: %s", "true");
         return res.trim() === 'false';
     }
 
     isSaleCloseable() {
-        debugLog("isSaleCloseable", "true");
+        debugLog("isSaleCloseable: %s", "true");
         return true;
     }
 
@@ -90,7 +90,7 @@ export class GateX extends ModBusDispenser {
                 dispensedQty: this.toFixedNumber(readsale.volume, 2)
             };
 
-            debugLog("isOrderComplete", JSON.stringify(response));
+            debugLog("isOrderComplete: %o", response);
             return response;
         }
 
@@ -104,7 +104,7 @@ export class GateX extends ModBusDispenser {
             dispensedQty: this.toFixedNumber(readsale.volume, 2)
         };
 
-        debugLog("isOrderComplete", JSON.stringify(response));
+        debugLog("isOrderComplete: %o", response);
         return response;
     }
 
@@ -135,7 +135,7 @@ export class GateX extends ModBusDispenser {
     }
 
     async suspendSale() {
-        debugLog("suspendSale", "Stop");
+        debugLog("suspendSale: %s", "Stop");
         return await this.pumpStop();
     }
 
@@ -194,6 +194,7 @@ export class GateX extends ModBusDispenser {
 
     calculateVolume(previousTotalizer: TotalizerResponse | undefined, currentTotalizer: TotalizerResponse): VolumeResponse {
         if(!this.kFactor || this.kFactor < 0) {
+            debugLog('K-Factor not set for this dispenser, you might get wrong volume!');
             alert('K-Factor not set for this dispenser, you might get wrong volume!');
         }
 
@@ -218,7 +219,7 @@ export class GateX extends ModBusDispenser {
         const printWidth = 40;
         const printArr = [];
 
-        debugLog("printReceipt", JSON.stringify(printObj));
+        debugLog("printReceipt: %o", printObj);
 
         if (printObj?.isReceiptRequired) {
             printArr.push(this.str2hex(this.centerAlignValue("****  CUSTOMER COPY  ****", printWidth)));
@@ -277,7 +278,7 @@ export class GateX extends ModBusDispenser {
         printArr.push('0A');
         printArr.push(this.str2hex(this.rightAlignValue("GROSS VOLUME", printObj?.unitOfMeasure, printWidth)));
 
-        debugLog("printReceipt", `${printArr.join('0A')}0A0A1D564200`);
+        debugLog("printReceipt: %s", `${printArr.join('0A')}0A0A1D564200`);
         return this.printOrder(`${printArr.join('0A')}0A0A1D564200`);
     }
 

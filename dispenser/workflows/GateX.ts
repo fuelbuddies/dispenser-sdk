@@ -9,8 +9,9 @@ import { IncrementOverflowRegister } from "./GateX/incrementOverflow";
 import { DispenserOptions } from "../interface/IDispenser";
 import { LogMessage } from "./common/logMessage";
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
-import { debugLog } from "../../utils/debugLog";
+import debug from 'debug';
 
+const debugLog = debug('dispenser:seneca');
 export class Seneca {
     public client: ModbusRTU;
     public timeout: number;
@@ -104,7 +105,7 @@ export class Seneca {
     }
 
     async readPulse() {
-      debugLog('ReadPulse', `Overflow Count: ${this.overflowOffset} : Pulse Count: ${this.pulseCount}`);
+      debugLog('ReadPulse: %s', `Overflow Count: ${this.overflowOffset} : Pulse Count: ${this.pulseCount}`);
       return this.overflowOffset + this.pulseCount;
     }
 }

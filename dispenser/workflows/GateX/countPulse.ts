@@ -1,6 +1,8 @@
 import ModbusRTU from "modbus-serial";
 import { ExecutionResult, StepBody, StepExecutionContext } from "workflow-es";
-import { debugLog } from "../../../utils/debugLog";
+import debug from 'debug';
+
+const debugLog = debug('dispenser:read-pulse-counter');
 
 export class ReadPulseCounter extends StepBody {
     public client: ModbusRTU = new ModbusRTU();
@@ -9,13 +11,13 @@ export class ReadPulseCounter extends StepBody {
     public previousPulseCount: number = 0;
 
     public async run(context: StepExecutionContext): Promise<ExecutionResult> {
-        debugLog("Read Pulse Register: ", JSON.stringify(this.pulseRegister));
+        debugLog("Read Pulse Register: %s", JSON.stringify(this.pulseRegister));
         const pulseCounter = await this.client.readHoldingRegisters(this.pulseRegister, 2);
-        debugLog("pulseRegister", JSON.stringify(this.pulseRegister));
+        debugLog("pulseRegister: %s", JSON.stringify(this.pulseRegister));
         this.previousPulseCount = this.pulseCount;
         this.pulseCount = pulseCounter.buffer.readUInt32BE(0);
 
-        if(this.pulseCount < this.previousPulseCount) debugLog('ReadPulseCounter', "<< ===== Overflow Detected ===== >>");
+        if(this.pulseCount < this.previousPulseCount) debugLog('ReadPulseCounter: %s', "<< ===== Overflow Detected ===== >>");
 
         return ExecutionResult.next();
     }

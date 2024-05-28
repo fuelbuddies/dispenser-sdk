@@ -6,9 +6,10 @@ import { execFile } from 'child_process';
 import * as path from 'path';
 import { Seneca, Z10DIN_Workflow } from "../workflows/GateX";
 import { ConsoleLogger, IWorkflowHost, WorkflowConfig, configureWorkflow } from "workflow-es";
-import { debugLog } from "../../utils/debugLog";
+import debug from 'debug';
 import { SingleNodeLockProvider } from "../workflows/provider/single-node-lock-provider";
 
+const debugLog = debug('dispenser:modbus-dispenser');
 export class ModBusDispenser implements IDispenser {
     connection: Promise<Seneca>;
     printer?: SerialPort<AutoDetectTypes>;
@@ -27,7 +28,7 @@ export class ModBusDispenser implements IDispenser {
             host.start().then(() => {
                 host.startWorkflow("z10d1n-world", 1, socket).then((workId) => {
                     socket.workId = workId;
-                    debugLog("ModBusDispenser", "Workflow started with id: " + workId);
+                    debugLog("ModBusDispenser: %s", "Workflow started with id: " + workId);
                     resolve(socket);
                 });
             });
@@ -52,7 +53,7 @@ export class ModBusDispenser implements IDispenser {
         const data = await callee.call(this, calleeArgs || undefined);
         if (bindFunction instanceof Function) {
             const result = bindFunction.call(this, data, calleeArgs || undefined, callee.name);
-            debugLog("bindFunction", JSON.stringify(result));
+            debugLog("bindFunction: %s", JSON.stringify(result));
             return result;
         } else {
             return data;
@@ -64,7 +65,7 @@ export class ModBusDispenser implements IDispenser {
             Promise.resolve(callee.call(this, calleeArgs || undefined)).then(async (data: any) => {
                 if (bindFunction instanceof Function) {
                     const result = await bindFunction.call(this, data, calleeArgs || undefined, callee.name);
-                    debugLog("bindFunction", JSON.stringify(result));
+                    debugLog("bindFunction: %s", JSON.stringify(result));
                     resolve(result);
                 } else {
                     resolve(data);
@@ -80,21 +81,21 @@ export class ModBusDispenser implements IDispenser {
     }
 
     async disconnect(callback: any) {
-        debugLog("disconnect", "Requesting disconnection from Seneca")
+        debugLog("disconnect: %s", "Requesting disconnection from Seneca")
         const connection = await this.connection;
         connection.client.close(async () => {
             if (connection.workId) {
-                debugLog("disconnect", "Terminating workflow");
+                debugLog("disconnect: %s", "Terminating workflow");
                 await this.host.terminateWorkflow(connection.workId);
             }
 
             if (!this.printer) {
-                debugLog("disconnect", "No printer connection found");
+                debugLog("disconnect: %s", "No printer connection found");
                 return callback();
             }
 
             this.printer.close(() => {
-                debugLog("disconnect", "Printer connection closed");
+                debugLog("disconnect: %s", "Printer connection closed");
                 callback();
             });
         });
@@ -126,7 +127,7 @@ export class ModBusDispenser implements IDispenser {
     * @returns
     */
     rightAlignValue = (label: string, valueStr: string, totalWidth: number) => {
-        debugLog('rightAlignValue',`${label}, ${valueStr}, ${totalWidth}`);
+        debugLog('rightAlignValue: %s',`${label}, ${valueStr}, ${totalWidth}`);
         const value = valueStr ? valueStr + "" : 'N/A';
         const labelWidth = label.length;
         const valueWidth = value.length;
@@ -159,14 +160,14 @@ export class ModBusDispenser implements IDispenser {
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
         const absoluteScriptPath = path.join(__dirname, scriptPath);
-        debugLog('Executing script: ', absoluteScriptPath);
+        debugLog('Executing script: %s', absoluteScriptPath);
 
         return new Promise((resolve, reject) => {
             execFile(absoluteScriptPath, (error, stdout, stderr) => {
                 if (error) {
                     // If there's an error, consider the script execution unsuccessful
-                    console.error('Console:', stderr);
-                    console.error('Error:', error);
+                    debugLog('Console: %s', stderr);
+                    debugLog('Error: %s', error);
                     resolve(false);
                 } else {
                     // If the script output is "true", consider the script execution successful

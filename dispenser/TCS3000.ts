@@ -1,6 +1,7 @@
-import { debugLog } from "../utils/debugLog";
+import debug from "debug";
 import { BaseDispenser } from "./base/BaseDispenser";
 
+const debugLog = debug("dispenser:tcs3000");
 export class TCS3000 extends BaseDispenser {
     // // elockStatus() {
     // //     debugLog("elockStatus", "Lock_Status");
@@ -122,71 +123,71 @@ export class TCS3000 extends BaseDispenser {
     // }
 
     processTotalizer(res: string) {
-        debugLog("processTotalizer", res);
+        debugLog("processTotalizer: %s", res);
         const response = this.hexToNumber(res.slice(16, -2));
-        debugLog("processTotalizer", JSON.stringify(response));
+        debugLog("processTotalizer: %o", response);
         return response;
     }
 
     processTotalizerWithBatch(res: string) {
-        debugLog("processTotalizerWithBatch", res);
+        debugLog("processTotalizerWithBatch: %s", res);
         // const response = {
         //     totalizer: parseFloat((this.processRawReadStatus(res))[7].replace(',', '.')),
         //     batchNumber: this.processBatchNumber(res) + 1 // called before pump start.. so +1
         // };
         const response = { totalizer: this.processTotalizer(res), batchNumber: 0 };
-        debugLog("processTotalizerWithBatch", JSON.stringify(response));
+        debugLog("processTotalizerWithBatch: %o", response);
         return response;
     }
 
     processCommand(res: string, args: any, fnName: string) {
         if (args) {
-            debugLog("processCommand", JSON.stringify(args));
-            console.log("processCommandArgs", JSON.stringify(args));
+            debugLog("processCommand: %o", args);
+           console.log("processCommandArgs: %o", args);
         }
 
         if (fnName) {
-            console.log("processCommandfnName", JSON.stringify(fnName))
-            debugLog("processCommand", JSON.stringify(fnName));
+            console.log("processCommandfnName: %o", fnName);            
+            debugLog("processCommand: %o", fnName);
         }
 
         if (fnName === "suspendSale") {
             if (res.includes('0043') || res.includes('0023')) {
-                debugLog("processCommand", "Command success for suspend");
+                debugLog("processCommand: %s", "Command success for suspend");
                 return true;
             }
-            debugLog("processCommand", "Command failed! check for status");
+            debugLog("processCommand: %s", "Command failed! check for status");
             throw Error("Command failed! check for status for pause");
         }
 
         if (fnName === "resumeSale") {
             if (res.includes('0023')) {
-                debugLog("processCommand", "Command success for resume");
+                debugLog("processCommand: %s", "Command success for resume");
                 return true;
             }
-            debugLog("processCommand", "Command failed! check for status");
+            debugLog("processCommand: %s", "Command failed! check for status");
             throw Error("Command failed! check for status for resume");
         }
 
-        debugLog("processCommand", res);
+        debugLog("processCommand: %s", res);
         if (res.includes('0011') || res.includes('0064') || res.includes('0044')) {
-            debugLog("processCommand", "Command success");
+            debugLog("processCommand: %s", "Command success");
             return true;
         }
 
-        debugLog("processCommand", "Command failed! check for status");
+        debugLog("processCommand: %s", "Command failed! check for status");
         throw Error("Command failed! check for status");
     }
 
     processReadSale(res: string) {
-        debugLog("processReadSale", res);
+        debugLog("processReadSale: %s", res);
         const response = this.hexToNumber(res.slice(16, -2));
-        debugLog("processReadSale", JSON.stringify(response));
+        debugLog("processReadSale: %s: %o", response);
         return response;
     }
 
     processStatus(res: string) {
-        debugLog("processStatus", res);
+        debugLog("processStatus: %s", res);
         const statusBit = res.slice(16, -2);
         const statusMap = new Map([
             ['00', 'ERROR'],
@@ -202,20 +203,20 @@ export class TCS3000 extends BaseDispenser {
     }
 
     isPumpStopped(res: string) {
-        debugLog("isPumpStopped", res);
+        debugLog("isPumpStopped: %s", res);
         const status = this.processStatus(res);
-        debugLog("isPumpStopped", JSON.stringify(status));
+        debugLog("isPumpStopped: %o", status);
         if (status.status == 'IDLE') {
-            debugLog("isPumpStopped", "true");
+            debugLog("isPumpStopped: %s", "true");
             return true;
         }
 
-        debugLog("isPumpStopped", "false");
+        debugLog("isPumpStopped: %s", "false");
         return false;
     }
 
     isDispensing(res: string) {
-        debugLog("isDispensing", res);
+        debugLog("isDispensing: %s", res);
         const status = this.processStatus(res);
         if (status.status == 'ACTIVE') {
             return true;
@@ -225,7 +226,7 @@ export class TCS3000 extends BaseDispenser {
     }
 
     isIdle(res: string) {
-        debugLog("isIdle", res);
+        debugLog("isIdle: %s", res);
         const status = this.processStatus(res);
         if (status.status == 'IDLE') {
             return true;
@@ -242,7 +243,7 @@ export class TCS3000 extends BaseDispenser {
      * @returns
      */
     isOrderComplete(res: string, quantity: number) {
-        debugLog("isOrderComplete", res);
+        debugLog("isOrderComplete: %s", res);
         const readsale = this.processReadSale(res);
 
         if (readsale > quantity - 1) {
@@ -255,7 +256,7 @@ export class TCS3000 extends BaseDispenser {
                 dispensedQty: this.toFixedNumber(readsale, 2)
             };
 
-            debugLog("isOrderComplete", JSON.stringify(response));
+            debugLog("isOrderComplete: %o", response);
             return response;
         }
 
@@ -268,7 +269,7 @@ export class TCS3000 extends BaseDispenser {
             dispensedQty: this.toFixedNumber(readsale, 2)
         };
 
-        debugLog("isOrderComplete", JSON.stringify(response));
+        debugLog("isOrderComplete: %o", response);
         return response;
     }
 
@@ -286,27 +287,27 @@ export class TCS3000 extends BaseDispenser {
 
 
     hasChecksBeforePumpStart() {
-        debugLog("hasChecksBeforePumpStart", "false");
+        debugLog("hasChecksBeforePumpStart: %s", "false");
         return false;
     }
 
     isReadyForPreset() {
-        debugLog("isReadyForPreset", "true");
+        debugLog("isReadyForPreset: %s", "true");
         return true;
     }
 
     isNozzleOnHook() {
-        debugLog("isNozzleOnHook", "true");
+        debugLog("isNozzleOnHook: %s", "true");
         return true;
     }
 
     isNozzleOffHook() {
-        debugLog("isNozzleOffHook", "true");
+        debugLog("isNozzleOffHook: %s", "true");
         return true;
     }
 
     isSaleCloseable() {
-        debugLog("isSaleCloseable", "true");
+        debugLog("isSaleCloseable: %s", "true");
         return true;
     }
 }

@@ -1,6 +1,7 @@
-import { debugLog } from "../utils/debugLog";
+import debug from 'debug';
 import { BaseDispenser } from "./base/BaseDispenser";
 
+const debugLog = debug('dispenser:Tokhiem');
 export class Tokhiem extends BaseDispenser {
     private totalizerBuffer       = Buffer.from([0x01, 0x41, 0x54, 0x7F, 0x6B]);
     private pump_start            = Buffer.from([0x01, 0x41, 0x4F, 0x7F, 0x70]);
@@ -195,7 +196,7 @@ export class Tokhiem extends BaseDispenser {
   // }
 
   printReceipt(printObj: any) {
-    debugLog("printReceipt", printObj);
+    debugLog("printReceipt: %s", printObj);
     // this.connection.send("Print_Receipt");
   }
 
@@ -344,21 +345,21 @@ export class Tokhiem extends BaseDispenser {
   }
 
   processFlowRate(res: string) {
-    debugLog("processFlowRate", res);
+    debugLog("processFlowRate: %s", res);
     // const response = parseInt(this.hex2a(res.slice(-82, -70)));
     // debugLog("processFlowRate", JSON.stringify(response));
     return 0;
   }
 
   processAverageFlowRate(res: string) {
-    debugLog("processAverageFlowRate", res);
+    debugLog("processAverageFlowRate: %s", res);
     // const response = parseInt(this.hex2a(res.slice(-70, -58)));
     // debugLog("processAverageFlowRate", JSON.stringify(response));
     return 0;
   }
 
   processBatchNumber(res: string) {
-    debugLog("processBatchNumber", res);
+    debugLog("processBatchNumber: %s", res);
     // const response = parseInt(this.hex2a(res.slice(-58, -46)));
     // debugLog("processBatchNumber", JSON.stringify(0));
     return 0;

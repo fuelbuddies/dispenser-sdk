@@ -3,7 +3,9 @@ import { QueueObject, queue } from 'async';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout'
-import { debugLog } from "../../utils/debugLog";
+import debug from 'debug';
+
+const debugLog = debug('dispenser:base-dispenser');
 
 export class BaseDispenser implements IDispenser {
   connection: SerialPort<AutoDetectTypes>;
@@ -33,7 +35,7 @@ export class BaseDispenser implements IDispenser {
           callback(null, data.toString('hex'));
         }
       } catch (e) {
-        debugLog("processTask", "error in try catch fn");
+        debugLog("processTask: %s", "error in try catch fn");
         callback(e);
       }
     });
@@ -198,7 +200,7 @@ export class BaseDispenser implements IDispenser {
      * @returns
      */
     rightAlignValue = (label: string, valueStr: string, totalWidth: number) => {
-        debugLog('rightAlignValue', `${label}, ${valueStr}, ${totalWidth}`);
+        debugLog('rightAlignValue: %s', `${label}, ${valueStr}, ${totalWidth}`);
         const value = valueStr ? valueStr + "" : 'N/A';
         const labelWidth = label.length;
         const valueWidth = value.length;
