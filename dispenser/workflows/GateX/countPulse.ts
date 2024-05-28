@@ -11,9 +11,9 @@ export class ReadPulseCounter extends StepBody {
     public previousPulseCount: number = 0;
 
     public async run(context: StepExecutionContext): Promise<ExecutionResult> {
-        debugLog("Read Pulse Register: %s", JSON.stringify(this.pulseRegister));
+        debugLog("Read Pulse Register: %o", this.pulseRegister);
         const pulseCounter = await this.client.readHoldingRegisters(this.pulseRegister, 2);
-        debugLog("pulseRegister: %s", JSON.stringify(this.pulseRegister));
+        debugLog("pulseRegister: %o", this.pulseRegister);
         this.previousPulseCount = this.pulseCount;
         this.pulseCount = pulseCounter.buffer.readUInt32BE(0);
 
