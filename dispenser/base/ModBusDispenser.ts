@@ -88,6 +88,7 @@ export class ModBusDispenser implements IDispenser {
             if (connection.workId) {
                 debugLog("disconnect: %s", "Terminating workflow");
                 await this.host.terminateWorkflow(connection.workId);
+                await this.host.stop();
             }
 
             if (!this.printer) {
