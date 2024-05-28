@@ -331,6 +331,7 @@ export class Tokhiem extends BaseDispenser {
     return {
       totalizer: this.processTotalizer(res),
       batchNumber: this.processBatchNumber(res) + 1, // called before pump start.. so +1
+      timestamp: new Date().getTime(),
     };
   }
 
