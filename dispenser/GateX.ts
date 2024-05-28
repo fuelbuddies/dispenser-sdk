@@ -57,6 +57,11 @@ export class GateX extends ModBusDispenser {
         return this.processTotalizerRes(data).totalizer;
     }
 
+    processTotalizerWithBatch(data: any): TotalizerResponse {
+        debugLog("processTotalizerWithBatch", JSON.stringify(arguments));
+        return this.processTotalizerRes(data);
+    }
+
     isIdle(res: string) {
         debugLog("isSaleCloseable", "true");
         return res.trim() === 'false';
