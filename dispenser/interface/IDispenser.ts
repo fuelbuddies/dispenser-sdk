@@ -43,7 +43,7 @@ export interface IDispenser {
   processCommand?(res: string, args: any, fnName: string): any;
   processReadSale?(res: string): any;
   processTotalizer?(res: string): any;
-  processTotalizerWithBatch?(res: string): any;
+  processTotalizerWithBatch?(res: string): TotalizerResponse;
   processReadPreset?(res: string): any;
   processResponse?(response: string[], exponentCut: number, mantessaCut: number): any;
   processExternalPump?(res: string): boolean;
