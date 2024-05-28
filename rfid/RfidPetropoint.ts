@@ -48,7 +48,7 @@ export class RfidPetropoint extends BaseRfid {
     }
 
     processTagId(res: string) {
-        debugLog('processTagId', res);
+        debugLog('processTagId: %s', res);
         if (res.length > 10) {
             const tagId = BigInt(res);
             debugLog('processTagId: %s', JSON.stringify(tagId, function (key, value) {

@@ -22,7 +22,7 @@ export class GateX extends ModBusDispenser {
         debugLog('totalizer: %s', 'awaiting connection');
         const seneca = await this.connection;
         debugLog('totalizer: %s', 'awaiting readPulse');
-        return await seneca.readPulse();
+        return seneca.readPulse();
     }
 
     async readSale() {
@@ -40,7 +40,7 @@ export class GateX extends ModBusDispenser {
         }
 
         var totalizer = {
-            totalizer: Number((pulse / (this.kFactor || 1)).toFixed(2)),
+            totalizer: this.toFixedNumber(pulse / (this.kFactor || 1), 2),
             batchNumber: pulse,
             timestamp: Date.now()
         } as TotalizerResponse;
@@ -96,12 +96,11 @@ export class GateX extends ModBusDispenser {
 
         const response = {
             status: false,
-            percentage: this.toFixedNumber((readsale.volume / quantity) * 100.00, 2),
             currentFlowRate: readsale.litersPerMinute,
             averageFlowRate: readsale.litersPerMinute,
             batchNumber: this.startTotalizer?.batchNumber || 0,
             totalizer: currentTotalizer.totalizer,
-            dispensedQty: this.toFixedNumber(readsale.volume, 2)
+            dispensedQty: readsale.volume
         };
 
         debugLog("isOrderComplete: %o", response);
@@ -204,13 +203,13 @@ export class GateX extends ModBusDispenser {
         }
 
         // Calculate the time difference in minutes
-        const timeDifferenceInMinutes = (currentTotalizer.timestamp - previousTotalizer.timestamp) / (1000 * 60);
+        const timeDifferenceInMinutes = (currentTotalizer.timestamp - previousTotalizer.timestamp) / 60000;
 
         // Calculate the volume difference (assuming totalizer represents volume)
         const volumeDifference = currentTotalizer.totalizer - previousTotalizer.totalizer;
         return {
-            volume: Number((volumeDifference).toFixed(2)),
-            litersPerMinute: Number((volumeDifference / timeDifferenceInMinutes).toFixed(2))
+            volume: volumeDifference,
+            litersPerMinute: this.toFixedNumber((volumeDifference / timeDifferenceInMinutes), 2)
         };
     }
 

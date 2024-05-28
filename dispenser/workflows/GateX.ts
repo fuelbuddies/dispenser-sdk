@@ -104,7 +104,7 @@ export class Seneca {
         return await lastValueFrom(this._previousPulseCount.asObservable());
     }
 
-    async readPulse() {
+    readPulse() {
       debugLog('ReadPulse: %s', `Overflow Count: ${this.overflowOffset} : Pulse Count: ${this.pulseCount}`);
       return this.overflowOffset + this.pulseCount;
     }
