@@ -6,7 +6,7 @@ import debug from 'debug';
 const debugLog = debug('dispenser:GateX');
 export class GateX extends ModBusDispenser {
     private AuthorizeValveGPIO: number = 26;
-    private kFactor: number | undefined;
+    private kFactor: number;
     private startTotalizer: TotalizerResponse | undefined;
 
     private preset: number;
@@ -14,7 +14,10 @@ export class GateX extends ModBusDispenser {
     constructor(socket: Seneca, printer: SerialPort, options: DispenserOptions) {
         super(socket, printer, options);
         let { kFactor } = options;
-        this.kFactor = kFactor;
+        if(!kFactor || kFactor < 0) {
+            debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value: %o', kFactor);
+        }
+        this.kFactor = kFactor || 1;
         this.preset = 0;
     }
 
@@ -35,14 +38,11 @@ export class GateX extends ModBusDispenser {
 
     processTotalizerRes(pulse: any): TotalizerResponse {
         debugLog("pulse: %o", pulse);
-        if(!this.kFactor || this.kFactor < 0) {
-            debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value: %s', 'error');
-        }
 
         var totalizer = {
-            totalizer: this.toFixedNumber(pulse / (this.kFactor || 1), 2),
+            totalizer: this.toFixedNumber(pulse / this.kFactor, 2),
             batchNumber: pulse,
-            timestamp: Date.now()
+            timestamp: (new Date()).getTime()
         } as TotalizerResponse;
 
         if(!this.startTotalizer) {
@@ -82,7 +82,7 @@ export class GateX extends ModBusDispenser {
         if (readsale.volume > quantity - 1) {
             const response = {
                 status: true,
-                percentage: this.toFixedNumber((readsale.volume / quantity) * 100.00, 2),
+                percentage: this.toFixedNumber(readsale.volume / quantity * 100, 2),
                 currentFlowRate: readsale.litersPerMinute,
                 averageFlowRate: readsale.litersPerMinute,
                 batchNumber: this.startTotalizer?.batchNumber || 0,
@@ -100,7 +100,7 @@ export class GateX extends ModBusDispenser {
             averageFlowRate: readsale.litersPerMinute,
             batchNumber: this.startTotalizer?.batchNumber || 0,
             totalizer: currentTotalizer.totalizer,
-            dispensedQty: readsale.volume
+            dispensedQty: this.toFixedNumber(readsale.volume, 2)
         };
 
         debugLog("isOrderComplete: %o", response);
@@ -192,11 +192,6 @@ export class GateX extends ModBusDispenser {
     }
 
     calculateVolume(previousTotalizer: TotalizerResponse | undefined, currentTotalizer: TotalizerResponse): VolumeResponse {
-        if(!this.kFactor || this.kFactor < 0) {
-            debugLog('K-Factor not set for this dispenser, you might get wrong volume!');
-            alert('K-Factor not set for this dispenser, you might get wrong volume!');
-        }
-
         // Check if timestamps are valid and current timestamp is greater than previous
         if (!previousTotalizer || !currentTotalizer.timestamp || !previousTotalizer.timestamp || currentTotalizer.timestamp <= previousTotalizer.timestamp) {
             throw new Error('Invalud data or timestamps not in order'); // Invalid data or timestamps not in order
