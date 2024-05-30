@@ -194,7 +194,8 @@ export class GateX extends ModBusDispenser {
     calculateVolume(previousTotalizer: TotalizerResponse | undefined, currentTotalizer: TotalizerResponse): VolumeResponse {
         // Check if timestamps are valid and current timestamp is greater than previous
         if (!previousTotalizer || !currentTotalizer.timestamp || !previousTotalizer.timestamp || currentTotalizer.timestamp <= previousTotalizer.timestamp) {
-            throw new Error('Invalud data or timestamps not in order'); // Invalid data or timestamps not in order
+            debugLog("calculateVolume: %o", { previousTotalizer, currentTotalizer });
+            throw new Error('Invalid data or timestamps not in order'); // Invalid data or timestamps not in order
         }
 
         // Calculate the time difference in minutes
