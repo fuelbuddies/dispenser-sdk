@@ -4,36 +4,48 @@ import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { execFile } from 'child_process';
 import * as path from 'path';
-import { Seneca, Z10DIN_Workflow } from "../workflows/GateX";
-import { ConsoleLogger, IWorkflowHost, WorkflowConfig, configureWorkflow } from "workflow-es";
+import { Seneca } from "../workflows/GateX";
 import debug from 'debug';
-import { SingleNodeLockProvider } from "../workflows/provider/single-node-lock-provider";
-import { WorkflowLogger } from "../workflows/provider/workflow-logger";
+
+import ModbusRTU from "modbus-serial";
 
 const debugLog = debug('dispenser:modbus-dispenser');
 export class ModBusDispenser implements IDispenser {
     connection: Promise<Seneca>;
     printer?: SerialPort<AutoDetectTypes>;
-    config: WorkflowConfig;
-    host: IWorkflowHost;
+    pulseInterval?: NodeJS.Timeout;
+    // config: WorkflowConfig;
+    // host: IWorkflowHost;
 
     [key: string]: any;
 
     constructor(socket: Seneca, printer?: SerialPort, options?: DispenserOptions) {
+        const _that = this;
         this.printer = printer;
-        this.config = configureWorkflow();
-        this.config.useLogger(new WorkflowLogger());
-        this.config.useLockManager(new SingleNodeLockProvider());
-        const host = this.config.getHost();
-        this.host = host;
-        this.host.registerWorkflow(Z10DIN_Workflow);
         this.connection = new Promise<Seneca>((resolve) => {
-            host.start().then(() => {
-                host.startWorkflow("z10d1n-world", 1, socket).then((workId) => {
-                    socket.workId = workId;
-                    debugLog("ModBusDispenser: %s", "Workflow started with id: " + workId);
-                    resolve(socket);
-                });
+            const client = new ModbusRTU();
+            client.setID(socket.deviceId);
+            client.setTimeout(socket.timeout);
+            client.connectRTU(socket.address, { baudRate: socket.baudRate }).then(async () => {
+                socket.client = client;
+                const overflowCounterBuffer = await client.readHoldingRegisters(socket.overflowRegister, 1);
+                const overCount =  overflowCounterBuffer.buffer.readUInt16BE(0);
+                socket.overflowCount = overCount;
+                socket.overflowOffset = 4294967296 * overCount;
+
+                _that.pulseInterval = setInterval(async function() {
+                    const pulseCounter = await client.readHoldingRegisters(socket.pulseRegister,2);
+                    const currentPulse = pulseCounter.buffer.readUInt32BE(0);
+                    if(currentPulse < socket.pulseCount) {
+                        debugLog('ReadPulseCounter: %s', "<< ===== Overflow Detected ===== >>");
+                        const response = await client.writeRegister(socket.overflowRegister, ++socket.overflowCount);
+                        socket.overflowOffset = 4294967296 * socket.overflowCount;
+                    }
+                    socket.previousPulseCount = socket.pulseCount;
+                    socket.pulseCount = currentPulse;
+                }, 500);
+
+                resolve(socket);
             });
         });
     }
@@ -94,13 +106,9 @@ export class ModBusDispenser implements IDispenser {
     async disconnect(callback: any) {
         debugLog("disconnect: %s", "Requesting disconnection from Seneca")
         const connection = await this.connection;
-        connection.client.close(async () => {
-            if (connection.workId) {
-                debugLog("disconnect: %s", "Terminating workflow");
-                await this.host.terminateWorkflow(connection.workId);
-                this.host.stop();
-            }
+        if(this.pulseInterval) clearInterval(this.pulseInterval);
 
+        connection.client.close(async () => {
             if (!this.printer) {
                 debugLog("disconnect: %s", "No printer connection found");
                 return callback();
