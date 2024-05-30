@@ -1,13 +1,5 @@
-import { WorkflowBase, WorkflowBuilder, WorkflowErrorHandling } from "workflow-es";
-import { GoodbyeWorld } from "./GateX/goodbye";
-import { HelloWorld } from "./GateX/hello";
-import { InitializeSeleca, ReInitializeSeleca } from "./GateX/connect";
 import ModbusRTU from "modbus-serial";
-import { ReadOverflowRegister } from "./GateX/readOverflow";
-import { ReadPulseCounter } from "./GateX/countPulse";
-import { IncrementOverflowRegister } from "./GateX/incrementOverflow";
 import { DispenserOptions } from "../interface/IDispenser";
-import { LogMessage } from "./common/logMessage";
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import debug from 'debug';
 
@@ -107,67 +99,5 @@ export class Seneca {
     readPulse() {
       debugLog('ReadPulse: %s', `Overflow Count: ${this.overflowOffset} : Pulse Count: ${this.pulseCount}`);
       return this.overflowOffset + this.pulseCount;
-    }
-}
-
-export class Z10DIN_Workflow implements WorkflowBase<Seneca> {
-    public id: string = "z10d1n-world";
-    public version: number = 1;
-
-    public build(builder: WorkflowBuilder<Seneca>) {
-        builder
-        .startWith(HelloWorld)
-        .saga((sequence) => sequence
-        .startWith(InitializeSeleca)
-            .input((step, data) => step.deviceId = data.deviceId)
-            .input((step, data) => step.timeout = data.timeout)
-            .input((step, data) => step.address = data.address)
-            .input((step) => step.client = new ModbusRTU())
-            .output((step, data) => data.client = step.client)
-        .then(ReadOverflowRegister)
-            .input((step, data) => step.client = data.client)
-            .input((step, data) => step.overflowRegister = data.overflowRegister)
-            .output((step, data) => data.overflowOffset = step.overflowOffset)
-            .output((step, data) => data.overflowCount = step.overflowCount))
-        .onError(WorkflowErrorHandling.Retry, 1000)
-        .then(LogMessage)
-            .input((step, data) => step.message = `Overflow count initalized with: ${data.overflowCount}`)
-        // Overflow register is a 32-bit register that increments every time the pulse counter overflows
-        .while((data) => data.overflowCount < 65536).do((sequence) => sequence
-        .startWith(LogMessage)
-            .input((step) => step.message = "Reading Pulse Loop")
-            .saga((sequence) => sequence
-                .startWith(LogMessage)
-                    .input((step) => step.message = "Reading Pulse Counter")
-                .then(ReadPulseCounter)
-                    .input((step, data) => step.client = data.client)
-                    .input((step, data) => step.pulseCount = data.pulseCount)
-                    .input((step, data) => step.pulseRegister = data.pulseRegister)
-                    .output((step, data) => data.pulseCount = step.pulseCount)
-                    .output((step, data) => data.previousPulseCount = step.previousPulseCount)
-                .compensateWithSequence(comp => comp
-                    .startWith(LogMessage)
-                        .input((step) => step.message = "Reinitializing Pulse Counter")    
-                    .then(ReInitializeSeleca)
-                        .input((step, data) => step.deviceId = data.deviceId)
-                        .input((step, data) => step.timeout = data.timeout)
-                        .input((step, data) => step.address = data.address)
-                        .input((step, data) => step.client = data.client)
-                        .output((step, data) => data.client = step.client))
-                .then(LogMessage)
-                    .input((step, data) => step.message = `Pulse Count: ${data.previousPulseCount} : ${data.pulseCount}`)
-                .if((data) => data.pulseCount < data.previousPulseCount).do((then) => then
-                    .startWith(LogMessage)
-                        .input((step, data) => step.message = `Running Overflow Sequence with Overflow Count: ${data.overflowCount}`)
-                    .then(IncrementOverflowRegister)
-                    .input((step, data) => step.client = data.client)
-                    .input((step, data) => step.overflowRegister = data.overflowRegister)
-                    .input((step, data) => step.overflowOffset = data.overflowOffset)
-                    .input((step, data) => step.overflowCount = data.overflowCount)
-                    .output((step, data) => data.overflowOffset = step.overflowOffset)
-                    .output((step, data) => data.overflowCount = step.overflowCount))
-                .then(LogMessage)
-                    .input((step, data) => step.message = `Overflow Count: ${data.overflowCount}`)))
-        .then(GoodbyeWorld);
     }
 }
