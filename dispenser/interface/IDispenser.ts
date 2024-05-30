@@ -5,6 +5,7 @@ import { Seneca } from '../workflows/GateX';
 export interface IDispenser {
   connection: SerialPort | Promise<Seneca>;
   execute(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
+  executeWork(strCallee: string, strBindFunction?: string, calleeArgs?: any): Promise<any>
   executeInPriority(callee: any, bindFunction?: any, calleeArgs?: any): Promise<any>;
   resetQueue?(): void;
   disconnect(callback: any): void;

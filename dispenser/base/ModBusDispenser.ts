@@ -17,6 +17,8 @@ export class ModBusDispenser implements IDispenser {
     config: WorkflowConfig;
     host: IWorkflowHost;
 
+    [key: string]: any;
+
     constructor(socket: Seneca, printer?: SerialPort, options?: DispenserOptions) {
         this.printer = printer;
         this.config = configureWorkflow();
@@ -75,6 +77,14 @@ export class ModBusDispenser implements IDispenser {
                 reject(err);
             });
         });
+    }
+
+    executeWork(strCallee: string, strBindFunction?: string, calleeArgs: any = undefined): Promise<any> {
+        const callee = this[strCallee] as (...args: [any]) => any;
+        const bindFunction = strBindFunction ? this[strBindFunction] : undefined;
+        if(!callee) throw new Error("Invalid callee function");
+        if(bindFunction && !(bindFunction instanceof Function)) throw new Error("Invalid Bind function");
+        return this.execute(callee, bindFunction, calleeArgs);
     }
 
     executeInPriority(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {

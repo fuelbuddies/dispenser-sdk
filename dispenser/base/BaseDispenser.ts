@@ -12,6 +12,7 @@ export class BaseDispenser implements IDispenser {
   queue: QueueObject<any>;
   innerByteTimeoutParser: InterByteTimeoutParser;
   // logger: Logger;
+  [key: string]: any;
 
   constructor(socket: SerialPort, options?: DispenserOptions) {
     this.connection = socket;
@@ -60,6 +61,14 @@ export class BaseDispenser implements IDispenser {
         }
       });
     });
+  }
+
+  executeWork(strCallee: string, strBindFunction?: string, calleeArgs: any = undefined): Promise<any> {
+    const callee = this[strCallee] as (...args: [any]) => any;
+    const bindFunction = strBindFunction ? this[strBindFunction] : undefined;
+    if(!callee) throw new Error("Invalid callee function");
+    if(bindFunction && !(bindFunction instanceof Function)) throw new Error("Invalid Bind function");
+    return this.execute(callee, bindFunction, calleeArgs);
   }
 
   executeInPriority(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {
