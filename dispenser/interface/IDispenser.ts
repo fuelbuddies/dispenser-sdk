@@ -75,6 +75,7 @@ export type DispenserOptions = {
   kFactor?: number;
   printer?: PrinterOptions;
   modbus?: ModbusOptions;
+  totalizerFile?: string;
 };
 
 export type ModbusOptions = {

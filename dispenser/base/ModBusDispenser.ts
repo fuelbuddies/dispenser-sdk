@@ -1,10 +1,11 @@
-import { DispenserOptions, IDispenser } from "../interface/IDispenser";
+import { DispenserOptions, IDispenser, TotalizerResponse } from "../interface/IDispenser";
 // import { QueueObject, queue } from 'async';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { execFile } from 'child_process';
 import * as path from 'path';
 import { Seneca } from "../workflows/GateX";
+import { promises as fs } from 'fs';
 import debug from 'debug';
 
 import ModbusRTU from "modbus-serial";
@@ -176,6 +177,28 @@ export class ModBusDispenser implements IDispenser {
         const hexPair: string = printText.substring(needle, needle + 2); // More concise way to extract substring
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
+
+    async writeTotalizerToFile (datObj: TotalizerResponse): Promise<void> {
+        const filename = (await this.connection).totalizerFile;
+        const data = JSON.stringify(datObj, function (key, value) {
+            if (typeof value === 'bigint') {
+              return value.toString();
+            } else {
+              return value;
+            }
+        });
+        await fs.writeFile(filename, data);
+        debugLog('Successfully wrote object to file: %o', data);
+    };
+
+    async readTotalizerFromFile(): Promise<TotalizerResponse> {
+        const filename = (await this.connection).totalizerFile;
+        const data = await fs.readFile(filename, 'utf8');
+        const obj = JSON.parse(data);
+        obj.totalizer = Number(obj.totalizer);
+        debugLog('Successfully read object from file: %o', obj);
+        return obj as TotalizerResponse;
+    };
 
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {

@@ -15,6 +15,7 @@ export class Seneca {
     private _pulseCount: BehaviorSubject<number> = new BehaviorSubject<number>(0);
     private _previousPulseCount: BehaviorSubject<number> = new BehaviorSubject<number>(0);
     public workId: string | undefined;
+    public totalizerFile: string | undefined;
 
     public overflowRegister: number = 8; // 16-bit register that increments every time the pulse counter overflows
     public pulseRegister: number = 10; // 16-bit register that increments every time the pulse counter overflows
@@ -22,6 +23,7 @@ export class Seneca {
     constructor(options: DispenserOptions) {
       const modbusOptions = options.modbus;
       this.baudRate = options.baudRate || 9600;
+      this.totalizerFile = options.totalizerFile || "totalizer.json";
       this.client = new ModbusRTU();
       this.timeout = modbusOptions?.timeout || 1000;
       this.deviceId = modbusOptions?.deviceId || 1;

@@ -6,6 +6,7 @@ export function getConfigFromEnv() {
         hardwareId: process.env.VITE_MAIN_DISPENSER_HARDWARE_ID || '',
         attributeId: process.env.VITE_MAIN_DISPENSER_ATTRIBUTE_ID || '',
         baudRate: parseInt(process.env.VITE_MAIN_DISPENSER_BAUD_RATE || '0'), // Parse as integer
+        totalizerFile: process.env.VITE_MAIN_DISPENSER_TOTALIZER_FILE || 'totalizer.json',
     };
 
     // Optionally, you can add more properties to the object if they exist in the environment variables

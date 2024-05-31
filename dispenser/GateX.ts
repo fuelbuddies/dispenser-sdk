@@ -29,6 +29,9 @@ export class GateX extends ModBusDispenser {
     }
 
     async readSale() {
+        if(!this.startTotalizer) {
+            this.startTotalizer = await this.readTotalizerFromFile();
+        }
         return await this.totalizer();
     }
 
@@ -117,6 +120,15 @@ export class GateX extends ModBusDispenser {
 
     async authorizeSale() {
         try {
+            if(!this.startTotalizer) {
+                await this.processTotalizerRes(await this.totalizer()); //This will initialize startTotalizer.
+            }
+
+            if(!this.startTotalizer) {
+                throw new Error('Totalizer not initialized');
+            }
+
+            this.writeTotalizerToFile(this.startTotalizer);
             return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
         } catch (error) {
             console.error(error);
