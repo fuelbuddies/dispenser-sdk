@@ -193,7 +193,7 @@ export class ModBusDispenser implements IDispenser {
 
     async readTotalizerFromFile(): Promise<TotalizerResponse> {
         const filename = (await this.connection).totalizerFile;
-        const data = await fs.readFile(filename, 'utf8');
+        const data = await fs.readFile(filename, {encoding: 'utf8'});
         const obj = JSON.parse(data);
         obj.totalizer = Number(obj.totalizer);
         debugLog('Successfully read object from file: %o', obj);
