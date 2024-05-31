@@ -180,6 +180,9 @@ export class ModBusDispenser implements IDispenser {
 
     async writeTotalizerToFile (datObj: TotalizerResponse): Promise<void> {
         const filename = (await this.connection).totalizerFile;
+        if (!filename) {
+            throw new Error('Filename is undefined or empty');
+        }
         const data = JSON.stringify(datObj, function (key, value) {
             if (typeof value === 'bigint') {
               return value.toString();
@@ -189,16 +192,19 @@ export class ModBusDispenser implements IDispenser {
         });
         await fs.writeFile(filename, data);
         debugLog('Successfully wrote object to file: %o', data);
-    };
+    }
 
     async readTotalizerFromFile(): Promise<TotalizerResponse> {
         const filename = (await this.connection).totalizerFile;
+        if (!filename) {
+            throw new Error('Filename is undefined or empty');
+        }
         const data = await fs.readFile(filename, {encoding: 'utf8'});
         const obj = JSON.parse(data);
         obj.totalizer = Number(obj.totalizer);
         debugLog('Successfully read object from file: %o', obj);
         return obj as TotalizerResponse;
-    };
+    }
 
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
