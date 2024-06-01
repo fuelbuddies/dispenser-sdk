@@ -75,6 +75,11 @@ export class GateX extends ModBusDispenser {
         return true;
     }
 
+    isDispensing(res: string) {
+        debugLog("isDispensing: %s", res);
+        return res.trim() === 'true';
+    }
+
     isOnline() {
         return true;
     }
