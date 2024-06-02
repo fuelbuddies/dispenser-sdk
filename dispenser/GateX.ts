@@ -82,7 +82,7 @@ export class GateX extends ModBusDispenser {
 
     isPumpStopped(res: string) {
         debugLog("isPumpStopped: %s", res);
-        return res.trim() === 'true';
+        return res.trim() === 'false';
     }
 
     isOnline() {
