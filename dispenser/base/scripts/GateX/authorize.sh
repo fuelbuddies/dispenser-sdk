@@ -2,10 +2,12 @@
 
 set -e
 
-pinctrl set 26 op dh
+authPin=${VITE_MAIN_DISPENSER_AUTHORIZATION_PIN:-26}
+
+pinctrl set ${authPin} op dh
 
 # Run the command and capture its output
-pin_state=$(pinctrl get 26)
+pin_state=$(pinctrl get ${authPin})
 
 # Check if the pin state contains "hi"
 if [[ $pin_state == *"hi"* ]]; then

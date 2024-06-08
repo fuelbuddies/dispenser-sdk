@@ -2,8 +2,10 @@
 
 set -e
 
+authPin=${VITE_MAIN_DISPENSER_AUTHORIZATION_PIN:-26}
+
 # Run the command and capture its output
-pin_state=$(pinctrl get 26)
+pin_state=$(pinctrl get ${authPin})
 
 # Check if the pin state contains "hi"
 if [[ $pin_state == *"hi"* ]]; then
