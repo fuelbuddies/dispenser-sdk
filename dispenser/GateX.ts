@@ -14,7 +14,7 @@ export class GateX extends ModBusDispenser {
     constructor(socket: Seneca, printer: SerialPort, options: DispenserOptions) {
         super(socket, printer, options);
         let { kFactor } = options;
-        if(!kFactor || kFactor < 0) {
+        if (!kFactor || kFactor < 0) {
             debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value: %o', kFactor);
         }
         this.kFactor = kFactor || 1;
@@ -29,7 +29,7 @@ export class GateX extends ModBusDispenser {
     }
 
     async readSale() {
-        if(!this.startTotalizer) {
+        if (!this.startTotalizer) {
             this.startTotalizer = await this.readTotalizerFromFile();
         }
         return await this.totalizer();
@@ -48,9 +48,9 @@ export class GateX extends ModBusDispenser {
             timestamp: (new Date()).getTime()
         } as TotalizerResponse;
 
-        if(!this.startTotalizer) {
-            this.startTotalizer = totalizer;
-        }
+        // if(!this.startTotalizer) {
+        //     this.startTotalizer = totalizer;
+        // }
         debugLog("totalizer: %o", totalizer);
         return totalizer;
     }
@@ -130,11 +130,12 @@ export class GateX extends ModBusDispenser {
 
     async authorizeSale() {
         try {
-            if(!this.startTotalizer) {
-                await this.processTotalizerRes(await this.totalizer()); //This will initialize startTotalizer.
+            if (!this.startTotalizer) {
+                const totalizer = await this.processTotalizerRes(await this.totalizer()); //This will initialize startTotalizer.
+                this.startTotalizer = totalizer;
             }
 
-            if(!this.startTotalizer) {
+            if (!this.startTotalizer) {
                 throw new Error('Totalizer not initialized');
             }
 
@@ -165,7 +166,7 @@ export class GateX extends ModBusDispenser {
     }
 
     processCommand(res: string) {
-        if(res === "true") {
+        if (res === "true") {
             return true;
         }
 
@@ -300,7 +301,7 @@ export class GateX extends ModBusDispenser {
     }
 
     printOrder(printText: string): boolean {
-        if(!this.printer) {
+        if (!this.printer) {
             throw new Error('Printer is required for GateX dispenser');
         }
 
