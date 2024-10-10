@@ -5,7 +5,6 @@ import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { execFile } from 'child_process';
 import * as path from 'path';
 import { Seneca } from "../workflows/GateX";
-import { promises as fs } from 'fs';
 import debug from 'debug';
 import sqlite, { open } from 'sqlite';
 
@@ -101,21 +100,17 @@ export class ModBusDispenser implements IDispenser {
             debugLog('Totalizer table initialized successfully');
         } catch (error) {
             console.error('Error initializing the database:', error);
+            throw error;
         } finally {
             await db.close();
         }
     }
 
-
-    async clearOldTotalizerRecords(): Promise<void> {
+    async clearOldTotalizerRecords(cutoffTime: number): Promise<void> {
         const db = await open({
             filename: path.join(__dirname, 'dispenser.db'),
             driver: sqlite.Database
         }); 
-
-        const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-        const currentTime = Date.now();
-        const cutoffTime = currentTime - THIRTY_DAYS;
     
         try {
             const result = await db.run(
@@ -125,6 +120,7 @@ export class ModBusDispenser implements IDispenser {
             debugLog('Deleted old totalizer records older than 30 days: %d rows affected', result.changes);
         } catch (error) {
             console.error('Error clearing old totalizer records:', error);
+            throw error;
         } finally {
             await db.close();
         }
@@ -232,7 +228,7 @@ export class ModBusDispenser implements IDispenser {
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
 
-    async writeTotalizerToFile(datObj: TotalizerResponse, orderCode: number, customerAssetId: string, sessionId: string): Promise<void> {
+    async saveTotalizerRecordToDB(datObj: TotalizerResponse, orderCode: number, customerAssetId: string, sessionId: string): Promise<void> {
 
         const db = await open({
             filename: path.join(__dirname, 'dispenser.db'),
@@ -252,15 +248,36 @@ export class ModBusDispenser implements IDispenser {
             );
             
             debugLog('Successfully wrote object to database: %o', datObj);
-            await this.clearOldTotalizerRecords();
+
+            const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+            const currentTime = Date.now();
+            const cutoffTime = currentTime - THIRTY_DAYS;
+            try {
+                const oldRecordsCount = await db.get(
+                    `SELECT COUNT(*) as count FROM totalizer WHERE timestamp < ?`,
+                    cutoffTime
+                );
+        
+                if (oldRecordsCount.count > 0) {
+                    await this.clearOldTotalizerRecords(cutoffTime);
+                } else {
+                    debugLog('No records older than 30 days found. No deletion needed.');
+                }
+            } catch (error) {
+                console.error('Error checking for old records:', error);
+                throw error;
+            } finally {
+                await db.close();
+            }       
         } catch (error) {
             console.error('Error writing totalizer to database:', error);
+            throw error;
         } finally {
             await db.close(); 
         }
     }
 
-    async readTotalizerFromFile(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
+    async readTotalizerRecordFromDB(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
         // Open SQLite database
         const db = await open({
             filename: path.join(__dirname, 'dispenser.db'),

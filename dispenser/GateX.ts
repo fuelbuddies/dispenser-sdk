@@ -30,8 +30,7 @@ export class GateX extends ModBusDispenser {
 
     async readSale() {
         if(!this.startTotalizer) {
-            const {totalizerResponse} = await this.readTotalizerFromFile();
-            this.startTotalizer = totalizerResponse;
+            this.startTotalizer = (await this.readTotalizerRecordFromDB()).totalizerResponse;
         }
         return await this.totalizer();
     }
@@ -140,7 +139,7 @@ export class GateX extends ModBusDispenser {
                 throw new Error('Totalizer not initialized');
             }
 
-            this.writeTotalizerToFile(this.startTotalizer, orderCode, customerAssetId, sessionId);
+            this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId);
             return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
         } catch (error) {
             console.error(error);
