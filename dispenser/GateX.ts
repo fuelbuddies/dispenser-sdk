@@ -128,10 +128,10 @@ export class GateX extends ModBusDispenser {
         return "false";
     }
 
-    async authorizeSale(orderCode: number, customerAssetId: string, sessionId: string) {
+    async authorizeSale(orderCode: number, customerAssetId: string | undefined, sessionId: string | null) {
         try {
             if(!this.startTotalizer) {
-                const totalizer = await this.processTotalizerRes(await this.totalizer()); //This will initialize startTotalizer.
+                const totalizer = await this.processTotalizerRes(await this.totalizer());
                 this.startTotalizer = totalizer;
             }
 
@@ -139,7 +139,7 @@ export class GateX extends ModBusDispenser {
                 throw new Error('Totalizer not initialized');
             }
 
-            this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId);
+            this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
             return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
         } catch (error) {
             console.error(error);
@@ -208,7 +208,14 @@ export class GateX extends ModBusDispenser {
         return this.preset;
     }
 
-    clearSale() {
+    async clearSale(orderCode: number, customerAssetId: string | undefined, sessionId: string | null) {
+        try{
+            const totalizer = await this.processTotalizerRes(await this.totalizer());
+            this.saveTotalizerRecordToDB(totalizer, orderCode, customerAssetId, sessionId, false);
+        }
+        catch (error) {
+            console.error(error);
+        }
         this.preset = 0;
         this.startTotalizer = undefined;
         return "true";

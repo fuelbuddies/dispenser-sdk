@@ -91,7 +91,8 @@ export class ModBusDispenser implements IDispenser {
                     order_code INTEGER,
                     customer_asset_id TEXT,
                     session_id TEXT,
-                    totalizer REAL,
+                    totalizer_start REAL,
+                    totalizer_end REAL,
                     batchNumber TEXT,
                     timestamp INTEGER
                 )
@@ -100,26 +101,6 @@ export class ModBusDispenser implements IDispenser {
             debugLog('Totalizer table initialized successfully');
         } catch (error) {
             console.error('Error initializing the database:', error);
-            throw error;
-        } finally {
-            await db.close();
-        }
-    }
-
-    async clearOldTotalizerRecords(cutoffTime: number): Promise<void> {
-        const db = await open({
-            filename: path.join(__dirname, 'dispenser.db'),
-            driver: sqlite.Database
-        }); 
-    
-        try {
-            const result = await db.run(
-                `DELETE FROM totalizer WHERE timestamp < ?`,
-                cutoffTime
-            );
-            debugLog('Deleted old totalizer records older than 30 days: %d rows affected', result.changes);
-        } catch (error) {
-            console.error('Error clearing old totalizer records:', error);
             throw error;
         } finally {
             await db.close();
@@ -228,52 +209,40 @@ export class ModBusDispenser implements IDispenser {
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
 
-    async saveTotalizerRecordToDB(datObj: TotalizerResponse, orderCode: number, customerAssetId: string, sessionId: string): Promise<void> {
-
+    async saveTotalizerRecordToDB(datObj: TotalizerResponse, orderCode: number, customerAssetId: string | undefined, sessionId: string | null, isStart: boolean): Promise<void> {
         const db = await open({
             filename: path.join(__dirname, 'dispenser.db'),
             driver: sqlite.Database
         });
     
-        try {   
-            await db.run(
-                `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer, batchNumber, timestamp) 
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                orderCode, 
-                customerAssetId, 
-                sessionId,
-                datObj.totalizer, 
-                datObj.batchNumber?.toString(), 
-                datObj.timestamp 
-            );
-            
-            debugLog('Successfully wrote object to database: %o', datObj);
-
-            const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-            const currentTime = Date.now();
-            const cutoffTime = currentTime - THIRTY_DAYS;
-            try {
-                const oldRecordsCount = await db.get(
-                    `SELECT COUNT(*) as count FROM totalizer WHERE timestamp < ?`,
-                    cutoffTime
+        try {
+            if (isStart) {
+                await db.run(
+                    `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp) 
+                     VALUES (?, ?, ?, ?, ?, ?)`,
+                    orderCode, 
+                    customerAssetId, 
+                    sessionId,
+                    datObj.totalizer,
+                    datObj.batchNumber?.toString(), 
+                    datObj.timestamp
                 );
-        
-                if (oldRecordsCount.count > 0) {
-                    await this.clearOldTotalizerRecords(cutoffTime);
-                } else {
-                    debugLog('No records older than 30 days found. No deletion needed.');
-                }
-            } catch (error) {
-                console.error('Error checking for old records:', error);
-                throw error;
-            } finally {
-                await db.close();
-            }       
+            } else {
+                await db.run(
+                    `UPDATE totalizer SET totalizer_end = ? WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`,
+                    datObj.totalizer, 
+                    orderCode, 
+                    customerAssetId, 
+                    sessionId
+                );
+            }
+    
+            debugLog(`Successfully wrote ${isStart ? 'start' : 'end'} totalizer to database: %o`, datObj);
         } catch (error) {
             console.error('Error writing totalizer to database:', error);
             throw error;
         } finally {
-            await db.close(); 
+            await db.close();
         }
     }
 
@@ -286,13 +255,15 @@ export class ModBusDispenser implements IDispenser {
     
         try {
             const row = await db.get(
-                `SELECT order_code, customer_asset_id, session_id, totalizer, batchNumber, timestamp FROM totalizer ORDER BY id DESC LIMIT 1`
+                `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp 
+                 FROM totalizer 
+                 ORDER BY id DESC LIMIT 1`
             );
     
             if (row) {
                 const totalizerResponse: TotalizerResponse = {
-                    totalizer: Number(row.totalizer),
-                    batchNumber: row.batchNumber, // No need to convert if stored as string
+                    totalizer: Number(row.totalizer_start),
+                    batchNumber: row.batchNumber,
                     timestamp: row.timestamp
                 };
     
@@ -311,7 +282,7 @@ export class ModBusDispenser implements IDispenser {
             console.error('Error reading totalizer from database:', error);
             throw error;
         } finally {
-            await db.close(); // Always close the database connection
+            await db.close();
         }
     }
     
