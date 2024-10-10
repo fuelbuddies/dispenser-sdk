@@ -7,6 +7,8 @@ import * as path from 'path';
 import { Seneca } from "../workflows/GateX";
 import { promises as fs } from 'fs';
 import debug from 'debug';
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 
 import ModbusRTU from "modbus-serial";
 
@@ -33,6 +35,8 @@ export class ModBusDispenser implements IDispenser {
                 const overCount =  overflowCounterBuffer.buffer.readUInt16BE(0);
                 socket.overflowCount = overCount;
                 socket.overflowOffset = 4294967296 * overCount;
+
+                await this.initializeDatabase();
 
                 _that.pulseInterval = setInterval(async function() {
                     const pulseCounter = await client.readHoldingRegisters(socket.pulseRegister,2);
@@ -76,6 +80,56 @@ export class ModBusDispenser implements IDispenser {
         }
     }
 
+    async initializeDatabase(): Promise<void> {
+        const db = await open({
+            filename: path.join(__dirname, 'dispenser.db'),
+            driver: sqlite3.Database
+        });
+        // storing sessionID also keeping in mind future 
+        try {
+            await db.run(`
+                CREATE TABLE IF NOT EXISTS totalizer (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    order_code INTEGER,
+                    customer_asset_id TEXT,
+                    session_id TEXT,
+                    totalizer REAL,
+                    batchNumber TEXT,
+                    timestamp INTEGER
+                )
+            `);
+
+            debugLog('Totalizer table initialized successfully');
+        } catch (error) {
+            console.error('Error initializing the database:', error);
+        } finally {
+            await db.close();
+        }
+    }
+
+    async clearOldTotalizerRecords(): Promise<void> {
+        const db = await open({
+            filename: path.join(__dirname, 'dispenser.db'),
+            driver: sqlite3.Database
+        });
+    
+        const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+        const currentTime = Date.now(); // Get the current timestamp
+        const cutoffTime = currentTime - THIRTY_DAYS; // Calculate the timestamp 30 days ago
+    
+        try {
+            const result = await db.run(
+                `DELETE FROM totalizer WHERE timestamp < ?`,
+                cutoffTime
+            );
+            debugLog('Deleted old totalizer records older than 30 days: %d rows affected', result.changes);
+        } catch (error) {
+            console.error('Error clearing old totalizer records:', error);
+        } finally {
+            await db.close();
+        }
+    }
+    
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
         return new Promise((resolve, reject) => {
             Promise.resolve(callee.call(this, calleeArgs || undefined)).then(async (data: any) => {
@@ -178,33 +232,72 @@ export class ModBusDispenser implements IDispenser {
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
 
-    async writeTotalizerToFile (datObj: TotalizerResponse): Promise<void> {
-        const filename = (await this.connection).totalizerFile;
-        if (!filename) {
-            throw new Error('Filename is undefined or empty');
-        }
-        const data = JSON.stringify(datObj, function (key, value) {
-            if (typeof value === 'bigint') {
-              return value.toString();
-            } else {
-              return value;
-            }
+    async writeTotalizerToFile(datObj: TotalizerResponse, orderCode: number, customerAssetId: string, sessionId: string): Promise<void> {
+
+        const db = await open({
+            filename: path.join(__dirname, 'dispenser.db'),
+            driver: sqlite3.Database
         });
-        await fs.writeFile(filename, data);
-        debugLog('Successfully wrote object to file: %o', data);
+    
+        try {   
+            await db.run(
+                `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer, batchNumber, timestamp) 
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                orderCode, 
+                customerAssetId, 
+                sessionId,
+                datObj.totalizer, 
+                datObj.batchNumber?.toString(), 
+                datObj.timestamp 
+            );
+            
+            debugLog('Successfully wrote object to database: %o', datObj);
+            await this.clearOldTotalizerRecords();
+        } catch (error) {
+            console.error('Error writing totalizer to database:', error);
+        } finally {
+            await db.close(); 
+        }
     }
 
-    async readTotalizerFromFile(): Promise<TotalizerResponse> {
-        const filename = (await this.connection).totalizerFile;
-        if (!filename) {
-            throw new Error('Filename is undefined or empty');
+    async readTotalizerFromFile(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
+        // Open SQLite database
+        const db = await open({
+            filename: path.join(__dirname, 'dispenser.db'),
+            driver: sqlite3.Database
+        });
+    
+        try {
+            const row = await db.get(
+                `SELECT order_code, customer_asset_id, session_id, totalizer, batchNumber, timestamp FROM totalizer ORDER BY id DESC LIMIT 1`
+            );
+    
+            if (row) {
+                const totalizerResponse: TotalizerResponse = {
+                    totalizer: Number(row.totalizer),
+                    batchNumber: row.batchNumber, // No need to convert if stored as string
+                    timestamp: row.timestamp
+                };
+    
+                debugLog('Successfully read object from database: %o', { orderCode: row.order_code, customerAssetId: row.customer_asset_id, totalizerResponse });
+                
+                return {
+                    orderCode: row.order_code,
+                    customerAssetId: row.customer_asset_id,
+                    sessionId: row.session_id,
+                    totalizerResponse
+                };
+            } else {
+                throw new Error('No totalizer record found in the database');
+            }
+        } catch (error) {
+            console.error('Error reading totalizer from database:', error);
+            throw error;
+        } finally {
+            await db.close(); // Always close the database connection
         }
-        const data = await fs.readFile(filename, {encoding: 'utf8'});
-        const obj = JSON.parse(data);
-        obj.totalizer = Number(obj.totalizer);
-        debugLog('Successfully read object from file: %o', obj);
-        return obj as TotalizerResponse;
     }
+    
 
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
