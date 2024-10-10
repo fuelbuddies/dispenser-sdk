@@ -5,8 +5,8 @@ import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { execFile } from 'child_process';
 import * as path from 'path';
 import { Seneca } from "../workflows/GateX";
-import { promises as fs } from 'fs';
 import debug from 'debug';
+import sqlite, { open } from 'sqlite';
 
 import ModbusRTU from "modbus-serial";
 
@@ -33,6 +33,8 @@ export class ModBusDispenser implements IDispenser {
                 const overCount =  overflowCounterBuffer.buffer.readUInt16BE(0);
                 socket.overflowCount = overCount;
                 socket.overflowOffset = 4294967296 * overCount;
+
+                await this.initializeDatabase();
 
                 _that.pulseInterval = setInterval(async function() {
                     const pulseCounter = await client.readHoldingRegisters(socket.pulseRegister,2);
@@ -76,6 +78,35 @@ export class ModBusDispenser implements IDispenser {
         }
     }
 
+    async initializeDatabase(): Promise<void> {
+        const db = await open({
+            filename: path.join(__dirname, 'dispenser.db'),
+            driver: sqlite.Database
+        });
+        // storing sessionID also keeping in mind future 
+        try {
+            await db.run(`
+                CREATE TABLE IF NOT EXISTS totalizer (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    order_code INTEGER,
+                    customer_asset_id TEXT,
+                    session_id TEXT,
+                    totalizer_start REAL,
+                    totalizer_end REAL,
+                    batchNumber TEXT,
+                    timestamp INTEGER
+                )
+            `);
+
+            debugLog('Totalizer table initialized successfully');
+        } catch (error) {
+            console.error('Error initializing the database:', error);
+            throw error;
+        } finally {
+            await db.close();
+        }
+    }
+    
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
         return new Promise((resolve, reject) => {
             Promise.resolve(callee.call(this, calleeArgs || undefined)).then(async (data: any) => {
@@ -178,33 +209,83 @@ export class ModBusDispenser implements IDispenser {
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
 
-    async writeTotalizerToFile (datObj: TotalizerResponse): Promise<void> {
-        const filename = (await this.connection).totalizerFile;
-        if (!filename) {
-            throw new Error('Filename is undefined or empty');
-        }
-        const data = JSON.stringify(datObj, function (key, value) {
-            if (typeof value === 'bigint') {
-              return value.toString();
-            } else {
-              return value;
-            }
+    async saveTotalizerRecordToDB(datObj: TotalizerResponse, orderCode: number, customerAssetId: string | undefined, sessionId: string | null, isStart: boolean): Promise<void> {
+        const db = await open({
+            filename: path.join(__dirname, 'dispenser.db'),
+            driver: sqlite.Database
         });
-        await fs.writeFile(filename, data);
-        debugLog('Successfully wrote object to file: %o', data);
+    
+        try {
+            if (isStart) {
+                await db.run(
+                    `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp) 
+                     VALUES (?, ?, ?, ?, ?, ?)`,
+                    orderCode, 
+                    customerAssetId, 
+                    sessionId,
+                    datObj.totalizer,
+                    datObj.batchNumber?.toString(), 
+                    datObj.timestamp
+                );
+            } else {
+                await db.run(
+                    `UPDATE totalizer SET totalizer_end = ? WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`,
+                    datObj.totalizer, 
+                    orderCode, 
+                    customerAssetId, 
+                    sessionId
+                );
+            }
+    
+            debugLog(`Successfully wrote ${isStart ? 'start' : 'end'} totalizer to database: %o`, datObj);
+        } catch (error) {
+            console.error('Error writing totalizer to database:', error);
+            throw error;
+        } finally {
+            await db.close();
+        }
     }
 
-    async readTotalizerFromFile(): Promise<TotalizerResponse> {
-        const filename = (await this.connection).totalizerFile;
-        if (!filename) {
-            throw new Error('Filename is undefined or empty');
+    async readTotalizerRecordFromDB(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
+        // Open SQLite database
+        const db = await open({
+            filename: path.join(__dirname, 'dispenser.db'),
+            driver: sqlite.Database
+        });
+    
+        try {
+            const row = await db.get(
+                `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp 
+                 FROM totalizer 
+                 ORDER BY id DESC LIMIT 1`
+            );
+    
+            if (row) {
+                const totalizerResponse: TotalizerResponse = {
+                    totalizer: Number(row.totalizer_start),
+                    batchNumber: row.batchNumber,
+                    timestamp: row.timestamp
+                };
+    
+                debugLog('Successfully read object from database: %o', { orderCode: row.order_code, customerAssetId: row.customer_asset_id, totalizerResponse });
+                
+                return {
+                    orderCode: row.order_code,
+                    customerAssetId: row.customer_asset_id,
+                    sessionId: row.session_id,
+                    totalizerResponse
+                };
+            } else {
+                throw new Error('No totalizer record found in the database');
+            }
+        } catch (error) {
+            console.error('Error reading totalizer from database:', error);
+            throw error;
+        } finally {
+            await db.close();
         }
-        const data = await fs.readFile(filename, {encoding: 'utf8'});
-        const obj = JSON.parse(data);
-        obj.totalizer = Number(obj.totalizer);
-        debugLog('Successfully read object from file: %o', obj);
-        return obj as TotalizerResponse;
     }
+    
 
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
