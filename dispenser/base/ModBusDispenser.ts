@@ -7,8 +7,7 @@ import * as path from 'path';
 import { Seneca } from "../workflows/GateX";
 import { promises as fs } from 'fs';
 import debug from 'debug';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import sqlite, { open } from 'sqlite';
 
 import ModbusRTU from "modbus-serial";
 
@@ -83,7 +82,7 @@ export class ModBusDispenser implements IDispenser {
     async initializeDatabase(): Promise<void> {
         const db = await open({
             filename: path.join(__dirname, 'dispenser.db'),
-            driver: sqlite3.Database
+            driver: sqlite.Database
         });
         // storing sessionID also keeping in mind future 
         try {
@@ -107,15 +106,16 @@ export class ModBusDispenser implements IDispenser {
         }
     }
 
+
     async clearOldTotalizerRecords(): Promise<void> {
         const db = await open({
             filename: path.join(__dirname, 'dispenser.db'),
-            driver: sqlite3.Database
-        });
-    
-        const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
-        const currentTime = Date.now(); // Get the current timestamp
-        const cutoffTime = currentTime - THIRTY_DAYS; // Calculate the timestamp 30 days ago
+            driver: sqlite.Database
+        }); 
+
+        const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+        const currentTime = Date.now();
+        const cutoffTime = currentTime - THIRTY_DAYS;
     
         try {
             const result = await db.run(
@@ -236,7 +236,7 @@ export class ModBusDispenser implements IDispenser {
 
         const db = await open({
             filename: path.join(__dirname, 'dispenser.db'),
-            driver: sqlite3.Database
+            driver: sqlite.Database
         });
     
         try {   
@@ -264,7 +264,7 @@ export class ModBusDispenser implements IDispenser {
         // Open SQLite database
         const db = await open({
             filename: path.join(__dirname, 'dispenser.db'),
-            driver: sqlite3.Database
+            driver: sqlite.Database
         });
     
         try {
