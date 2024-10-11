@@ -79,13 +79,13 @@ export class ModBusDispenser implements IDispenser {
     }
 
     async initializeDatabase(): Promise<void> {
-        const db = await open({
+        this.db = await open({
             filename: path.join(__dirname, 'dispenser.db'),
             driver: sqlite.Database
         });
-        // storing sessionID also keeping in mind future 
+
         try {
-            await db.run(`
+            await this.db.run(`
                 CREATE TABLE IF NOT EXISTS totalizer (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     order_code INTEGER,
@@ -102,8 +102,6 @@ export class ModBusDispenser implements IDispenser {
         } catch (error) {
             console.error('Error initializing the database:', error);
             throw error;
-        } finally {
-            await db.close();
         }
     }
     
@@ -210,14 +208,11 @@ export class ModBusDispenser implements IDispenser {
     }
 
     async saveTotalizerRecordToDB(datObj: TotalizerResponse, orderCode: number, customerAssetId: string | undefined, sessionId: string | null, isStart: boolean): Promise<void> {
-        const db = await open({
-            filename: path.join(__dirname, 'dispenser.db'),
-            driver: sqlite.Database
-        });
+        if (!this.db) throw new Error("Database not initialized");
     
         try {
             if (isStart) {
-                await db.run(
+                await this.db.run(
                     `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp) 
                      VALUES (?, ?, ?, ?, ?, ?)`,
                     orderCode, 
@@ -228,7 +223,7 @@ export class ModBusDispenser implements IDispenser {
                     datObj.timestamp
                 );
             } else {
-                await db.run(
+                await this.db.run(
                     `UPDATE totalizer SET totalizer_end = ? WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`,
                     datObj.totalizer, 
                     orderCode, 
@@ -241,20 +236,14 @@ export class ModBusDispenser implements IDispenser {
         } catch (error) {
             console.error('Error writing totalizer to database:', error);
             throw error;
-        } finally {
-            await db.close();
         }
     }
 
     async readTotalizerRecordFromDB(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
-        // Open SQLite database
-        const db = await open({
-            filename: path.join(__dirname, 'dispenser.db'),
-            driver: sqlite.Database
-        });
+        if (!this.db) throw new Error("Database not initialized");
     
         try {
-            const row = await db.get(
+            const row = await this.db.get(
                 `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp 
                  FROM totalizer 
                  ORDER BY id DESC LIMIT 1`
@@ -281,8 +270,6 @@ export class ModBusDispenser implements IDispenser {
         } catch (error) {
             console.error('Error reading totalizer from database:', error);
             throw error;
-        } finally {
-            await db.close();
         }
     }
     
