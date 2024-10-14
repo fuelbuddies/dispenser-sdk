@@ -221,8 +221,16 @@ export class ModBusDispenser implements IDispenser {
             ? [orderCode, customerAssetId, sessionId, totalizer, batchNumber?.toString(), timestamp]
             : [totalizer, orderCode, customerAssetId, sessionId];
     
-        await this.db.run(sql, ...params);
-        debugLog(`Successfully wrote ${isStart ? 'start' : 'end'} totalizer to database: %o`, datObj);
+            return new Promise((resolve, reject) => {
+                this.db.run(sql, ...params, (error: any) => {
+                    if (error) {
+                        debugLog(`Error writing ${isStart ? 'start' : 'end'} totalizer to database: %o`, error);
+                        return reject(error);
+                    }
+                    debugLog(`Successfully wrote ${isStart ? 'start' : 'end'} totalizer to database: %o`, datObj);
+                    resolve();
+                });
+            });
     }
     
 
