@@ -129,32 +129,22 @@ export class GateX extends ModBusDispenser {
     }
 
     async authorizeSale(orderCode: number, customerAssetId: string | undefined, sessionId: string | null) {
-        try {
-            if(!this.startTotalizer) {
-                const totalizer = await this.processTotalizerRes(await this.totalizer());
-                this.startTotalizer = totalizer;
-            }
-
-            if(!this.startTotalizer) {
-                throw new Error('Totalizer not initialized');
-            }
-
-            this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
-            return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
-        } catch (error) {
-            console.error(error);
-            return "false";
+        if (!this.startTotalizer) {
+            const totalizer = await this.processTotalizerRes(await this.totalizer());
+            this.startTotalizer = totalizer;
         }
-    }
+    
+        if (!this.startTotalizer) {
+            throw new Error('Totalizer not initialized');
+        }
+    
+        this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
+        return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
+    }    
 
     async pumpStop() {
-        try {
-            return (await this.executeShellScriptAndCheck('scripts/GateX/unauthorize.sh')) ? "true" : "false";
-        } catch (error) {
-            console.error(error);
-            return "false";
-        }
-    }
+        return (await this.executeShellScriptAndCheck('scripts/GateX/unauthorize.sh')) ? "true" : "false";
+    }    
 
     async suspendSale() {
         debugLog("suspendSale: %s", "Stop");
@@ -209,18 +199,15 @@ export class GateX extends ModBusDispenser {
     }
 
     async clearSale(orderCode: number, customerAssetId: string | undefined, sessionId: string | null) {
-        try{
-            const totalizer = await this.processTotalizerRes(await this.totalizer());
-            this.saveTotalizerRecordToDB(totalizer, orderCode, customerAssetId, sessionId, false);
-        }
-        catch (error) {
-            console.error(error);
-        }
+        const totalizer = await this.processTotalizerRes(await this.totalizer());
+        this.saveTotalizerRecordToDB(totalizer, orderCode, customerAssetId, sessionId, false);
+        
         this.preset = 0;
         this.startTotalizer = undefined;
+        
         return "true";
     }
-
+    
     calculateVolume(previousTotalizer: TotalizerResponse | undefined, currentTotalizer: TotalizerResponse): VolumeResponse {
         // Check if timestamps are valid and current timestamp is greater than previous
         if (!previousTotalizer || !currentTotalizer.timestamp || !previousTotalizer.timestamp || currentTotalizer.timestamp <= previousTotalizer.timestamp) {
