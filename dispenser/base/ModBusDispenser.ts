@@ -84,25 +84,20 @@ export class ModBusDispenser implements IDispenser {
             driver: sqlite.Database
         });
 
-        try {
-            await this.db.run(`
-                CREATE TABLE IF NOT EXISTS totalizer (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    order_code INTEGER,
-                    customer_asset_id TEXT,
-                    session_id TEXT,
-                    totalizer_start REAL,
-                    totalizer_end REAL,
-                    batchNumber TEXT,
-                    timestamp INTEGER
-                )
-            `);
+        await this.db.run(`
+            CREATE TABLE IF NOT EXISTS totalizer (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_code INTEGER,
+                customer_asset_id TEXT,
+                session_id TEXT,
+                totalizer_start REAL,
+                totalizer_end REAL,
+                batchNumber TEXT,
+                timestamp INTEGER
+            )
+        `);
 
-            debugLog('Totalizer table initialized successfully');
-        } catch (error) {
-            console.error('Error initializing the database:', error);
-            throw error;
-        }
+        debugLog('Totalizer table initialized successfully');
     }
     
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
@@ -207,43 +202,34 @@ export class ModBusDispenser implements IDispenser {
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
 
-    async saveTotalizerRecordToDB(datObj: TotalizerResponse, orderCode: number, customerAssetId: string | undefined, sessionId: string | null, isStart: boolean): Promise<void> {
+    async saveTotalizerRecordToDB(
+        datObj: TotalizerResponse, 
+        orderCode: number, 
+        customerAssetId: string | undefined, 
+        sessionId: string | null, 
+        isStart: boolean
+    ): Promise<void> {
         if (!this.db) throw new Error("Database not initialized");
     
-        try {
-            if (isStart) {
-                await this.db.run(
-                    `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp) 
-                     VALUES (?, ?, ?, ?, ?, ?)`,
-                    orderCode, 
-                    customerAssetId, 
-                    sessionId,
-                    datObj.totalizer,
-                    datObj.batchNumber?.toString(), 
-                    datObj.timestamp
-                );
-            } else {
-                await this.db.run(
-                    `UPDATE totalizer SET totalizer_end = ? WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`,
-                    datObj.totalizer, 
-                    orderCode, 
-                    customerAssetId, 
-                    sessionId
-                );
-            }
+        const { totalizer, batchNumber, timestamp } = datObj;
+        const sql = isStart
+            ? `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp) 
+               VALUES (?, ?, ?, ?, ?, ?)`
+            : `UPDATE totalizer SET totalizer_end = ? WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`;
     
-            debugLog(`Successfully wrote ${isStart ? 'start' : 'end'} totalizer to database: %o`, datObj);
-        } catch (error) {
-            console.error('Error writing totalizer to database:', error);
-            throw error;
-        }
+        const params = isStart
+            ? [orderCode, customerAssetId, sessionId, totalizer, batchNumber?.toString(), timestamp]
+            : [totalizer, orderCode, customerAssetId, sessionId];
+    
+        await this.db.run(sql, ...params);
+        debugLog(`Successfully wrote ${isStart ? 'start' : 'end'} totalizer to database: %o`, datObj);
     }
+    
 
     async readTotalizerRecordFromDB(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
         if (!this.db) throw new Error("Database not initialized");
     
-        try {
-            const row = await this.db.get(
+        const row = await this.db.get(
                 `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp 
                  FROM totalizer 
                  ORDER BY id DESC LIMIT 1`
@@ -267,10 +253,6 @@ export class ModBusDispenser implements IDispenser {
             } else {
                 throw new Error('No totalizer record found in the database');
             }
-        } catch (error) {
-            console.error('Error reading totalizer from database:', error);
-            throw error;
-        }
     }
     
 
