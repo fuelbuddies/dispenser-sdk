@@ -79,26 +79,34 @@ export class ModBusDispenser implements IDispenser {
     }
 
     async initializeDatabase(): Promise<void> {
-        this.db = await open({
-            filename: path.join(__dirname, 'dispenser.db'),
-            driver: sqlite.Database
+        return new Promise(async (resolve, reject) => {
+            try {
+                this.db = await open({
+                    filename: path.join(__dirname, 'dispenser.db'),
+                    driver: sqlite.Database
+                });
+    
+                await this.db.run(`
+                    CREATE TABLE IF NOT EXISTS totalizer (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        order_code INTEGER,
+                        customer_asset_id TEXT,
+                        session_id TEXT,
+                        totalizer_start REAL,
+                        totalizer_end REAL,
+                        batchNumber TEXT,
+                        timestamp INTEGER
+                    )
+                `);
+    
+                debugLog('Totalizer table initialized successfully');
+                resolve(); 
+            } catch (error) {
+                debugLog('Error initializing the database: %o', error);
+                reject(error); 
+            }
         });
-
-        await this.db.run(`
-            CREATE TABLE IF NOT EXISTS totalizer (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                order_code INTEGER,
-                customer_asset_id TEXT,
-                session_id TEXT,
-                totalizer_start REAL,
-                totalizer_end REAL,
-                batchNumber TEXT,
-                timestamp INTEGER
-            )
-        `);
-
-        debugLog('Totalizer table initialized successfully');
-    }
+    }    
     
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
         return new Promise((resolve, reject) => {
