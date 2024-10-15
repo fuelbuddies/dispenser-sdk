@@ -143,8 +143,13 @@ export class GateX extends ModBusDispenser {
     }    
 
     async pumpStop() {
-        return (await this.executeShellScriptAndCheck('scripts/GateX/unauthorize.sh')) ? "true" : "false";
-    }    
+        try {
+            return (await this.executeShellScriptAndCheck('scripts/GateX/unauthorize.sh')) ? "true" : "false";
+        } catch (error) {
+            console.error(error);
+            return "false";
+        }
+    }
 
     async suspendSale() {
         debugLog("suspendSale: %s", "Stop");
