@@ -217,8 +217,8 @@ export class ModBusDispenser implements IDispenser {
     async saveTotalizerRecordToDB(
         datObj: TotalizerResponse, 
         orderCode: number, 
-        customerAssetId: string | undefined, 
-        sessionId: string | null, 
+        customerAssetId: string, 
+        sessionId: string,
         isStart: boolean
     ): Promise<void> {
         if (!this.db) throw new Error("Database not initialized");
@@ -246,7 +246,7 @@ export class ModBusDispenser implements IDispenser {
     }
     
 
-    async readTotalizerRecordFromDB(): Promise<{ orderCode: number, customerAssetId: string | undefined, sessionId: string | null, totalizerResponse: TotalizerResponse }> {
+    async readTotalizerRecordFromDB(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
         if (!this.db) throw new Error("Database not initialized");
     
         const row = await this.db.get(
