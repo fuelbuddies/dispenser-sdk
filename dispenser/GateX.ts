@@ -138,7 +138,7 @@ export class GateX extends ModBusDispenser {
             throw new Error('Totalizer not initialized');
         }
     
-        this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
+        await this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
         return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
     }    
 
@@ -200,7 +200,7 @@ export class GateX extends ModBusDispenser {
 
     async clearSale(orderCode: number, customerAssetId: string | undefined, sessionId: string | null) {
         const totalizer = await this.processTotalizerRes(await this.totalizer());
-        this.saveTotalizerRecordToDB(totalizer, orderCode, customerAssetId, sessionId, false);
+        await this.saveTotalizerRecordToDB(totalizer, orderCode, customerAssetId, sessionId, false);
         
         this.preset = 0;
         this.startTotalizer = undefined;
