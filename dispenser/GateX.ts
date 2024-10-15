@@ -129,17 +129,22 @@ export class GateX extends ModBusDispenser {
     }
 
     async authorizeSale(orderCode: number, customerAssetId: string, sessionId: string) {
-        if (!this.startTotalizer) {
-            const totalizer = this.processTotalizerRes(await this.totalizer());
-            this.startTotalizer = totalizer;
-        }
-    
-        if (!this.startTotalizer) {
-            throw new Error('Totalizer not initialized');
-        }
-    
-        await this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
-        return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
+        try{
+            if (!this.startTotalizer) {
+                const totalizer = this.processTotalizerRes(await this.totalizer());
+                this.startTotalizer = totalizer;
+            }
+        
+            if (!this.startTotalizer) {
+                throw new Error('Totalizer not initialized');
+            }
+        
+            await this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
+            return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
+        } catch(error){
+            console.error(error);
+            return "false";
+        } 
     }    
 
     async pumpStop() {
