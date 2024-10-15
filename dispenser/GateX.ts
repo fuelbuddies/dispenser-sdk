@@ -130,7 +130,7 @@ export class GateX extends ModBusDispenser {
 
     async authorizeSale(orderCode: number, customerAssetId: string, sessionId: string) {
         if (!this.startTotalizer) {
-            const totalizer = await this.processTotalizerRes(await this.totalizer());
+            const totalizer = this.processTotalizerRes(await this.totalizer());
             this.startTotalizer = totalizer;
         }
     
@@ -199,7 +199,7 @@ export class GateX extends ModBusDispenser {
     }
 
     async clearSale(orderCode: number, customerAssetId: string, sessionId: string) {
-        const totalizer = await this.processTotalizerRes(await this.totalizer());
+        const totalizer = this.processTotalizerRes(await this.totalizer());
         await this.saveTotalizerRecordToDB(totalizer, orderCode, customerAssetId, sessionId, false);
         
         this.preset = 0;
