@@ -5,6 +5,7 @@ import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { execFile } from 'child_process';
 import * as path from 'path';
 import { Seneca } from "../workflows/GateX";
+import { promises as fs } from 'fs';
 import debug from 'debug';
 import sqlite, { open } from 'sqlite';
 
@@ -80,13 +81,16 @@ export class ModBusDispenser implements IDispenser {
 
     async initializeDatabase(): Promise<void> {
         debugLog('Initializing database...');
-    
+
+        const filename = (await this.connection).totalizerFile;
+        if(!filename) throw new Error('Db file is undefined or empty');
+
         this.db = await open({
-            filename: path.join(__dirname, 'dispenser.db'),
+            filename: filename,
             driver: sqlite.Database,
         });
         debugLog('Database opened successfully.');
-    
+
         const createTableSQL = `
             CREATE TABLE IF NOT EXISTS totalizer (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -99,7 +103,7 @@ export class ModBusDispenser implements IDispenser {
                 timestamp INTEGER
             )
         `;
-    
+
         return new Promise((resolve, reject) => {
             this.db.run(createTableSQL, (error: any) => {
                 if (error) {
@@ -111,7 +115,7 @@ export class ModBusDispenser implements IDispenser {
             });
         });
     }
-    
+
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
         return new Promise((resolve, reject) => {
             Promise.resolve(callee.call(this, calleeArgs || undefined)).then(async (data: any) => {
@@ -214,25 +218,41 @@ export class ModBusDispenser implements IDispenser {
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
 
+    async writeTotalizerToFile (datObj: TotalizerResponse): Promise<void> {
+        const filename = (await this.connection).totalizerFile;
+        if (!filename) {
+            throw new Error('Filename is undefined or empty');
+        }
+        const data = JSON.stringify(datObj, function (key, value) {
+            if (typeof value === 'bigint') {
+              return value.toString();
+            } else {
+              return value;
+            }
+        });
+        await fs.writeFile(filename, data);
+        debugLog('Successfully wrote object to file: %o', data);
+    }
+
     async saveTotalizerRecordToDB(
-        datObj: TotalizerResponse, 
-        orderCode: number, 
-        customerAssetId: string, 
+        datObj: TotalizerResponse,
+        orderCode: number,
+        customerAssetId: string,
         sessionId: string,
         isStart: boolean
     ): Promise<void> {
         if (!this.db) throw new Error("Database not initialized");
-    
+
         const { totalizer, batchNumber, timestamp } = datObj;
         const sql = isStart
-            ? `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp) 
+            ? `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp)
                VALUES (?, ?, ?, ?, ?, ?)`
             : `UPDATE totalizer SET totalizer_end = ? WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`;
-    
+
         const params = isStart
             ? [orderCode, customerAssetId, sessionId, totalizer, batchNumber?.toString(), timestamp]
             : [totalizer, orderCode, customerAssetId, sessionId];
-    
+
             return new Promise((resolve, reject) => {
                 this.db.run(sql, ...params, (error: any) => {
                     if (error) {
@@ -244,26 +264,37 @@ export class ModBusDispenser implements IDispenser {
                 });
             });
     }
-    
+
+    async readTotalizerFromFile(): Promise<TotalizerResponse> {
+        const filename = (await this.connection).totalizerFile;
+        if (!filename) {
+            throw new Error('Filename is undefined or empty');
+        }
+        const data = await fs.readFile(filename, {encoding: 'utf8'});
+        const obj = JSON.parse(data);
+        obj.totalizer = Number(obj.totalizer);
+        debugLog('Successfully read object from file: %o', obj);
+        return obj as TotalizerResponse;
+    }
 
     async readTotalizerRecordFromDB(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
         if (!this.db) throw new Error("Database not initialized");
-    
+
         const row = await this.db.get(
-                `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp 
-                 FROM totalizer 
+                `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp
+                 FROM totalizer
                  ORDER BY id DESC LIMIT 1`
             );
-    
+
             if (row) {
                 const totalizerResponse: TotalizerResponse = {
                     totalizer: Number(row.totalizer_start),
                     batchNumber: row.batchNumber,
                     timestamp: row.timestamp
                 };
-    
+
                 debugLog('Successfully read object from database: %o', { orderCode: row.order_code, customerAssetId: row.customer_asset_id, totalizerResponse });
-                
+
                 return {
                     orderCode: row.order_code,
                     customerAssetId: row.customer_asset_id,
@@ -274,7 +305,7 @@ export class ModBusDispenser implements IDispenser {
                 throw new Error('No totalizer record found in the database');
             }
     }
-    
+
 
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {

@@ -129,23 +129,23 @@ export class GateX extends ModBusDispenser {
     }
 
     async authorizeSale(orderCode: number, customerAssetId: string, sessionId: string) {
-        try{
-            if (!this.startTotalizer) {
+        try {
+            if(!this.startTotalizer) {
                 const totalizer = this.processTotalizerRes(await this.totalizer());
                 this.startTotalizer = totalizer;
             }
-        
-            if (!this.startTotalizer) {
+
+            if(!this.startTotalizer) {
                 throw new Error('Totalizer not initialized');
             }
-        
+
             await this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
             return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
-        } catch(error){
+        } catch (error) {
             console.error(error);
             return "false";
-        } 
-    }    
+        }
+    }
 
     async pumpStop() {
         try {
@@ -211,13 +211,13 @@ export class GateX extends ModBusDispenser {
     async clearSale(orderCode: number, customerAssetId: string, sessionId: string) {
         const totalizer = this.processTotalizerRes(await this.totalizer());
         await this.saveTotalizerRecordToDB(totalizer, orderCode, customerAssetId, sessionId, false);
-        
+
         this.preset = 0;
         this.startTotalizer = undefined;
-        
+
         return "true";
     }
-    
+
     calculateVolume(previousTotalizer: TotalizerResponse | undefined, currentTotalizer: TotalizerResponse): VolumeResponse {
         // Check if timestamps are valid and current timestamp is greater than previous
         if (!previousTotalizer || !currentTotalizer.timestamp || !previousTotalizer.timestamp || currentTotalizer.timestamp <= previousTotalizer.timestamp) {
