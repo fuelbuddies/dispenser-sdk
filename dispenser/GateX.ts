@@ -132,11 +132,9 @@ export class GateX extends ModBusDispenser {
         try {
             if(!this.startTotalizer) {
                 const totalizer = this.processTotalizerRes(await this.totalizer());
+                // changed by repo owner.
+                if(!totalizer) throw new Error('Totalizer not initialized');
                 this.startTotalizer = totalizer;
-            }
-
-            if(!this.startTotalizer) {
-                throw new Error('Totalizer not initialized');
             }
 
             await this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
