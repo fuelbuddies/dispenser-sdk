@@ -28,9 +28,9 @@ export class GateX extends ModBusDispenser {
         return seneca.readPulse();
     }
 
-    async readSale() {
+    async readSale(orderCode: number, customerAssetId: string, sessionId: string) {
         if(!this.startTotalizer) {
-            this.startTotalizer = (await this.readTotalizerRecordFromDB()).totalizerResponse;
+            this.startTotalizer = (await this.readTotalizerRecordFromDB(orderCode, customerAssetId, sessionId)).totalizerResponse;
         }
         return await this.totalizer();
     }

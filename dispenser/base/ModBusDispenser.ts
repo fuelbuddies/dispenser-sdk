@@ -218,6 +218,10 @@ export class ModBusDispenser implements IDispenser {
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
 
+    /**
+     * @deprecated we are saving data to sqlite db
+     * @param datObj 
+     */
     async writeTotalizerToFile (datObj: TotalizerResponse): Promise<void> {
         const filename = (await this.connection).totalizerFile;
         if (!filename) {
@@ -234,6 +238,15 @@ export class ModBusDispenser implements IDispenser {
         debugLog('Successfully wrote object to file: %o', data);
     }
 
+    /**
+     * save totalizer to sqlitedb
+     * @param datObj 
+     * @param orderCode 
+     * @param customerAssetId 
+     * @param sessionId 
+     * @param isStart 
+     * @returns 
+     */
     async saveTotalizerRecordToDB(
         datObj: TotalizerResponse,
         orderCode: number,
@@ -265,6 +278,10 @@ export class ModBusDispenser implements IDispenser {
             });
     }
 
+    /**
+     * @deprecated we are using sqlite to save records now. @see 
+     * @returns 
+     */
     async readTotalizerFromFile(): Promise<TotalizerResponse> {
         const filename = (await this.connection).totalizerFile;
         if (!filename) {
@@ -277,35 +294,47 @@ export class ModBusDispenser implements IDispenser {
         return obj as TotalizerResponse;
     }
 
-    async readTotalizerRecordFromDB(): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
+    /**
+     * read totalizer record from sqlitedb
+     * @param orderCode 
+     * @param customerAssetId 
+     * @param sessionId 
+     * @returns 
+     */
+    async readTotalizerRecordFromDB(
+        orderCode: number,
+        customerAssetId: string, 
+        sessionId: string
+      ): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
+          
         if (!this.db) throw new Error("Database not initialized");
-
+    
         const row = await this.db.get(
-                `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp
-                 FROM totalizer
-                 ORDER BY id DESC LIMIT 1`
-            );
-
-            if (row) {
-                const totalizerResponse: TotalizerResponse = {
-                    totalizer: Number(row.totalizer_start),
-                    batchNumber: row.batchNumber,
-                    timestamp: row.timestamp
-                };
-
-                debugLog('Successfully read object from database: %o', { orderCode: row.order_code, customerAssetId: row.customer_asset_id, totalizerResponse });
-
-                return {
-                    orderCode: row.order_code,
-                    customerAssetId: row.customer_asset_id,
-                    sessionId: row.session_id,
-                    totalizerResponse
-                };
-            } else {
-                throw new Error('No totalizer record found in the database');
-            }
+            `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp
+            FROM totalizer
+            WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`,
+            [orderCode, customerAssetId, sessionId]
+        );
+    
+        if (row) {
+            const totalizerResponse: TotalizerResponse = {
+                totalizer: Number(row.totalizer_start),
+                batchNumber: row.batchNumber,
+                timestamp: row.timestamp
+            };
+    
+            debugLog('Successfully read object from database: %o', { orderCode: row.order_code, customerAssetId: row.customer_asset_id, totalizerResponse });
+    
+            return {
+                orderCode: row.order_code,
+                customerAssetId: row.customer_asset_id,
+                sessionId: row.session_id,
+                totalizerResponse
+            };
+        } else {
+            throw new Error('No totalizer record found in the database for the provided order code, asset ID, and session ID');
+        }
     }
-
 
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
