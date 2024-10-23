@@ -7,6 +7,7 @@ import * as path from 'path';
 import { Seneca } from "../workflows/GateX";
 import { promises as fs } from 'fs';
 import debug from 'debug';
+import sqlite, { open } from 'sqlite';
 
 import ModbusRTU from "modbus-serial";
 
@@ -33,6 +34,8 @@ export class ModBusDispenser implements IDispenser {
                 const overCount =  overflowCounterBuffer.buffer.readUInt16BE(0);
                 socket.overflowCount = overCount;
                 socket.overflowOffset = 4294967296 * overCount;
+
+                await this.initializeDatabase();
 
                 _that.pulseInterval = setInterval(async function() {
                     const pulseCounter = await client.readHoldingRegisters(socket.pulseRegister,2);
@@ -74,6 +77,43 @@ export class ModBusDispenser implements IDispenser {
         } else {
             return data;
         }
+    }
+
+    async initializeDatabase(): Promise<void> {
+        debugLog('Initializing database...');
+
+        const filename = (await this.connection).totalizerFile;
+        if(!filename) throw new Error('Db file is undefined or empty');
+
+        this.db = await open({
+            filename: filename,
+            driver: sqlite.Database,
+        });
+        debugLog('Database opened successfully.');
+
+        const createTableSQL = `
+            CREATE TABLE IF NOT EXISTS totalizer (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_code INTEGER,
+                customer_asset_id TEXT,
+                session_id TEXT,
+                totalizer_start REAL,
+                totalizer_end REAL,
+                batchNumber TEXT,
+                timestamp INTEGER
+            )
+        `;
+
+        return new Promise((resolve, reject) => {
+            this.db.run(createTableSQL, (error: any) => {
+                if (error) {
+                    debugLog('Error initializing the totalizer table: %o', error);
+                    return reject(error);
+                }
+                debugLog('Totalizer table initialized successfully');
+                resolve();
+            });
+        });
     }
 
     execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
@@ -178,6 +218,10 @@ export class ModBusDispenser implements IDispenser {
         return parseInt(hexPair, 16); // Use parseInt for hex conversion
     }
 
+    /**
+     * @deprecated we are saving data to sqlite db
+     * @param datObj 
+     */
     async writeTotalizerToFile (datObj: TotalizerResponse): Promise<void> {
         const filename = (await this.connection).totalizerFile;
         if (!filename) {
@@ -194,6 +238,50 @@ export class ModBusDispenser implements IDispenser {
         debugLog('Successfully wrote object to file: %o', data);
     }
 
+    /**
+     * save totalizer to sqlitedb
+     * @param datObj 
+     * @param orderCode 
+     * @param customerAssetId 
+     * @param sessionId 
+     * @param isStart 
+     * @returns 
+     */
+    async saveTotalizerRecordToDB(
+        datObj: TotalizerResponse,
+        orderCode: number,
+        customerAssetId: string,
+        sessionId: string,
+        isStart: boolean
+    ): Promise<void> {
+        if (!this.db) throw new Error("Database not initialized");
+
+        const { totalizer, batchNumber, timestamp } = datObj;
+        const sql = isStart
+            ? `INSERT INTO totalizer (order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp)
+               VALUES (?, ?, ?, ?, ?, ?)`
+            : `UPDATE totalizer SET totalizer_end = ? WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`;
+
+        const params = isStart
+            ? [orderCode, customerAssetId, sessionId, totalizer, batchNumber?.toString(), timestamp]
+            : [totalizer, orderCode, customerAssetId, sessionId];
+
+            return new Promise((resolve, reject) => {
+                this.db.run(sql, ...params, (error: any) => {
+                    if (error) {
+                        debugLog(`Error writing ${isStart ? 'start' : 'end'} totalizer to database: %o`, error);
+                        return reject(error);
+                    }
+                    debugLog(`Successfully wrote ${isStart ? 'start' : 'end'} totalizer to database: %o`, datObj);
+                    resolve();
+                });
+            });
+    }
+
+    /**
+     * @deprecated we are using sqlite to save records now. @see 
+     * @returns 
+     */
     async readTotalizerFromFile(): Promise<TotalizerResponse> {
         const filename = (await this.connection).totalizerFile;
         if (!filename) {
@@ -205,6 +293,56 @@ export class ModBusDispenser implements IDispenser {
         debugLog('Successfully read object from file: %o', obj);
         return obj as TotalizerResponse;
     }
+
+    /**
+     * read totalizer record from sqlitedb
+     * @param orderCode 
+     * @param customerAssetId 
+     * @param sessionId 
+     * @returns 
+     */
+    async readTotalizerRecordFromDB(
+        orderCode: number,
+        customerAssetId: string, 
+        sessionId: string
+      ): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
+        if (!this.db) throw new Error("Database not initialized");
+
+        const sql = `
+            SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp
+            FROM totalizer
+            WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`;
+    
+        const params = [orderCode, customerAssetId, sessionId];
+    
+        return new Promise((resolve, reject) => {
+            this.db.get(sql, ...params, (error: any, row: any) => {
+                if (error) {
+                    debugLog('Error querying the database: %o', error);
+                    return reject(new Error('Error querying the database: ' + error.message));
+                }
+    
+                if (row) {
+                    const totalizerResponse: TotalizerResponse = {
+                        totalizer: Number(row.totalizer_start),
+                        batchNumber: row.batchNumber,
+                        timestamp: row.timestamp
+                    };
+    
+                    debugLog('Successfully read object from database: %o', { orderCode: row.order_code, customerAssetId: row.customer_asset_id, totalizerResponse });
+    
+                    resolve({
+                        orderCode: row.order_code,
+                        customerAssetId: row.customer_asset_id,
+                        sessionId: row.session_id,
+                        totalizerResponse
+                    });
+                } else {
+                    return reject(new Error('No totalizer record found in the database for the provided order code, asset ID, and session ID'));
+                }
+            });
+        });
+    }    
 
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {

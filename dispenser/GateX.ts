@@ -28,9 +28,9 @@ export class GateX extends ModBusDispenser {
         return seneca.readPulse();
     }
 
-    async readSale() {
+    async readSale(orderCode: number, customerAssetId: string, sessionId: string) {
         if(!this.startTotalizer) {
-            this.startTotalizer = await this.readTotalizerFromFile();
+            this.startTotalizer = (await this.readTotalizerRecordFromDB(orderCode, customerAssetId, sessionId)).totalizerResponse;
         }
         return await this.totalizer();
     }
@@ -128,18 +128,16 @@ export class GateX extends ModBusDispenser {
         return "false";
     }
 
-    async authorizeSale() {
+    async authorizeSale(orderCode: number, customerAssetId: string, sessionId: string) {
         try {
             if(!this.startTotalizer) {
-                const totalizer = await this.processTotalizerRes(await this.totalizer()); //This will initialize startTotalizer.
+                const totalizer = this.processTotalizerRes(await this.totalizer());
+                // changed by repo owner.
+                if(!totalizer) throw new Error('Totalizer not initialized');
                 this.startTotalizer = totalizer;
             }
 
-            if(!this.startTotalizer) {
-                throw new Error('Totalizer not initialized');
-            }
-
-            this.writeTotalizerToFile(this.startTotalizer);
+            await this.saveTotalizerRecordToDB(this.startTotalizer, orderCode, customerAssetId, sessionId, true);
             return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? "true" : "false";
         } catch (error) {
             console.error(error);
@@ -208,9 +206,13 @@ export class GateX extends ModBusDispenser {
         return this.preset;
     }
 
-    clearSale() {
+    async clearSale(orderCode: number, customerAssetId: string, sessionId: string) {
+        const totalizer = this.processTotalizerRes(await this.totalizer());
+        await this.saveTotalizerRecordToDB(totalizer, orderCode, customerAssetId, sessionId, false);
+
         this.preset = 0;
         this.startTotalizer = undefined;
+
         return "true";
     }
 
