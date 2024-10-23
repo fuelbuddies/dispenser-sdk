@@ -306,35 +306,43 @@ export class ModBusDispenser implements IDispenser {
         customerAssetId: string, 
         sessionId: string
       ): Promise<{ orderCode: number, customerAssetId: string, sessionId: string, totalizerResponse: TotalizerResponse }> {
-          
         if (!this.db) throw new Error("Database not initialized");
-    
-        const row = await this.db.get(
-            `SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp
+
+        const sql = `
+            SELECT order_code, customer_asset_id, session_id, totalizer_start, batchNumber, timestamp
             FROM totalizer
-            WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`,
-            [orderCode, customerAssetId, sessionId]
-        );
+            WHERE order_code = ? AND customer_asset_id = ? AND session_id = ?`;
     
-        if (row) {
-            const totalizerResponse: TotalizerResponse = {
-                totalizer: Number(row.totalizer_start),
-                batchNumber: row.batchNumber,
-                timestamp: row.timestamp
-            };
+        const params = [orderCode, customerAssetId, sessionId];
     
-            debugLog('Successfully read object from database: %o', { orderCode: row.order_code, customerAssetId: row.customer_asset_id, totalizerResponse });
+        return new Promise((resolve, reject) => {
+            this.db.get(sql, ...params, (error: any, row: any) => {
+                if (error) {
+                    debugLog('Error querying the database: %o', error);
+                    return reject(new Error('Error querying the database: ' + error.message));
+                }
     
-            return {
-                orderCode: row.order_code,
-                customerAssetId: row.customer_asset_id,
-                sessionId: row.session_id,
-                totalizerResponse
-            };
-        } else {
-            throw new Error('No totalizer record found in the database for the provided order code, asset ID, and session ID');
-        }
-    }
+                if (row) {
+                    const totalizerResponse: TotalizerResponse = {
+                        totalizer: Number(row.totalizer_start),
+                        batchNumber: row.batchNumber,
+                        timestamp: row.timestamp
+                    };
+    
+                    debugLog('Successfully read object from database: %o', { orderCode: row.order_code, customerAssetId: row.customer_asset_id, totalizerResponse });
+    
+                    resolve({
+                        orderCode: row.order_code,
+                        customerAssetId: row.customer_asset_id,
+                        sessionId: row.session_id,
+                        totalizerResponse
+                    });
+                } else {
+                    return reject(new Error('No totalizer record found in the database for the provided order code, asset ID, and session ID'));
+                }
+            });
+        });
+    }    
 
     // Function to execute a shell script and check if the result is "true"
     async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
