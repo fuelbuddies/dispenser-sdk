@@ -17,100 +17,73 @@ export class TCS3000 extends BaseDispenser {
         return "TCS3000";
     }
 
-    // // elockStatus() {
-    // //     debugLog("elockStatus", "Lock_Status");
-    // //     this.connection.send('Lock_Status');
-    // // }
-
-    // // elockUnlock() {
-    // //     debugLog("elockUnlock", "Lock_UnLock");
-    // //     this.connection.send('Lock_UnLock');
-    // // }
-
-    // // elockReset() {
-    // //     debugLog("elockReset", "Lock_Reset");
-    // //     this.connection.send('Lock_Reset');
-    // // }
-
-    // // elockLock() {
-    // //     debugLog("elockLock", "Lock_Lock");
-    // //     this.connection.send('Lock_Lock');
-    // // }
-
     async totalizer() {
         debugLog("totalizer", "Read_Totalizer");
         await this.connection.write(this.totalizerBuffer);
     }
 
-    // readPreset() {
-    //     debugLog("readPreset", "Read_Status");
-    //     this.connection.send('Read_Status'); // same command to get data on isoil
-    // }
+    readPreset() {
+        debugLog("readPreset", "Read_Status");
+        this.connection.write(this.read_preset); // same command to get data on isoil
+    }
 
+    // TODO: Need to set this up
     // readSale() {
     //     debugLog("readSale", "Read_Sale");
     //     this.connection.send('Read_Sale'); // same command to get data on isoil
     // }
 
+    // TODO: Need to set this up
     // readStatus() {
     //     debugLog("readStatus", "Read_Status");
     //     this.connection.send("Read_Status"); // response needs some statuses to be hardcoded .. will see
     // }
 
-    // switchToRemote() {
-    //     debugLog("switchToRemote", "Go_Remote");
-    //     //TBD        this.connection.send('Go_Remote');
-    // }
+    startPump() {
+        debugLog("startPump", "Pump_Start");
+        this.connection.write(this.pump_start);
+    }
 
-    // switchToLocal() {
-    //     debugLog("switchToLocal", "Go_Local");
-    //     //TBD        this.connection.send('Go_Local');
-    // }
+    stopPump() {
+        debugLog("stopPump", "Pump_Stop");
+        this.connection.write(this.pump_stop);
+    }
 
-    // startPump() {
-    //     debugLog("startPump", "Pump_Start");
-    //     this.connection.send('Pump_Start');
-    // }
+    authorizeSale() {
+        debugLog("authorizeSale", "Start");
+        this.connection.write(this.authotize);
+    }
 
-    // stopPump() {
-    //     debugLog("stopPump", "Pump_Stop");
-    //     this.connection.send("Pump_Stop");
-    // }
+    setPreset(quantity: number) {
+        debugLog("setPreset", `Preset_QTY=${quantity}`);
+        // TODO: implement this
+        // this.connection.send(`Preset_QTY=${quantity}`);
+    }
 
-    // authorizeSale() {
-    //     debugLog("authorizeSale", "Start");
-    //     this.connection.send("Authorize");
-    // }
+    cancelPreset() {
+        debugLog("cancelPreset", "Cancel_Preset");
+        this.connection.write(this.cancel_preset);
+    }
 
-    // setPreset(quantity: number) {
-    //     debugLog("setPreset", `Preset_QTY=${quantity}`);
-    //     this.connection.send(`Preset_QTY=${quantity}`);
-    // }
+    suspendSale() {
+        debugLog("suspendSale", "Stop");
+        this.connection.write(this.suspend_sale);
+    }
 
-    // cancelPreset() {
-    //     debugLog("cancelPreset", "Cancel_Preset");
-    //     this.connection.send("Cancel_Preset");
-    // }
+    resumeSale() {
+        debugLog("resumeSale", "Resume_Sale");
+        this.connection.write(this.resume_sale);
+    }
 
-    // suspendSale() {
-    //     debugLog("suspendSale", "Stop");
-    //     this.connection.send("Suspend_Sale");
-    // }
+    clearSale() {
+        debugLog("clearSale", "Clear_Sale");
+        this.connection.write(this.clear_sale);
+    }
 
-    // resumeSale() {
-    //     debugLog("resumeSale", "Resume_Sale");
-    //     this.connection.send("Resume_Sale");
-    // }
-
-    // clearSale() {
-    //     debugLog("clearSale", "Clear_Sale");
-    //     this.connection.send('Clear_Sale');
-    // }
-
-    // hasExternalPump() {
-    //     debugLog("hasExternalPump", "External_Pump");
-    //     return "false";
-    // }
+    hasExternalPump() {
+        debugLog("hasExternalPump", "External_Pump");
+        return "false";
+    }
 
     // // readExternalPumpStatus() {
     // //     debugLog("readExternalPumpStatus", "External_Pump_Status");
