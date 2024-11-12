@@ -2,11 +2,8 @@ import { SerialPort } from "serialport";
 import { TCS3000 } from "../dispenser/TCS3000";
 import { findDispenserPort } from "../utils/findDispenserPort";
 
-const hardwareId = '';
-const attributeId = '';
-
-const printerHardwareId = '';
-const printerAttributeId = '';
+const hardwareId = '10c4';
+const attributeId = 'ea60';
 
 describe('TCS3000', () => {
     let dispenser: TCS3000;
