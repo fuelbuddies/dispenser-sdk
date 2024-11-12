@@ -22,9 +22,9 @@ export class TCS3000 extends BaseDispenser {
         await this.connection.write(this.totalizerBuffer);
     }
 
-    readPreset() {
+    async readPreset() {
         debugLog("readPreset", "Read_Status");
-        this.connection.write(this.read_preset); // same command to get data on isoil
+        await this.connection.write(this.read_preset); // same command to get data on isoil
     }
 
     // TODO: Need to set this up
@@ -39,45 +39,45 @@ export class TCS3000 extends BaseDispenser {
     //     this.connection.send("Read_Status"); // response needs some statuses to be hardcoded .. will see
     // }
 
-    startPump() {
+    async startPump() {
         debugLog("startPump", "Pump_Start");
-        this.connection.write(this.pump_start);
+        await this.connection.write(this.pump_start);
     }
 
-    stopPump() {
+    async stopPump() {
         debugLog("stopPump", "Pump_Stop");
-        this.connection.write(this.pump_stop);
+        await this.connection.write(this.pump_stop);
     }
 
-    authorizeSale() {
+    async authorizeSale() {
         debugLog("authorizeSale", "Start");
-        this.connection.write(this.authotize);
+        await this.connection.write(this.authotize);
     }
 
-    setPreset(quantity: number) {
+    async setPreset(quantity: number) {
         debugLog("setPreset", `Preset_QTY=${quantity}`);
         // TODO: implement this
         // this.connection.send(`Preset_QTY=${quantity}`);
     }
 
-    cancelPreset() {
+    async cancelPreset() {
         debugLog("cancelPreset", "Cancel_Preset");
-        this.connection.write(this.cancel_preset);
+        await this.connection.write(this.cancel_preset);
     }
 
-    suspendSale() {
+    async suspendSale() {
         debugLog("suspendSale", "Stop");
-        this.connection.write(this.suspend_sale);
+        await this.connection.write(this.suspend_sale);
     }
 
-    resumeSale() {
+    async resumeSale() {
         debugLog("resumeSale", "Resume_Sale");
-        this.connection.write(this.resume_sale);
+        await this.connection.write(this.resume_sale);
     }
 
-    clearSale() {
+    async clearSale() {
         debugLog("clearSale", "Clear_Sale");
-        this.connection.write(this.clear_sale);
+        await this.connection.write(this.clear_sale);
     }
 
     hasExternalPump() {
