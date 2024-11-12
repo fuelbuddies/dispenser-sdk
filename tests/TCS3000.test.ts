@@ -24,7 +24,7 @@ describe('TCS3000', () => {
 
     it("Should return TCS3000 on checkType", () => {
         const kind = dispenser.checkType();
-        expect(kind).toBe('TCO3000');
+        expect(kind).toBe('TCS3000');
     });
 
     it("Should return valid totalizer reading on checkTotalizer", async () => {
