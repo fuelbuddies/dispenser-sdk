@@ -3,14 +3,24 @@ import { BaseDispenser } from "./base/BaseDispenser";
 
 const debugLog = debug("dispenser:tcs3000");
 export class TCS3000 extends BaseDispenser {
+    private totalizerBuffer = Buffer.from([0x7E, 0x01, 0x00, 0x40, 0x1E, 0x00, 0x47]);
+    private pump_start = Buffer.from([0x7E, 0x01, 0x00, 0x40, 0x1F, 0x00, 0x83]);
+    private pump_stop = Buffer.from([0x7E, 0x01, 0x00, 0x20, 0x3B, 0x00, 0xDC]);
+    private read_preset = Buffer.from([0x7E, 0x01, 0x00, 0x40, 0x1F, 0x00, 0x83]);
+    private cancel_preset = Buffer.from([0x7E, 0x01, 0x00, 0x20, 0x36, 0x00, 0x55]);
+    private authotize = Buffer.from([0x7E, 0x01, 0x00, 0x40, 0x3C, 0x00, 0x17]);
+    private clear_sale = ([0x7E, 0x01, 0x00, 0x20, 0x3E, 0x00, 0x23]);
+    private suspend_sale = ([0x7E, 0x01, 0x00, 0x20, 0x39, 0x00, 0x4D]);
+    private resume_sale = ([0x7E, 0x01, 0x00, 0x20, 0x3A, 0x00, 0x18]);
+
+    checkType() {
+        return "TCS3000";
+    }
+
     // // elockStatus() {
     // //     debugLog("elockStatus", "Lock_Status");
     // //     this.connection.send('Lock_Status');
     // // }
-
-    // checkType() {
-    //    this.connection.send("Dispenser");
-    // }
 
     // // elockUnlock() {
     // //     debugLog("elockUnlock", "Lock_UnLock");
@@ -27,10 +37,10 @@ export class TCS3000 extends BaseDispenser {
     // //     this.connection.send('Lock_Lock');
     // // }
 
-    // totalizer() {
-    //     debugLog("totalizer", "Read_Totalizer");
-    //     this.connection.send('Totalizer');
-    // }
+    async totalizer() {
+        debugLog("totalizer", "Read_Totalizer");
+        await this.connection.write(this.totalizerBuffer);
+    }
 
     // readPreset() {
     //     debugLog("readPreset", "Read_Status");
@@ -131,11 +141,11 @@ export class TCS3000 extends BaseDispenser {
 
     processTotalizerWithBatch(res: string) {
         debugLog("processTotalizerWithBatch: %s", res);
-        // const response = {
-        //     totalizer: parseFloat((this.processRawReadStatus(res))[7].replace(',', '.')),
-        //     batchNumber: this.processBatchNumber(res) + 1 // called before pump start.. so +1
-        // };
-        const response = { totalizer: this.processTotalizer(res), batchNumber: 0 };
+        const response = {
+            totalizer: this.processTotalizer(res),
+            batchNumber: undefined,
+            timestamp: new Date().getTime(),
+        };
         debugLog("processTotalizerWithBatch: %o", response);
         return response;
     }
@@ -143,11 +153,11 @@ export class TCS3000 extends BaseDispenser {
     processCommand(res: string, args: any, fnName: string) {
         if (args) {
             debugLog("processCommand: %o", args);
-           console.log("processCommandArgs: %o", args);
+            console.log("processCommandArgs: %o", args);
         }
 
         if (fnName) {
-            console.log("processCommandfnName: %o", fnName);            
+            console.log("processCommandfnName: %o", fnName);
             debugLog("processCommand: %o", fnName);
         }
 
