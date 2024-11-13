@@ -23,7 +23,7 @@ export class TCS3000 extends BaseDispenser {
 		0x7e, 0x01, 0x00, 0x20, 0x36, 0x00, 0x55,
 	]);
 
-	private authotize = Buffer.from([0x7e, 0x01, 0x00, 0x40, 0x3c, 0x00, 0x17]);
+	private authorize = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x3c, 0x00, 0x17]);
 	private clear_sale = [0x7e, 0x01, 0x00, 0x20, 0x3e, 0x00, 0x23];
 	private suspend_sale = [0x7e, 0x01, 0x00, 0x20, 0x39, 0x00, 0x4d];
 	private resume_sale = [0x7e, 0x01, 0x00, 0x20, 0x3a, 0x00, 0x18];
@@ -86,7 +86,7 @@ export class TCS3000 extends BaseDispenser {
 
 	async authorizeSale() {
 		debugLog('authorizeSale', 'Start');
-		await this.connection.write(this.authotize);
+		await this.connection.write(this.authorize);
 	}
 
 	async setPreset(quantity: number) {
@@ -96,7 +96,7 @@ export class TCS3000 extends BaseDispenser {
 		await this.sendPreset(quantity);
 	}
 
-	async sendPreset(quantity: number) {
+	sendPreset(quantity: number) {
 		let crc = 0;
 		const buffer_array = [];
 		const volumePrecursor = [
@@ -120,7 +120,7 @@ export class TCS3000 extends BaseDispenser {
 		}
 		buffer_array.push(crc);
 
-		await this.connection.write(Buffer.from(buffer_array));
+		this.connection.write(Buffer.from(buffer_array));
 	}
 
 	async cancelPreset() {
@@ -187,6 +187,7 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	processCommand(res: string, args: any, fnName: string) {
+		console.log(res);
 		if (args) {
 			debugLog('processCommand: %o', args);
 			console.log('processCommandArgs: %o', args);
