@@ -9,11 +9,11 @@ const configuration = getConfigFromEnv();
 debugLog('Configuration: %O', configuration);
 createDispenser(configuration).then((dispenser) => {
 	dispenser
-		.execute(dispenser.totalizer, dispenser.processTotalizer)
-		.then((totalizer) => {
+		.execute(dispenser.readStatus, dispenser.processStatus)
+		.then((status) => {
 			dispenser.disconnect(() => {
 				console.log('Disconnected');
 			});
-			console.log(totalizer);
+			console.log(status);
 		});
 });
