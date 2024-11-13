@@ -23,7 +23,9 @@ export class TCS3000 extends BaseDispenser {
 		0x7e, 0x01, 0x00, 0x20, 0x36, 0x00, 0x55,
 	]);
 
-	private authorize = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x3c, 0x00, 0x17]);
+	private authorize = Buffer.from([
+		0x7e, 0x01, 0x00, 0x20, 0x3c, 0x01, 0x03, 0xa8,
+	]);
 	private clear_sale = [0x7e, 0x01, 0x00, 0x20, 0x3e, 0x00, 0x23];
 	private suspend_sale = [0x7e, 0x01, 0x00, 0x20, 0x39, 0x00, 0x4d];
 	private resume_sale = [0x7e, 0x01, 0x00, 0x20, 0x3a, 0x00, 0x18];
@@ -219,6 +221,11 @@ export class TCS3000 extends BaseDispenser {
 			}
 			debugLog('processCommand: %s', 'Command failed! check for status');
 			throw Error('Command failed! check for status for resume');
+		}
+
+		if (fnName === 'authorizeSale') {
+			console.log(this.hexToNumber(res.slice(16, -2)));
+			return true;
 		}
 
 		debugLog('processCommand: %s', res);
