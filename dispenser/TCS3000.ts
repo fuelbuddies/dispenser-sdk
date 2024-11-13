@@ -110,7 +110,7 @@ export class TCS3000 extends BaseDispenser {
 		}
 
 		// Convert quantity to hex representation
-		const hexQuantity = this.str2hex(quantity.toString()); // Convert the quantity to a hex string
+		const hexQuantity = this.doubleToHex(quantity); // Convert the quantity to a hex string
 
 		// Calculate CRC for the hex representation
 		for (let i = 0; i < hexQuantity.length; i += 2) {
