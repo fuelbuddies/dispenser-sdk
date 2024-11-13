@@ -120,6 +120,7 @@ export class TCS3000 extends BaseDispenser {
 		}
 		buffer_array.push(crc);
 
+		console.log(Buffer.from(buffer_array));
 		buffer_array.forEach((item) =>
 			console.log(item.toString(16).padStart(2, '0'))
 		);
