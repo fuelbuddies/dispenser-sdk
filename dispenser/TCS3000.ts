@@ -74,12 +74,12 @@ export class TCS3000 extends BaseDispenser {
 		this.connection.write(this.read_status); // response needs some statuses to be hardcoded .. will see
 	}
 
-	async startPump() {
+	async pumpStart() {
 		debugLog('startPump', 'Pump_Start');
 		await this.connection.write(this.pump_start);
 	}
 
-	async stopPump() {
+	async pumpStop() {
 		debugLog('stopPump', 'Pump_Stop');
 		await this.connection.write(this.pump_stop);
 	}
