@@ -326,6 +326,14 @@ export class VeederEmr4 extends BaseDispenser {
     return true;
   }
 
+  isNozzleCheckRequiredBeforeAuthorize() {
+    return false;
+  }
+
+  isNozzleCheckRequiredBeforeClearSale() {
+    return false;
+  }
+
   isPresetVerified(res: string, quantity: number) {
     const presetValue = this.processReadPreset(res);
     if (quantity == presetValue) {

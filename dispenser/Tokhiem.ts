@@ -446,6 +446,14 @@ export class Tokhiem extends BaseDispenser {
     return true;
   }
 
+  isNozzleCheckRequiredBeforeAuthorize() {
+    return true;
+  }
+
+  isNozzleCheckRequiredBeforeClearSale() {
+    return true;
+  }
+
   isPresetVerified(res: string, quantity: number) {
     const presetValue = this.processReadPreset(res);
     if (quantity == presetValue) {

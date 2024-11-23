@@ -520,6 +520,14 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         return true;
     }
 
+    isNozzleCheckRequiredBeforeAuthorize() {
+        return false;
+    }
+
+    isNozzleCheckRequiredBeforeClearSale() {
+        return false;
+    }
+
     isPrinterAvailable(res: string): boolean {
         debugLog("isPrinterAvailable: %s", res);
         const status = this.processStatus(res);
