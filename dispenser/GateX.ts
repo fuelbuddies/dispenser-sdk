@@ -199,6 +199,10 @@ export class GateX extends ModBusDispenser {
         return "true";
     }
 
+    isPresetAvailable(): boolean {
+        return false;
+    }
+
     isPrinterAvailable(res: string): boolean {
         return this.printer?.isOpen || false;
     }

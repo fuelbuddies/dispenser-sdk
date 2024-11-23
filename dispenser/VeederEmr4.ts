@@ -322,6 +322,10 @@ export class VeederEmr4 extends BaseDispenser {
     return res.substring(10).slice(0, -4) == "01";
   }
 
+  isPresetAvailable(): boolean {
+    return true;
+  }
+
   isPresetVerified(res: string, quantity: number) {
     const presetValue = this.processReadPreset(res);
     if (quantity == presetValue) {

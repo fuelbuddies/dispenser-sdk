@@ -306,6 +306,16 @@ export class TCS3000 extends BaseDispenser {
         return true;
     }
 
+    isPresetAvailable() {
+        debugLog("isPresetAvailable: %s", "true");
+        return true;
+    }
+
+    isPrinterAvailable() {
+        debugLog("isPrinterAvailable: %s", "true");
+        return true;
+    }
+
     isSaleCloseable() {
         debugLog("isSaleCloseable: %s", "true");
         return true;

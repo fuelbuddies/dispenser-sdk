@@ -442,6 +442,10 @@ export class Tokhiem extends BaseDispenser {
     return false;
   }
 
+  isPresetAvailable(): boolean {
+    return true;
+  }
+
   isPresetVerified(res: string, quantity: number) {
     const presetValue = this.processReadPreset(res);
     if (quantity == presetValue) {
