@@ -66,7 +66,7 @@ export class BaseDispenser implements IDispenser {
   executeWork(strCallee: string, strBindFunction?: string, calleeArgs: any = undefined): Promise<any> {
     const callee = this[strCallee] as (...args: [any]) => any;
     const bindFunction = strBindFunction ? this[strBindFunction] : undefined;
-    if(!callee) throw new Error("Invalid callee function");
+    if(!callee) throw new Error("Invalid callee function - " + strCallee);
     if(bindFunction && !(bindFunction instanceof Function)) throw new Error("Invalid Bind function");
     return this.execute(callee, bindFunction, calleeArgs);
   }
@@ -105,7 +105,6 @@ export class BaseDispenser implements IDispenser {
     if (cutFromLast) {
       return str.substring(str.length - cutLength);
     }
-
     return str.substring(0, cutLength);
   }
 
