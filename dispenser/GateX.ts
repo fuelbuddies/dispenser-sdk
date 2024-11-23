@@ -203,13 +203,9 @@ export class GateX extends ModBusDispenser {
         return false;
     }
 
-    isNozzleCheckRequiredBeforeAuthorize() {
+    isNozzleCheckRequired() {
         return false;
-      }
-
-      isNozzleCheckRequiredBeforeClearSale() {
-        return false;
-      }
+    }
 
     isPrinterAvailable(res: string): boolean {
         return this.printer?.isOpen || false;

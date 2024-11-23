@@ -326,11 +326,7 @@ export class VeederEmr4 extends BaseDispenser {
     return true;
   }
 
-  isNozzleCheckRequiredBeforeAuthorize() {
-    return false;
-  }
-
-  isNozzleCheckRequiredBeforeClearSale() {
+  isNozzleCheckRequired() {
     return false;
   }
 

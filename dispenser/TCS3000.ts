@@ -311,11 +311,7 @@ export class TCS3000 extends BaseDispenser {
         return true;
     }
 
-    isNozzleCheckRequiredBeforeAuthorize() {
-        return false;
-    }
-
-    isNozzleCheckRequiredBeforeClearSale() {
+    isNozzleCheckRequired() {
         return false;
     }
 

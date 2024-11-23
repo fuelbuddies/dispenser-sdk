@@ -520,11 +520,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
         return true;
     }
 
-    isNozzleCheckRequiredBeforeAuthorize() {
-        return false;
-    }
-
-    isNozzleCheckRequiredBeforeClearSale() {
+    isNozzleCheckRequired() {
         return false;
     }
 

@@ -446,11 +446,7 @@ export class Tokhiem extends BaseDispenser {
     return true;
   }
 
-  isNozzleCheckRequiredBeforeAuthorize() {
-    return true;
-  }
-
-  isNozzleCheckRequiredBeforeClearSale() {
+  isNozzleCheckRequired() {
     return true;
   }
 
