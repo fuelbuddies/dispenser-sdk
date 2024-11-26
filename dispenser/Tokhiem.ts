@@ -18,78 +18,96 @@ export class Tokhiem extends BaseDispenser {
     private tokhim_authorize_on   = Buffer.from([0x01, 0x41, 0x41, 0x7F, 0x7E]);
     private tokhim_authorize_off  = Buffer.from([0x01, 0x41, 0x47, 0x7F, 0x78]);
     private tokhim_show_preset    = Buffer.from([0x01, 0x41, 0x43, 0x7F, 0x7C]);
-    
+
     async totalizer() {
+        debugLog("totalizer");
         await this.connection.write(this.totalizerBuffer);
     }
     async authorizeSale() {
+        debugLog("authorizeSale");
         await this.connection.write(this.authorize);
     }
-    
+
     async readPreset() {
+        debugLog("readPreset");
         await this.connection.write(this.read_preset);
     }
-    
+
     async suspendDispencer() {
+        debugLog("suspendDispencer");
         await this.connection.write(this.suspend_sale);
     }
-    
+
     async clearSale() {
+        debugLog("clearSale");
         await this.connection.write(this.clear_sale);
     }
-    
+
     async readSale() {
+        debugLog("readSale");
         await this.connection.write(this.tokhim_read_sale);
     }
-    
+
     async readAuth() {
+        debugLog("readAuth");
         await this.connection.write(this.tokhim_status);
     }
-    
+
     async cancelPreset() {
+        debugLog("cancelPreset");
         await this.connection.write(this.cancel_preset);
     }
-    
+
     async resumeDispencer() {
+        debugLog("resumeDispencer");
         await this.connection.write(this.resume_sale);
     }
-    
+
     async pumpStop() {
+        debugLog("pumpStop");
         await this.connection.write(this.pump_stop);
     }
-    
+
     async pumpStart() {
+        debugLog("pumpStart");
         await this.connection.write(this.pump_start);
     }
 
-    printReciept(receiptMessage: unknown) { return "59"; }
-    
+    printReciept(receiptMessage: unknown) {
+        debugLog("printReciept");
+        return "59";
+    }
+
     getType() {
         return 'TOKHIEM';
     }
-    
+
     getExternalPump() {
+        debugLog("getExternalPump: false");
         return "false";
     }
-    
+
     async switchMode(online=true) {
         if(online) {
             // for switching to online pump_start is recommended that is happening already in future flow
+            debugLog("switchMode: online");
             await this.pumpStart();
         }
-        
+        debugLog("switchMode: offline");
         await this.connection.write(this.tokhim_authorize_off);
     }
-    
+
     async readDispencerStatus() {
+        debugLog("readDispencerStatus");
         await this.connection.write(this.tokhim_status);
     }
-    
+
     async sendPreset(quantity: number) {
+        debugLog("sendPreset", quantity);
         const set = Math.floor(quantity); // Convert quantity to integer
-        
+
         let J = 0, K = 0, L = 0, P = 0;
-        
+
         if (set < 10) {
             P = set;
         } else if (set < 100) {
@@ -105,31 +123,34 @@ export class Tokhiem extends BaseDispenser {
             L = Math.floor((set / 10) % 10);
             P = set % 10;
         }
-        
+
         const one = 0x30 + J;
         const two = 0x30 + K;
         const three = 0x30 + L;
         const four = 0x30 + P;
-        
+
         const BCC = Buffer.from([0x01, 0x41, 0x50, 0x31, 0x30, one, two, three, four, 0x30, 0x30, 0x7F]);
         const result = BCC.reduce((acc, byte) => acc ^ byte, 0);
         const volume = Buffer.concat([BCC, Buffer.from([result])]);
-        
+
         // Assuming you have a serialport object named 'dispencerSerial'
-        console.log("volume sent", volume);
+        debugLog("volume sent", volume);
         await this.connection.write(volume);
     }
 
 
   async switchToRemote() {
+    debugLog("switchToRemote");
     await this.switchMode(true);
   }
 
   checkType() {
+    debugLog("checkType");
     return this.getType();
   }
 
   async switchToLocal() {
+    debugLog("switchToLocal");
     await this.switchMode(false);
   }
 
@@ -151,34 +172,42 @@ export class Tokhiem extends BaseDispenser {
   // }
 
   async readStatus() {
+    debugLog("readStatus");
     await this.readDispencerStatus();
   }
 
   async readAuthorization() {
+    debugLog("readAuthorization");
     await this.readDispencerStatus();
   }
 
   async startPump() {
+    debugLog("startPump");
     await this.pumpStart();
   }
 
   async stopPump() {
+    debugLog("stopPump");
     await this.pumpStop();
   }
 
   async setPreset(quantity: number) {
+    debugLog("setPreset", quantity);
     await this.sendPreset(quantity);
   }
 
   async suspendSale() {
+    debugLog("suspendSale");
     await this.suspendDispencer();
   }
 
   async resumeSale() {
+    debugLog("resumeSale");
     await this.resumeDispencer();
   }
 
   hasExternalPump() {
+    debugLog("hasExternalPump");
     return this.getExternalPump();
   }
 
@@ -196,26 +225,29 @@ export class Tokhiem extends BaseDispenser {
   // }
 
   printReceipt(printObj: any) {
-    debugLog("printReceipt: %s", printObj);
+    debugLog("printReceipt:", printObj);
+    return "59";
     // this.connection.send("Print_Receipt");
   }
 
   processStatus(res: string) {
-    console.log("processStatus", arguments);
+    debugLog("processStatus", arguments);
     const statusSplit = res.split("7f");
     const statusString = this.cutStringFromLast(statusSplit[0], 4, true);
     const hexStatus1 = this.cutStringFromLast(statusString, 2, true);
     const hexStatus0 = this.cutStringFromLast(statusString, 2, false);
 
-    const ret = {
+    const returnObj = {
       duStatus: this.processStatusZero(hexStatus0.toString()),
       state: this.processStatusOne(hexStatus1.toString()),
     };
 
-    return ret;
+    debugLog("processStatus: ", returnObj);
+    return returnObj;
   }
 
   processElockStatus(status: string) {
+    debugLog("processElockStatus", status);
     const statuses: any = {
       Position: ["Unlocked", "Locked"],
       Tank1Cup: ["Unlocked", "Locked"],
@@ -224,12 +256,17 @@ export class Tokhiem extends BaseDispenser {
       Tank2Handle: ["Unlocked", "Locked"],
     };
 
-    return this.processStatusMappingRaw(status.split(""), statuses);
+
+    var elockStatus = this.processStatusMappingRaw(status.split(""), statuses);
+    debugLog("processElockStatus: ", elockStatus);
+    return elockStatus;
   }
 
   processStatusMapping(status: string, statuses: any) {
     const statusCodes = this.hex2bin(status).split("").reverse();
-    return this.processStatusMappingRaw(statusCodes, statuses);
+    var returnObj = this.processStatusMappingRaw(statusCodes, statuses);
+    debugLog("processStatusMapping: ", returnObj);
+    return returnObj;
   }
 
   processStatusMappingRaw(statusCodes: any, statuses: any) {
@@ -237,10 +274,13 @@ export class Tokhiem extends BaseDispenser {
       return [key, statuses[key][statusCodes[index]]];
     });
 
-    return statistics.reduce(function (acc: any, cur: any) {
+    var returnObj = statistics.reduce(function (acc: any, cur: any) {
       acc[cur[0]] = cur[1];
       return acc;
     }, {});
+
+    debugLog("processStatusMappingRaw: ", returnObj);
+    return returnObj;
   }
 
   processStatusZero(status: string) {
@@ -255,10 +295,13 @@ export class Tokhiem extends BaseDispenser {
       Print: ["Taken", "Not Taken"],
     };
 
-    return this.processStatusMapping(status, statuses);
+    var returnObj = this.processStatusMapping(status, statuses);
+    debugLog("processStatusZero: ", returnObj);
+    return returnObj;
   }
 
   processStatusOne(status: string) {
+    debugLog("processStatusOne", status);
     switch (status) {
       case "30":
         return "Idle"; //
@@ -290,16 +333,18 @@ export class Tokhiem extends BaseDispenser {
   }
 
   processCommand(res: string) {
-    console.log('processCommand', arguments);
+    debugLog("processCommand", arguments);
     if (!res.includes("59")) {
       throw Error("Command failed! check for status");
     }
+    debugLog("processCommand: success");
     return true;
   }
 
   processReadSale(res: string) {
-    const responseCodedArray = res.split("2e"); //not sure about this, (ideal packet must look like '3333333333236540')
-    return {
+    debugLog("processReadSale", arguments);
+    const responseCodedArray = res.split("2e");
+    const returnObj = {
       unitPrice: this.processResponseRaw(
         [responseCodedArray[0], responseCodedArray[1]],
         4,
@@ -315,8 +360,11 @@ export class Tokhiem extends BaseDispenser {
         10,
         2
       ),
-      density: "", //@TODO fix me
+      density: "",
     };
+
+    debugLog("processReadSale: ", returnObj);
+    return returnObj;
   }
 
   /**
@@ -325,23 +373,30 @@ export class Tokhiem extends BaseDispenser {
    * @returns
    */
   processTotalizer(res: string) {
-    return this.processResponse(res.split("2e"), 16, 4);
+    var returnObj = this.processResponse(res.split("2e"), 16, 4);
+    debugLog("processTotalizer: ", returnObj);
+    return returnObj;
   }
 
   processTotalizerWithBatch(res: string) {
-    return {
+    var returnObj = {
       totalizer: this.processTotalizer(res),
-      batchNumber: this.processBatchNumber(res) + 1, // called before pump start.. so +1
+      batchNumber: this.processBatchNumber(res) + 1,
       timestamp: new Date().getTime(),
     };
+
+    debugLog("processTotalizerWithBatch: ", returnObj);
+    return returnObj;
   }
 
   processReadPreset(res: string) {
-    console.log("processReadPreset", arguments);
+    debugLog("processReadPreset", arguments);
     if (res.includes("4e"))
       throw new Error("Preset read command failed! please check");
 
-    return this.processResponse(res.split("2e"), 14, 4);
+    var returnObj = this.processResponse(res.split("2e"), 14, 4);
+    debugLog("processReadPreset: ", returnObj);
+    return returnObj;
   }
 
   processFlowRate(res: string) {
@@ -370,6 +425,8 @@ export class Tokhiem extends BaseDispenser {
     exponentCut: number,
     mantessaCut: number
   ) {
+    debugLog("processResponseRaw", arguments);
+
     if (response.length < 2) {
       throw new Error("Incompatible response");
     }
@@ -380,7 +437,10 @@ export class Tokhiem extends BaseDispenser {
     const mantessa = this.hex2a(
       this.cutStringFromLast(response[1], mantessaCut, false)
     );
-    return `${exponent}.${mantessa}`;
+
+    var returnObj = `${exponent}.${mantessa}`;
+    debugLog("processResponseRaw: %s", returnObj);
+    return returnObj;
   }
 
   /**
@@ -395,103 +455,141 @@ export class Tokhiem extends BaseDispenser {
     exponentCut: number,
     mantessaCut: number
   ) {
-    return parseFloat(
+    debugLog("processResponse", arguments);
+    var returnObj = parseFloat(
       this.processResponseRaw(response, exponentCut, mantessaCut)
     );
+
+    debugLog("processResponse: ", returnObj);
+    return returnObj;
   }
 
   hasChecksBeforePumpStart() {
+    debugLog("hasChecksBeforePumpStart");
     return true;
   }
 
   isPumpStopped(res: string) {
+    debugLog("isPumpStopped", arguments);
     const dispenserStatus = this.processStatus(res);
     if (dispenserStatus["state"] === "Stopped") {
+      debugLog("isPumpStopped: true");
       return true;
     }
+    debugLog("isPumpStopped: false");
     return false;
   }
 
   isReadyForPreset(res: string) {
+    debugLog("isReadyForPreset", arguments);
     const dispenserStatus = this.processStatus(res);
     if (dispenserStatus["state"] === "Idle") {
+      debugLog("isReadyForPreset: true");
       return true;
     }
+    debugLog("isReadyForPreset: false");
     return false;
   }
 
   isNozzleOnHook(res: string): boolean {
+    debugLog("isNozzleOnHook", arguments);
     const readStatuses = this.processStatus(res);
-    return readStatuses.duStatus["Nozzle"] == "On Hook";
+    if (readStatuses.duStatus["Nozzle"] == "On Hook") {
+      debugLog("isNozzleOnHook: true");
+      return true;
+    }
+    debugLog("isNozzleOnHook: false");
+    return false;
   }
 
   isNozzleOffHook(res: string): boolean {
+    debugLog("isNozzleOffHook", arguments);
     const readStatuses = this.processStatus(res);
-    return readStatuses.duStatus["Nozzle"] == "Off Hook";
+    if (readStatuses.duStatus["Nozzle"] == "Off Hook") {
+      debugLog("isNozzleOffHook: true");
+      return true;
+    }
+    debugLog("isNozzleOffHook: false");
+    return false;
   }
 
   isOnline(res: string): boolean {
+    debugLog("isOnline", arguments);
     const readStatuses = this.processStatus(res);
     if (
       readStatuses.duStatus &&
       readStatuses.state &&
       readStatuses.duStatus.Mode === "Remote"
     ) {
+      debugLog("isOnline: true");
       return true;
     }
+    debugLog("isOnline: false");
     return false;
   }
 
   isPresetAvailable(): boolean {
+    debugLog("isPresetAvailable");
     return true;
   }
 
   isNozzleCheckRequired() {
+    debugLog("isNozzleCheckRequired");
     return true;
   }
 
   isPresetVerified(res: string, quantity: number) {
     const presetValue = this.processReadPreset(res);
     if (quantity == presetValue) {
+      debugLog("isPresetVerified: true");
       return true;
     }
+    debugLog("isPresetVerified: false");
     return false;
   }
 
   isDispensing(res: string) {
     const dispenserStatus = this.processStatus(res);
     if (dispenserStatus["state"] === "Fueling") {
+      debugLog("isDispensing: true");
       return true;
     }
+    debugLog("isDispensing: false");
     return false;
   }
 
   isIdle(res: string) {
     const dispenserStatus = this.processStatus(res);
     if (dispenserStatus["state"] === "Idle") {
+      debugLog("isIdle: true");
       return true;
     }
+    debugLog("isIdle: false");
     return false;
   }
 
   isSaleCloseable(res: string) {
+    debugLog("isSaleCloseable", arguments);
     const dispenserStatus = this.processStatus(res);
     if (
       dispenserStatus["duStatus"]["Nozzle"] === "On Hook" &&
       dispenserStatus["state"] === "Payable"
     ) {
+      debugLog("isSaleCloseable: true");
       return true;
     }
+    debugLog("isSaleCloseable: false");
     return false;
   }
 
   isOrderComplete(res: string, quantity: number) {
+    debugLog("isOrderComplete Arguments", arguments);
     const readsale = this.toFixedNumber(
       parseFloat(this.processReadSale(res).volume),
       2
     );
     if (readsale >= quantity) {
-      return {
+      var returnObj = {
         status: true,
         percentage: this.toFixedNumber((readsale / quantity) * 100.0, 2),
         currentFlowRate: this.processFlowRate(res),
@@ -499,8 +597,10 @@ export class Tokhiem extends BaseDispenser {
         batchNumber: this.processBatchNumber(res),
         dispensedQty: this.toFixedNumber(readsale, 2),
       };
+      debugLog("isOrderComplete: ", returnObj);
+      return returnObj;
     }
-    return {
+    var returnObj = {
       status: false,
       percentage: this.toFixedNumber((readsale / quantity) * 100.0, 2),
       currentFlowRate: this.processFlowRate(res),
@@ -508,5 +608,8 @@ export class Tokhiem extends BaseDispenser {
       batchNumber: this.processBatchNumber(res),
       dispensedQty: this.toFixedNumber(readsale, 2),
     };
+
+    debugLog("isOrderComplete: ", returnObj);
+    return returnObj;
   }
 }
