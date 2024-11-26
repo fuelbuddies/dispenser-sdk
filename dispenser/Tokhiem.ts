@@ -224,7 +224,8 @@ export class Tokhiem extends BaseDispenser {
   //   this.connection.send("External_Pump_Stop");
   // }
 
-  printReceipt(printObj: any) {
+  async printReceipt(printObj: any) {
+    await new Promise(resolve => setTimeout(resolve, 200));
     debugLog("printReceipt:", printObj);
     return "59";
     // this.connection.send("Print_Receipt");
