@@ -583,6 +583,11 @@ export class Tokhiem extends BaseDispenser {
     return false;
   }
 
+  isPrinterAvailable() {
+    debugLog("isPrinterAvailable: %s", "false");
+    return false;
+  }
+
   isOrderComplete(res: string, quantity: number) {
     debugLog("isOrderComplete Arguments", arguments);
     const readsale = this.toFixedNumber(

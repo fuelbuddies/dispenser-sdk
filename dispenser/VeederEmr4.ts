@@ -362,6 +362,15 @@ export class VeederEmr4 extends BaseDispenser {
     return false;
   }
 
+  /**
+   * we can install a printer on this dispenser. but it's not installed.
+   * @returns false
+   */
+  isPrinterAvailable() {
+    debugLog("isPrinterAvailable: %s", "false");
+    return false;
+  }
+
   isOrderComplete(res: string, quantity: number) {
     const readsale = this.processReadSale(res).volume;
     if (readsale >= quantity) {

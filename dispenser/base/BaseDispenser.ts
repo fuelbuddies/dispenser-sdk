@@ -53,6 +53,10 @@ export class BaseDispenser implements IDispenser {
 
   execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
     return new Promise((resolve, reject) => {
+      if(typeof bindFunction !== 'function') {
+        throw new Error(`Invalid Binding with function ${bindFunction}`);
+      }
+
       this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
         if (err) {
           reject(err);
@@ -139,7 +143,7 @@ export class BaseDispenser implements IDispenser {
       const exponent = (hex >> 23) & 0xFF;
       return sign * (hex & 0x7fffff | 0x800000) * 1.0 / Math.pow(2, 23) * Math.pow(2, (exponent - 127));
     }
-    
+
     hexStringToByte(printText: string, needle: number): number {
       const hexPair: string = printText.substring(needle, needle + 2); // More concise way to extract substring
       return parseInt(hexPair, 16); // Use parseInt for hex conversion
