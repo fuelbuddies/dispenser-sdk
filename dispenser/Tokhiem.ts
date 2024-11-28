@@ -492,7 +492,7 @@ export class Tokhiem extends BaseDispenser {
     return false;
   }
 
-  isNozzleOnHook(res: string): boolean {
+  isNozzleOnHook(res: string) {
     debugLog("isNozzleOnHook", arguments);
     const readStatuses = this.processStatus(res);
     if (readStatuses.duStatus["Nozzle"] == "On Hook") {
@@ -503,7 +503,7 @@ export class Tokhiem extends BaseDispenser {
     return false;
   }
 
-  isNozzleOffHook(res: string): boolean {
+  isNozzleOffHook(res: string) {
     debugLog("isNozzleOffHook", arguments);
     const readStatuses = this.processStatus(res);
     if (readStatuses.duStatus["Nozzle"] == "Off Hook") {
@@ -514,7 +514,7 @@ export class Tokhiem extends BaseDispenser {
     return false;
   }
 
-  isOnline(res: string): boolean {
+  isOnline(res: string) {
     debugLog("isOnline", arguments);
     const readStatuses = this.processStatus(res);
     if (
@@ -529,7 +529,7 @@ export class Tokhiem extends BaseDispenser {
     return false;
   }
 
-  isPresetAvailable(): boolean {
+  isPresetAvailable() {
     debugLog("isPresetAvailable");
     return true;
   }
