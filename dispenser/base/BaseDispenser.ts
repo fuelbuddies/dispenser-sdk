@@ -53,10 +53,6 @@ export class BaseDispenser implements IDispenser {
 
   execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
     return new Promise((resolve, reject) => {
-      if(typeof bindFunction !== 'function') {
-        debugLog("ALERT!!: Invalid Binding with function", bindFunction);
-      }
-
       this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
         if (err) {
           reject(err);

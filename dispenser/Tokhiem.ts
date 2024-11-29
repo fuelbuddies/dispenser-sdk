@@ -535,7 +535,7 @@ export class Tokhiem extends BaseDispenser {
   }
 
   isNozzleCheckRequired() {
-    debugLog("isNozzleCheckRequired");
+    debugLog("isNozzleCheckRequired", arguments);
     return true;
   }
 
