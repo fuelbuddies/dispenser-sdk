@@ -242,6 +242,9 @@ export class BaseDispenser implements IDispenser {
 
       return new Promise((resolve, reject) => {
           execFile(absoluteScriptPath, (error, stdout, stderr) => {
+              debugLog('stdout: %s', stdout);
+              debugLog('stderr: %s', stderr);
+              debugLog('error: %s', error);
               if (error) {
                   // If there's an error, consider the script execution unsuccessful
                   debugLog('Console: %s', stderr);
