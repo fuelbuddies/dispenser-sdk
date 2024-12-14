@@ -77,20 +77,24 @@ export class VeederEmr4 extends BaseDispenser {
     return await this.connection.write(this.veeder_status);
   }
 
-  async pumpStart() {
-    try {
-      const result = (await this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh'));
-      debugLog("pumpStart result: %s", result);
+  pumpStart() {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh').then((result) => {
+          debugLog("pumpStart result: %s", result);
 
-      if (result) {
-        return "7eff014100bf7e";
+          if (result) {
+            resolve("7eff014100bf7e");
+          }
+
+          reject("Command failed!");
+
+        });
+      } catch (error) {
+        debugLog("pumpStart error: %s", error);
+        reject("Command failed!");
       }
-
-      return "Command failed!";
-    } catch (error) {
-      debugLog("pumpStart error: %s", error);
-      return "Command failed!";
-    }
+    });
   }
 
   async pumpStop() {
