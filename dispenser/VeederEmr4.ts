@@ -45,6 +45,17 @@ export class VeederEmr4 extends BaseDispenser {
     return 'VEEDER_EMR4';
   }
 
+  processCommand(res: string) {
+    debugLog("processCommand: %s", res);
+    if (res.includes("7eff014100bf7e")) {
+      debugLog("processCommand: Command successful");
+      return true;
+    }
+
+    throw Error("Command failed! check for status");
+  }
+
+
   checkType() {
     debugLog("checkType");
     return this.getType();
@@ -185,16 +196,6 @@ export class VeederEmr4 extends BaseDispenser {
       acc[cur[0]] = cur[1];
       return acc;
     }, {});
-  }
-
-  processCommand(res: string) {
-    debugLog("processCommand: %s", res);
-    if (res.includes("7eff014100bf7e")) {
-      debugLog("processCommand: Command successful");
-      return true;
-    }
-
-    throw Error("Command failed! check for status");
   }
 
   processReadSale(res: string) {
