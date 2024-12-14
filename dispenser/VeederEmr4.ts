@@ -66,11 +66,11 @@ export class VeederEmr4 extends BaseDispenser {
     return await this.connection.write(this.veeder_status);
   }
 
-  async startPump() {
+  async pumpStart() {
     return await this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh') ? "7eff014100bf7e": "Command failed!";
   }
 
-  async stopPump() {
+  async pumpStop() {
     return await this.executeShellScriptAndCheck('scripts/EMR4/stoppump.sh') ? "7eff014100bf7e": "Command failed!";
   }
 
