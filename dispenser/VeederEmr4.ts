@@ -84,15 +84,17 @@ export class VeederEmr4 extends BaseDispenser {
           debugLog("pumpStart result: %s", result);
 
           if (result) {
-            resolve("7eff014100bf7e");
+            debugLog("pumpStart result: %s", "7eff014100bf7e");
+            return resolve("7eff014100bf7e");
           }
 
-          reject("Command failed!");
+          debugLog("pumpStart result: %s", "Command failed!");
+          return reject("Command failed!");
 
         });
       } catch (error) {
         debugLog("pumpStart error: %s", error);
-        reject("Command failed!");
+        return reject("Command failed!");
       }
     });
   }
