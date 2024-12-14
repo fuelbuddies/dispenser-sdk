@@ -4,6 +4,8 @@ import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout'
 import debug from 'debug';
+import { execFile } from 'child_process';
+import * as path from 'path';
 
 const debugLog = debug('dispenser:base-dispenser');
 
@@ -231,5 +233,25 @@ export class BaseDispenser implements IDispenser {
 
         const alignedString = ' '.repeat(leftSpaces) + value + ' '.repeat(rightSpaces);
         return alignedString;
+    }
+
+    // Function to execute a shell script and check if the result is "true"
+    async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
+      const absoluteScriptPath = path.join(__dirname, scriptPath);
+      debugLog('Executing script: %s', absoluteScriptPath);
+
+      return new Promise((resolve, reject) => {
+          execFile(absoluteScriptPath, (error, stdout, stderr) => {
+              if (error) {
+                  // If there's an error, consider the script execution unsuccessful
+                  debugLog('Console: %s', stderr);
+                  debugLog('Error: %s', error);
+                  resolve(false);
+              } else {
+                  // If the script output is "true", consider the script execution successful
+                  resolve(stdout.trim() === 'true');
+              }
+          });
+      });
     }
   }
