@@ -451,17 +451,13 @@ export class VeederEmr4 extends BaseDispenser {
     const DD = 0x53;
     const EE = 0x6E;
 
-    // Write the static part of the message
-    await this.connection.write(Buffer.from([AA, BB, CC, DD, EE]));
+    // Create an array to hold all bytes to be sent
+    const bytesToSend = [AA, BB, CC, DD, EE];
 
     // Write the floating-point value byte by byte
     for (let i = 0; i < 4; i++) {
         const byte = veederPreBuffer.getUint8(i);
-        if (byte === 0) {
-            await this.connection.write(Buffer.from([0x00]));
-        } else {
-            await this.connection.write(Buffer.from([byte]));
-        }
+        bytesToSend.push(byte === 0 ? 0x00 : byte);
         message[7 - i] = byte; // Reverse order to mimic the original C++ logic
     }
 
@@ -471,13 +467,17 @@ export class VeederEmr4 extends BaseDispenser {
     const checksum = BCC + 0x01;
 
     if (checksum < 10) {
-        await this.connection.write(Buffer.from([0x00, checksum]));
+        bytesToSend.push(0x00, checksum);
     } else {
-        await this.connection.write(Buffer.from([checksum]));
+        bytesToSend.push(checksum);
     }
 
     // Write the final byte
-    return await this.connection.write(Buffer.from([AA]));
+    bytesToSend.push(AA);
+
+    debugLog("sendPreset: %s", bytesToSend.map(byte => byte.toString(16).padStart(2, '0')).join(' '));
+    // Write all bytes to the connection at once
+    return this.connection.write(Buffer.from(bytesToSend));
   }
 
   processTask(task: any, callback: any) {
