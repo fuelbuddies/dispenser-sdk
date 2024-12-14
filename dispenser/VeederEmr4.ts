@@ -501,12 +501,16 @@ export class VeederEmr4 extends BaseDispenser {
     }
 
     if(bindFunction.name == "isNozzleCheckRequired") {
-      callback(null, false);
+      setTimeout(() => {
+        callback(null, false);
+      }, 400);
       return;
     }
 
     if(bindFunction.name == "isPresetAvailable") {
-      callback(null, true);
+      setTimeout(() => {
+        callback(null, true);
+      }, 400);
       return;
     }
 
