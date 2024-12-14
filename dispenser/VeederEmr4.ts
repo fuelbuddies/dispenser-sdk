@@ -422,15 +422,15 @@ export class VeederEmr4 extends BaseDispenser {
     const EE = 0x6E;
 
     // Write the static part of the message
-    this.connection.write(Buffer.from([AA, BB, CC, DD, EE]));
+    await this.connection.write(Buffer.from([AA, BB, CC, DD, EE]));
 
     // Write the floating-point value byte by byte
     for (let i = 0; i < 4; i++) {
         const byte = veederPreBuffer.getUint8(i);
         if (byte === 0) {
-            this.connection.write(Buffer.from([0x00]));
+            await this.connection.write(Buffer.from([0x00]));
         } else {
-            this.connection.write(Buffer.from([byte]));
+            await this.connection.write(Buffer.from([byte]));
         }
         message[7 - i] = byte; // Reverse order to mimic the original C++ logic
     }
@@ -441,12 +441,12 @@ export class VeederEmr4 extends BaseDispenser {
     const checksum = BCC + 0x01;
 
     if (checksum < 10) {
-        this.connection.write(Buffer.from([0x00, checksum]));
+        await this.connection.write(Buffer.from([0x00, checksum]));
     } else {
-        this.connection.write(Buffer.from([checksum]));
+        await this.connection.write(Buffer.from([checksum]));
     }
 
     // Write the final byte
-    return this.connection.write(Buffer.from([AA]));
+    return await this.connection.write(Buffer.from([AA]));
   }
 }
