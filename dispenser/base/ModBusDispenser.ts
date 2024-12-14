@@ -207,7 +207,7 @@ export class ModBusDispenser implements IDispenser {
     }
 
     // Function to execute a shell script and check if the result is "true"
-    async executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
+    executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
         const absoluteScriptPath = path.join(__dirname, scriptPath);
         debugLog('Executing script: %s', absoluteScriptPath);
 
