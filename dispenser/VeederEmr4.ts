@@ -455,4 +455,24 @@ export class VeederEmr4 extends BaseDispenser {
     // Write the final byte
     return await this.connection.write(Buffer.from([AA]));
   }
+
+  processTask(task: any, callback: any) {
+    const {bindFunction, callee, calleeArgs} = task;
+    console.log("processTask:", bindFunction);
+    console.log("processTask:", calleeArgs);
+    console.log("processTask:", callee);
+    this.innerByteTimeoutParser.once('data', (data: any): void => {
+      try {
+        if (bindFunction instanceof Function) {
+          callback(null, bindFunction.call(this, data.toString('hex'), calleeArgs, callee.name));
+        } else {
+          callback(null, data.toString('hex'));
+        }
+      } catch (e) {
+        debugLog("processTask: %s", "error in try catch fn");
+        callback(e);
+      }
+    });
+    callee.call(this, calleeArgs || undefined);
+  }
 }
