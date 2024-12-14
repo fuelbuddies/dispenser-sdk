@@ -458,9 +458,22 @@ export class VeederEmr4 extends BaseDispenser {
 
   processTask(task: any, callback: any) {
     const {bindFunction, callee, calleeArgs} = task;
-    console.log("processTask:", bindFunction);
-    console.log("processTask:", calleeArgs);
-    console.log("processTask:", callee);
+    if(callee.name == "pumpStart") {
+      this.pumpStart().then((result) => {
+        callback(null, bindFunction.call(this, result, calleeArgs, callee.name));
+      }).catch((error) => {
+        callback(error);
+      });
+    }
+
+    if(callee.name == "pumpStop") {
+      this.pumpStop().then((result) => {
+        callback(null, bindFunction.call(this, result, calleeArgs, callee.name));
+      }).catch((error) => {
+        callback(error);
+      });
+    }
+
     this.innerByteTimeoutParser.once('data', (data: any): void => {
       try {
         if (bindFunction instanceof Function) {
