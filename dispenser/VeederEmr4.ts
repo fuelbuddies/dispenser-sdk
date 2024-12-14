@@ -67,25 +67,35 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   async pumpStart() {
-    const result = await this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh');
-    debugLog("pumpStart result: %s", result);
+    try {
+      const result = await this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh');
+      debugLog("pumpStart result: %s", result);
 
-    if (result) {
-      return "7eff014100bf7e";
+      if (result) {
+        return "7eff014100bf7e";
+      }
+
+      return "Command failed!";
+    } catch (error) {
+      debugLog("pumpStart error: %s", error);
+      return "Command failed!";
     }
-
-    return "Command failed!";
   }
 
   async pumpStop() {
-    const result = await this.executeShellScriptAndCheck('scripts/EMR4/stoppump.sh');
-    debugLog("pumpStop result: %s", result);
+    try {
+      const result = await this.executeShellScriptAndCheck('scripts/EMR4/stoppump.sh');
+      debugLog("pumpStop result: %s", result);
 
-    if (result) {
-      return "7eff014100bf7e";
+      if (result) {
+        return "7eff014100bf7e";
+      }
+
+      return "Command failed!";
+    } catch (error) {
+      debugLog("pumpStop error: %s", error);
+      return "Command failed!";
     }
-
-    return "Command failed!";
   }
 
   async authorizeSale() {
