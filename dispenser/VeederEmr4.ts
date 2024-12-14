@@ -440,44 +440,40 @@ export class VeederEmr4 extends BaseDispenser {
     await this.sendPreset(quantity);
   }
 
-  async sendPreset(quantity: number) {
-    const message = new Array(8).fill(0);
-    const veederPreBuffer = new DataView(new ArrayBuffer(4));
-    veederPreBuffer.setFloat32(0, quantity, true); // Store the float in little-endian format
+  calculateChecksum(headerBytes: any, messageBytes: any) {
+    // Add all header and message bytes
+    let checksum = headerBytes.reduce((sum: any, byte: any) => sum + byte, 0);
+    checksum += messageBytes.reduce((sum: any, byte: any) => sum + byte, 0);
 
-    const AA = 0x7E;
-    const BB = 0x01;
-    const CC = 0xFF;
-    const DD = 0x53;
-    const EE = 0x6E;
+    // Two's complement (invert and add 1)
+    checksum = ~checksum + 1;
+    return checksum & 0xFF; // Ensure it's 8-bit
+  }
 
-    // Create an array to hold all bytes to be sent
-    const bytesToSend = [AA, BB, CC, DD, EE];
+  async sendPreset(veederPre: number) {
+    // Header bytes as per protocol
+    const START_BYTE = 0x7E;
+    const HEADER_BYTES = [0x01, 0xFF, 0x53, 0x6E];
 
-    // Write the floating-point value byte by byte
-    for (let i = 0; i < 4; i++) {
-        const byte = veederPreBuffer.getUint8(i);
-        bytesToSend.push(byte === 0 ? 0x00 : byte);
-        message[7 - i] = byte; // Reverse order to mimic the original C++ logic
-    }
+    // Convert the float to its 4-byte representation
+    const messageBytes = Buffer.alloc(4);
+    messageBytes.writeFloatLE(veederPre);
 
     // Calculate checksum
-    let BCC = BB + CC + DD + EE + message.reduce((sum, byte) => sum + byte, 0);
-    BCC = (BCC ^ 0xFF);
-    const checksum = BCC + 0x01;
+    const checksum = this.calculateChecksum(HEADER_BYTES, [...messageBytes]);
 
-    if (checksum < 10) {
-        bytesToSend.push(0x00, checksum);
-    } else {
-        bytesToSend.push(checksum);
-    }
+    // Construct the full message
+    const fullMessage = [
+      START_BYTE,
+      ...HEADER_BYTES,
+      ...messageBytes,
+      checksum,
+      START_BYTE,
+    ];
 
-    // Write the final byte
-    bytesToSend.push(AA);
-
-    debugLog("sendPreset: %s", bytesToSend.map(byte => byte.toString(16).padStart(2, '0')).join(' '));
+    debugLog("sendPreset: %s", fullMessage.map(byte => byte.toString(16).padStart(2, '0')).join(' '));
     // Write all bytes to the connection at once
-    return this.connection.write(Buffer.from(bytesToSend));
+    return this.connection.write(Buffer.from(fullMessage));
   }
 
   processTask(task: any, callback: any) {
