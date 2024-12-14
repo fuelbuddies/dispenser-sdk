@@ -249,10 +249,10 @@ export class BaseDispenser implements IDispenser {
                   // If there's an error, consider the script execution unsuccessful
                   debugLog('Console: %s', stderr);
                   debugLog('Error: %s', error);
-                  resolve(false);
+                  reject(false);
               } else {
                   // If the script output is "true", consider the script execution successful
-                  resolve(stdout.trim() === 'true');
+                  resolve(stdout.trim() == "true");
               }
           });
       });
