@@ -324,32 +324,51 @@ export class VeederEmr4 extends BaseDispenser {
     return false;
   }
 
-  hasChecksBeforePumpStart() {
+  hasChecksBeforePumpStart(res: string) {
+    debugLog("hasChecksBeforePumpStart: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("hasChecksBeforePumpStart: %s", dispenserStatus);
     return false;
   }
 
-  isNozzleOnHook(): boolean {
+  isNozzleOnHook(res: string): boolean {
+    debugLog("isNozzleOnHook: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isNozzleOnHook: %s", dispenserStatus);
     return true;
   }
 
-  isNozzleOffHook(): boolean {
+  isNozzleOffHook(res: string): boolean {
+    debugLog("isNozzleOffHook: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isNozzleOffHook: %s", dispenserStatus);
     return true;
   }
 
   isOnline(res: string): boolean {
+    debugLog("isOnline: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isOnline: %s", dispenserStatus);
     return res.substring(10).slice(0, -4) == "01";
   }
 
-  isPresetAvailable(): boolean {
+  isPresetAvailable(res: string): boolean {
+    debugLog("isPresetAvailable: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isPresetAvailable: %s", dispenserStatus);
     return true;
   }
 
-  isNozzleCheckRequired() {
+  isNozzleCheckRequired(res: string) {
+    debugLog("isNozzleCheckRequired: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isNozzleCheckRequired: %s", dispenserStatus);
     return false;
   }
 
   isPresetVerified(res: string, quantity: number) {
     const presetValue = this.processReadPreset(res);
+    debugLog("isPresetVerified: %s", presetValue);
     if (quantity == presetValue) {
       return true;
     }
@@ -358,6 +377,7 @@ export class VeederEmr4 extends BaseDispenser {
 
   isDispensing(res: string) {
     const dispenserStatus = this.processStatus(res);
+    debugLog("isDispensing: %s", dispenserStatus);
     if (dispenserStatus.get("Delivery Is Active")) {
       return true;
     }
@@ -366,6 +386,7 @@ export class VeederEmr4 extends BaseDispenser {
 
   isIdle(res: string) {
     const dispenserStatus = this.processStatus(res);
+    debugLog("isIdle: %s", dispenserStatus);
     if (dispenserStatus.get("Delivery Completed")) {
       return true;
     }
@@ -374,6 +395,7 @@ export class VeederEmr4 extends BaseDispenser {
 
   isSaleCloseable(res: string) {
     const dispenserStatus = this.processStatus(res);
+    debugLog("isSaleCloseable: %s", dispenserStatus);
     if (dispenserStatus.get("Net Preset Is Active")) {
       return true;
     }
@@ -384,13 +406,15 @@ export class VeederEmr4 extends BaseDispenser {
    * we can install a printer on this dispenser. but it's not installed.
    * @returns false
    */
-  isPrinterAvailable() {
+  isPrinterAvailable(res: string) {
+    debugLog("isPrinterAvailable: %s", res);
     debugLog("isPrinterAvailable: %s", "false");
     return false;
   }
 
   isOrderComplete(res: string, quantity: number) {
     const readsale = this.processReadSale(res).volume;
+    debugLog("isOrderComplete: %s", readsale);
     if (readsale >= quantity) {
       return {
         status: true,
@@ -412,7 +436,7 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   async setPreset(quantity: number) {
-    debugLog("setPreset", quantity);
+    debugLog("setPreset: %s", quantity);
     await this.sendPreset(quantity);
   }
 
