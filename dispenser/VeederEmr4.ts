@@ -79,7 +79,7 @@ export class VeederEmr4 extends BaseDispenser {
 
   async pumpStart() {
     try {
-      const result = await this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh');
+      const result = (await this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh'));
       debugLog("pumpStart result: %s", result);
 
       if (result) {
