@@ -464,6 +464,7 @@ export class VeederEmr4 extends BaseDispenser {
       }).catch((error) => {
         callback(error);
       });
+      return;
     }
 
     if(callee.name == "pumpStop") {
@@ -472,6 +473,7 @@ export class VeederEmr4 extends BaseDispenser {
       }).catch((error) => {
         callback(error);
       });
+      return;
     }
 
     this.innerByteTimeoutParser.once('data', (data: any): void => {
