@@ -178,11 +178,13 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   processCommand(res: string) {
+    debugLog("processCommand: %s", res);
     if (res.includes("7eff014100bf7e")) {
+      debugLog("processCommand: Command successful");
       return true;
-    } else {
-      throw Error("Command failed! check for status");
     }
+
+    throw Error("Command failed! check for status");
   }
 
   processReadSale(res: string) {
