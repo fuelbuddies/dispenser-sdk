@@ -22,55 +22,67 @@ export class Tokhiem extends BaseDispenser {
     async totalizer() {
         debugLog("totalizer");
         await this.connection.write(this.totalizerBuffer);
+        return await this.dispenserResponse();
     }
+
     async authorizeSale() {
         debugLog("authorizeSale");
         await this.connection.write(this.authorize);
+        return await this.dispenserResponse();
     }
 
     async readPreset() {
         debugLog("readPreset");
         await this.connection.write(this.read_preset);
+        return await this.dispenserResponse();
     }
 
     async suspendDispencer() {
         debugLog("suspendDispencer");
         await this.connection.write(this.suspend_sale);
+        return await this.dispenserResponse();
     }
 
     async clearSale() {
         debugLog("clearSale");
         await this.connection.write(this.clear_sale);
+        return await this.dispenserResponse();
     }
 
     async readSale() {
         debugLog("readSale");
         await this.connection.write(this.tokhim_read_sale);
+        return await this.dispenserResponse();
     }
 
     async readAuth() {
         debugLog("readAuth");
         await this.connection.write(this.tokhim_status);
+        return await this.dispenserResponse();
     }
 
     async cancelPreset() {
         debugLog("cancelPreset");
         await this.connection.write(this.cancel_preset);
+        return await this.dispenserResponse();
     }
 
     async resumeDispencer() {
         debugLog("resumeDispencer");
         await this.connection.write(this.resume_sale);
+        return await this.dispenserResponse();
     }
 
     async pumpStop() {
         debugLog("pumpStop");
         await this.connection.write(this.pump_stop);
+        return await this.dispenserResponse();
     }
 
     async pumpStart() {
         debugLog("pumpStart");
         await this.connection.write(this.pump_start);
+        return await this.dispenserResponse();
     }
 
     printReciept(receiptMessage: unknown) {
@@ -100,6 +112,7 @@ export class Tokhiem extends BaseDispenser {
     async readDispencerStatus() {
         debugLog("readDispencerStatus");
         await this.connection.write(this.tokhim_status);
+        return await this.dispenserResponse();
     }
 
     async sendPreset(quantity: number) {
@@ -136,12 +149,14 @@ export class Tokhiem extends BaseDispenser {
         // Assuming you have a serialport object named 'dispencerSerial'
         debugLog("volume sent", volume);
         await this.connection.write(volume);
+        return await this.dispenserResponse();
     }
 
 
   async switchToRemote() {
     debugLog("switchToRemote");
     await this.switchMode(true);
+    return await this.dispenserResponse();
   }
 
   checkType() {
@@ -152,6 +167,7 @@ export class Tokhiem extends BaseDispenser {
   async switchToLocal() {
     debugLog("switchToLocal");
     await this.switchMode(false);
+    return await this.dispenserResponse();
   }
 
   // todo:  this will be moved to baseDispenser
@@ -174,36 +190,43 @@ export class Tokhiem extends BaseDispenser {
   async readStatus() {
     debugLog("readStatus");
     await this.readDispencerStatus();
+    return await this.dispenserResponse();
   }
 
   async readAuthorization() {
     debugLog("readAuthorization");
     await this.readDispencerStatus();
+    return await this.dispenserResponse();
   }
 
   async startPump() {
     debugLog("startPump");
     await this.pumpStart();
+    return await this.dispenserResponse();
   }
 
   async stopPump() {
     debugLog("stopPump");
     await this.pumpStop();
+    return await this.dispenserResponse();
   }
 
   async setPreset(quantity: number) {
     debugLog("setPreset", quantity);
     await this.sendPreset(quantity);
+    return await this.dispenserResponse();
   }
 
   async suspendSale() {
     debugLog("suspendSale");
     await this.suspendDispencer();
+    return await this.dispenserResponse();
   }
 
   async resumeSale() {
     debugLog("resumeSale");
     await this.resumeDispencer();
+    return await this.dispenserResponse();
   }
 
   hasExternalPump() {
