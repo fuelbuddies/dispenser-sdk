@@ -62,19 +62,23 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   async switchToRemote() {
-    return await this.connection.write(this.veeder_authorize_on);
+    await this.connection.write(this.veeder_authorize_on);
+    return await this.dispenserResponse();
   }
 
   async switchToLocal() {
-    return await this.connection.write(this.veeder_authorize_off);
+    await this.connection.write(this.veeder_authorize_off);
+    return await this.dispenserResponse();
   }
 
   async totalizer() {
-    return await this.connection.write(this.veeder_totalizer);
+    await this.connection.write(this.veeder_totalizer);
+    return await this.dispenserResponse();
   }
 
   async readStatus() {
-    return await this.connection.write(this.veeder_status);
+    await this.connection.write(this.veeder_status);
+    return await this.dispenserResponse();
   }
 
   pumpStart() {
@@ -116,36 +120,44 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   async authorizeSale() {
-    return await this.connection.write(this.veeder_start);
+    await this.connection.write(this.veeder_start);
+    return await this.dispenserResponse();
   }
 
   async readPreset() {
-    return await this.connection.write(this.veeder_read_preset);
+    await this.connection.write(this.veeder_read_preset);
+    return await this.dispenserResponse();
   }
 
   async cancelPreset() {
-    return await this.connection.write(this.veeder_reset);
+    await this.connection.write(this.veeder_reset);
+    return await this.dispenserResponse();
   }
 
   async readSale() {
-    return await this.connection.write(this.veeder_read_sale);
+    await this.connection.write(this.veeder_read_sale);
+    return await this.dispenserResponse();
   }
 
   async suspendSale() {
-    return await this.connection.write(this.veeder_pause);
+    await this.connection.write(this.veeder_pause);
+    return await this.dispenserResponse();
   }
 
   async resumeSale() {
-    return await this.connection.write(this.veeder_resume);
+    await this.connection.write(this.veeder_resume);
+    return await this.dispenserResponse();
   }
 
   async clearSale() {
     await this.connection.write(this.veeder_reset);
-    return this.connection.write(this.veeder_finish);
+    await this.connection.write(this.veeder_finish);
+    return await this.dispenserResponse();
   }
 
   async readAuthorization() {
-    return await this.connection.write(this.veeder_get_authorization);
+    await this.connection.write(this.veeder_get_authorization);
+    return await this.dispenserResponse();
   }
 
   interpolateHex(originalString: string) {
@@ -437,7 +449,7 @@ export class VeederEmr4 extends BaseDispenser {
 
   async setPreset(quantity: number) {
     debugLog("setPreset: %s", quantity);
-    await this.sendPreset(quantity);
+    return await this.sendPreset(quantity);
   }
 
   calculateChecksum(headerBytes: any, messageBytes: any) {
@@ -473,55 +485,7 @@ export class VeederEmr4 extends BaseDispenser {
 
     debugLog("sendPreset: %s", fullMessage.map(byte => byte.toString(16).padStart(2, '0')).join(' '));
     // Write all bytes to the connection at once
-    return this.connection.write(Buffer.from(fullMessage));
-  }
-
-  processTask(task: any, callback: any) {
-    const {bindFunction, callee, calleeArgs} = task;
-    if(callee.name == "pumpStart") {
-      this.pumpStart().then((result) => {
-        callback(null, bindFunction.call(this, result, calleeArgs, callee.name));
-      }).catch((error) => {
-        callback(error);
-      });
-      return;
-    }
-
-    if(callee.name == "pumpStop") {
-      this.pumpStop().then((result) => {
-        callback(null, bindFunction.call(this, result, calleeArgs, callee.name));
-      }).catch((error) => {
-        callback(error);
-      });
-      return;
-    }
-
-    if(bindFunction.name == "isNozzleCheckRequired") {
-      setTimeout(() => {
-        callback(null, false);
-      }, 400);
-      return;
-    }
-
-    if(bindFunction.name == "isPresetAvailable") {
-      setTimeout(() => {
-        callback(null, true);
-      }, 400);
-      return;
-    }
-
-    this.innerByteTimeoutParser.once('data', (data: any): void => {
-      try {
-        if (bindFunction instanceof Function) {
-          callback(null, bindFunction.call(this, data.toString('hex'), calleeArgs, callee.name));
-        } else {
-          callback(null, data.toString('hex'));
-        }
-      } catch (e) {
-        debugLog("processTask: %s", "error in try catch fn");
-        callback(e);
-      }
-    });
-    callee.call(this, calleeArgs || undefined);
+    this.connection.write(Buffer.from(fullMessage));
+    return await this.dispenserResponse();
   }
 }

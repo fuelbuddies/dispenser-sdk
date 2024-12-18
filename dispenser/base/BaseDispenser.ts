@@ -11,90 +11,72 @@ const debugLog = debug('dispenser:base-dispenser');
 
 export class BaseDispenser implements IDispenser {
   connection: SerialPort<AutoDetectTypes>;
-  queue: QueueObject<any>;
   innerByteTimeoutParser: InterByteTimeoutParser;
-  // logger: Logger;
   [key: string]: any;
 
   constructor(socket: SerialPort, options?: DispenserOptions) {
     this.connection = socket;
-    this.queue = queue(this.processTask.bind(this), 1);
     // Adjust concurrency as needed
     this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 300 }));
-    // this.logger = new Logger({id: 'dispenser', useConsole: false});
   }
 
-  disconnect(callback: any): void {
-    this.connection.close(callback);
-  }
-
-  processTask(task: any, callback: any) {
-    const {bindFunction, callee, calleeArgs} = task;
-    this.innerByteTimeoutParser.once('data', (data: any): void => {
+  dispenserResponse(): Promise<any> {
+    return new Promise((resolve, reject) => {
       try {
-        if (bindFunction instanceof Function) {
-          callback(null, bindFunction.call(this, data.toString('hex'), calleeArgs, callee.name));
-        } else {
-          callback(null, data.toString('hex'));
-        }
+        this.innerByteTimeoutParser.once('data', (data: any): void => {
+          var res = data.toString('hex');
+          debugLog("awaitDispenserResponse: %s", res);
+          resolve(res);
+        });
       } catch (e) {
-        debugLog("processTask: %s", "error in try catch fn");
-        callback(e);
+        reject(e);
       }
     });
-    callee.call(this, calleeArgs || undefined);
   }
-
-  // bind(fn: (...args: any[]) => void) {
-  //   return this.connection.pipe(new InterByteTimeoutParser({ interval: 200 })).addListener('data', fn);
-  // }
-
-  // unbind(fn: (...args: any[]) => void) {
-  //   return this.connection.removeListener('data', fn);
-  // }
 
   execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.queue.push({ callee, bindFunction, calleeArgs }, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
+        Promise.resolve(callee.call(this, calleeArgs || undefined)).then(async (data: any) => {
+            if (bindFunction instanceof Function) {
+                const result = await bindFunction.call(this, data, calleeArgs || undefined, callee.name);
+                debugLog("bindFunction: %s", JSON.stringify(result));
+                resolve(result);
+            } else {
+                resolve(data);
+            }
+        }).catch((err: any) => {
+            reject(err);
+        });
     });
   }
 
   executeWork(strCallee: string, strBindFunction?: string, calleeArgs: any = undefined): Promise<any> {
-    const callee = this[strCallee] as (...args: [any]) => any;
-    const bindFunction = strBindFunction ? this[strBindFunction] : undefined;
-    if(!callee) throw new Error("Invalid callee function - " + strCallee);
-    if(bindFunction && !(bindFunction instanceof Function)) throw new Error("Invalid Bind function");
-    return this.execute(callee, bindFunction, calleeArgs);
+      const callee = this[strCallee] as (...args: [any]) => any;
+      const bindFunction = strBindFunction ? this[strBindFunction] : undefined;
+      if(!callee) throw new Error("Invalid callee function");
+      if(bindFunction && !(bindFunction instanceof Function)) throw new Error("Invalid Bind function");
+      return this.execute(callee, bindFunction, calleeArgs);
   }
 
   executeInPriority(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.queue.unshift({ callee, bindFunction, calleeArgs }, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
+      return this.execute(callee, bindFunction, calleeArgs);
+  }
+
+  async disconnect(callback: any) {
+      debugLog("disconnect: %s", "Requesting disconnection from Seneca")
+      const connection = await this.connection;
+
+      connection.close(async () => {
+          // if (!this.printer) {
+              // debugLog("disconnect: %s", "No printer connection found");
+              return callback();
+          // }
+
+          // this.printer.close(() => {
+          //     debugLog("disconnect: %s", "Printer connection closed");
+          //     callback();
+          // });
       });
-    });
-  }
-
-  /**
-   * reset queue
-   */
-  resetQueue(): void {
-    this.queue.kill();
-    this.queue = queue(this.processTask.bind(this), 1);
-  }
-
-  processExternalPump(res: string) {
-    return JSON.parse(res);
   }
 
   /**
