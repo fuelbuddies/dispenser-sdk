@@ -23,6 +23,7 @@ export class VeederEmr4 extends BaseDispenser {
   private veeder_emr_status        = Buffer.from([0x7E, 0x01, 0xFF, 0x47, 0x4B, 0x6F, 0x7E]);
   private veeder_end_delivery      = Buffer.from([0x7E, 0x01, 0xFF, 0x4F, 0x03, 0xAE, 0x7E]);
   private veeder_delivery_auth     = Buffer.from([0x7E, 0x01, 0xFF, 0x4F, 0x06, 0x01, 0xAA, 0x7E]);
+  private veeder_auth_required     = Buffer.from([0x7E, 0x01, 0xFF, 0x44, 0x25, 0x01, 0x96, 0x7E]);
   
   private deliveryStatus: string[] = [
     "Delivery Error",
@@ -86,7 +87,7 @@ export class VeederEmr4 extends BaseDispenser {
   pumpStart() {
     return new Promise(async (resolve, reject) => {
       try {
-        await this.connection.write(this.veeder_delivery_auth);
+        await this.connection.write(this.veeder_auth_required);
         const response = await this.dispenserResponse();
         debugLog("pumpStart response: %s", response);
         if(response.includes("7eff014100bf7e")) {
@@ -129,7 +130,7 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   async authorizeSale() {
-    await this.connection.write(this.veeder_start);
+    await this.connection.write(this.veeder_delivery_auth);
     return await this.dispenserResponse();
   }
 
