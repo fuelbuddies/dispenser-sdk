@@ -21,7 +21,10 @@ export class VeederEmr4 extends BaseDispenser {
   private veeder_read_sale         = Buffer.from([0x7E, 0x01, 0xFF, 0x47, 0x4B, 0x6E, 0x7E]);
   private veeder_get_authorization = Buffer.from([0x7E, 0x01, 0xFF, 0x54, 0x05, 0xA7, 0x7E]);
   private veeder_emr_status        = Buffer.from([0x7E, 0x01, 0xFF, 0x47, 0x4B, 0x6F, 0x7E]);
+  private veeder_end_delivery      = Buffer.from([0x7E, 0x01, 0xFF, 0x4F, 0x03, 0xAE, 0x7E]);
+  private veeder_delivery_auth     = Buffer.from([0x7E, 0x01, 0xFF, 0x4F, 0x06, 0x01, 0xAA, 0x7E]);
 
+  
   private deliveryStatus: string[] = [
     "Delivery Error",
     "Delivery Completed",
@@ -82,20 +85,27 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   pumpStart() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh').then((result) => {
-          debugLog("pumpStart result: %s", result);
+        await this.connection.write(this.veeder_delivery_auth);
+        const response = await this.dispenserResponse();
+        debugLog("pumpStart response: %s", response);
+        if(response.includes("7eff014100bf7e")) {
+          this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh').then((result) => {
+            debugLog("pumpStart result: %s", result);
 
-          if (result) {
-            debugLog("pumpStart result: %s", "7eff014100bf7e");
-            return resolve("7eff014100bf7e");
-          }
+            if (result) {
+              debugLog("pumpStart result: %s", "7eff014100bf7e");
+              return resolve("7eff014100bf7e");
+            }
 
-          debugLog("pumpStart result: %s", "Command failed!");
-          return reject("Command failed!");
+            debugLog("pumpStart result: %s", "Command failed!");
+            return reject("Command failed!");
 
-        });
+          });
+        } else {
+          return reject(response);
+        }
       } catch (error) {
         debugLog("pumpStart error: %s", error);
         return reject("Command failed!");
@@ -150,8 +160,8 @@ export class VeederEmr4 extends BaseDispenser {
   }
 
   async clearSale() {
+    await this.connection.write(this.veeder_end_delivery);
     await this.connection.write(this.veeder_reset);
-    await this.connection.write(this.veeder_finish);
     return await this.dispenserResponse();
   }
 
