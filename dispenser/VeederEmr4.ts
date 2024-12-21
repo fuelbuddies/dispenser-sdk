@@ -418,7 +418,7 @@ export class VeederEmr4 extends BaseDispenser {
   isSaleCloseable(res: string) {
     const dispenserStatus = this.processStatus(res);
     debugLog("isSaleCloseable: %s", dispenserStatus);
-    if (dispenserStatus.get("Net Preset Is Active")) {
+    if (dispenserStatus.get("Net Preset Is Active") || dispenserStatus.get("Delivery Error")) {
       return true;
     }
     return false;
