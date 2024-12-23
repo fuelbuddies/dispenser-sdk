@@ -143,11 +143,11 @@ export class TCS3000 extends BaseDispenser {
     processCommand(res: string, args: any, fnName: string) {
         if (args) {
             debugLog("processCommand: %o", args);
-           console.log("processCommandArgs: %o", args);
+            console.log("processCommandArgs: %o", args);
         }
 
         if (fnName) {
-            console.log("processCommandfnName: %o", fnName);            
+            console.log("processCommandfnName: %o", fnName);
             debugLog("processCommand: %o", fnName);
         }
 
@@ -303,6 +303,20 @@ export class TCS3000 extends BaseDispenser {
 
     isNozzleOffHook() {
         debugLog("isNozzleOffHook: %s", "true");
+        return true;
+    }
+
+    isPresetAvailable() {
+        debugLog("isPresetAvailable: %s", "true");
+        return true;
+    }
+
+    isNozzleCheckRequired() {
+        return false;
+    }
+
+    isPrinterAvailable() {
+        debugLog("isPrinterAvailable: %s", "true");
         return true;
     }
 

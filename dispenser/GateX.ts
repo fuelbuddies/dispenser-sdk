@@ -48,9 +48,9 @@ export class GateX extends ModBusDispenser {
             timestamp: (new Date()).getTime()
         } as TotalizerResponse;
 
-        if(!this.startTotalizer) {
-            this.startTotalizer = totalizer;
-        }
+        // if(!this.startTotalizer) {
+        //     this.startTotalizer = totalizer;
+        // }
         debugLog("totalizer: %o", totalizer);
         return totalizer;
     }
@@ -131,7 +131,8 @@ export class GateX extends ModBusDispenser {
     async authorizeSale() {
         try {
             if(!this.startTotalizer) {
-                await this.processTotalizerRes(await this.totalizer()); //This will initialize startTotalizer.
+                const totalizer = await this.processTotalizerRes(await this.totalizer()); //This will initialize startTotalizer.
+                this.startTotalizer = totalizer;
             }
 
             if(!this.startTotalizer) {
@@ -196,6 +197,14 @@ export class GateX extends ModBusDispenser {
     setPreset(quantity: number) {
         this.preset = quantity
         return "true";
+    }
+
+    isPresetAvailable(): boolean {
+        return false;
+    }
+
+    isNozzleCheckRequired() {
+        return false;
     }
 
     isPrinterAvailable(res: string): boolean {

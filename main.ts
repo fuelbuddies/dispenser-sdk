@@ -21,6 +21,11 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
             const tokhiemUsbPath = await findDispenserPort(hardwareId, attributeId);
             debugLog('Dispenser found at: %o', tokhiemUsbPath);
             return new DispenserType.Tokhiem(new SerialPort({path: tokhiemUsbPath, baudRate: baudRate }), options);
+        case 'VeederEmr4':
+            const VeederEmr4 = await import('./dispenser/VeederEmr4');
+            const veederUsbPath = await findDispenserPort(hardwareId, attributeId);
+            debugLog('Dispenser found at: %o', veederUsbPath);
+            return new VeederEmr4.VeederEmr4(new SerialPort({path: veederUsbPath, baudRate: baudRate }), options);
         case 'IsoilVegaTVersion10':
             const IsoilVegaTVersion10 = await import('./dispenser/IsoilVegaTVersion10');
             const ISoilUsbPath = await findDispenserPort(hardwareId, attributeId);

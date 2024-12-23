@@ -57,9 +57,11 @@ export interface IDispenser {
   isSaleCloseable?(res: string): boolean;
   isSaleSuspended?(res: string): boolean;
   isOrderComplete?(res: string, quantity: number): any;
-  isNozzleOnHook?(res: string): boolean;
-  isNozzleOffHook?(res: string): boolean;
+  isNozzleOnHook?(res: string): any;
+  isNozzleOffHook?(res: string): any;
   isOnline?(res: string): boolean;
+  isPresetAvailable?(res: string): boolean;
+  isNozzleCheckRequired?(res: string): boolean;
   isPrinterAvailable?(res: string): boolean;
   cutStringFromLast?(str: string, cutLength: number, cutFromLast: boolean): any;
   hex2a?(hex: string): string;
