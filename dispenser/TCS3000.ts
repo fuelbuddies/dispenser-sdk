@@ -224,8 +224,13 @@ export class TCS3000 extends BaseDispenser {
 		}
 
 		if (fnName === 'authorizeSale') {
-			console.log(this.hexToNumber(res.slice(16, -2)));
-			return true;
+			const commandData = res.slice(14);
+			return commandData[1] == '3';
+		}
+
+		if (fnName === 'pumpStop') {
+			const errorBytes = res.slice(12);
+			return errorBytes[0] === '0' && errorBytes[1] === '0';
 		}
 
 		debugLog('processCommand: %s', res);
