@@ -1,9 +1,5 @@
 import { ModBusDispenser } from './base/ModBusDispenser';
-import {
-	DispenserOptions,
-	TotalizerResponse,
-	VolumeResponse,
-} from './interface/IDispenser';
+import { DispenserOptions, TotalizerResponse, VolumeResponse } from './interface/IDispenser';
 import { SerialPort } from 'serialport';
 import { Seneca } from './workflows/GateX';
 import debug from 'debug';
@@ -15,18 +11,11 @@ export class GateX extends ModBusDispenser {
 
 	private preset: number;
 
-	constructor(
-		socket: Seneca,
-		printer: SerialPort,
-		options: DispenserOptions
-	) {
+	constructor(socket: Seneca, printer: SerialPort, options: DispenserOptions) {
 		super(socket, printer, options);
 		let { kFactor } = options;
 		if (!kFactor || kFactor < 0) {
-			debugLog(
-				'K-Factor not set for this dispenser, you might get wrong totalizer value: %o',
-				kFactor
-			);
+			debugLog('K-Factor not set for this dispenser, you might get wrong totalizer value: %o', kFactor);
 		}
 		this.kFactor = kFactor || 1;
 		this.preset = 0;
@@ -47,11 +36,7 @@ export class GateX extends ModBusDispenser {
 	}
 
 	async readStatus() {
-		return (await this.executeShellScriptAndCheck(
-			'scripts/GateX/status.sh'
-		))
-			? 'true'
-			: 'false';
+		return (await this.executeShellScriptAndCheck('scripts/GateX/status.sh')) ? 'true' : 'false';
 	}
 
 	processTotalizerRes(pulse: any): TotalizerResponse {
@@ -106,17 +91,11 @@ export class GateX extends ModBusDispenser {
 
 	isOrderComplete(res: any, quantity: number) {
 		const currentTotalizer = this.processTotalizerRes(res);
-		const readsale = this.calculateVolume(
-			this.startTotalizer,
-			currentTotalizer
-		);
+		const readsale = this.calculateVolume(this.startTotalizer, currentTotalizer);
 		if (readsale.volume > quantity - 1) {
 			const response = {
 				status: true,
-				percentage: this.toFixedNumber(
-					(readsale.volume / quantity) * 100,
-					2
-				),
+				percentage: this.toFixedNumber((readsale.volume / quantity) * 100, 2),
 				currentFlowRate: readsale.litersPerMinute,
 				averageFlowRate: readsale.litersPerMinute,
 				batchNumber: this.startTotalizer?.batchNumber || 0,
@@ -152,9 +131,7 @@ export class GateX extends ModBusDispenser {
 	async authorizeSale() {
 		try {
 			if (!this.startTotalizer) {
-				const totalizer = await this.processTotalizerRes(
-					await this.totalizer()
-				); //This will initialize startTotalizer.
+				const totalizer = await this.processTotalizerRes(await this.totalizer()); //This will initialize startTotalizer.
 				this.startTotalizer = totalizer;
 			}
 
@@ -163,11 +140,7 @@ export class GateX extends ModBusDispenser {
 			}
 
 			this.writeTotalizerToFile(this.startTotalizer);
-			return (await this.executeShellScriptAndCheck(
-				'scripts/GateX/authorize.sh'
-			))
-				? 'true'
-				: 'false';
+			return (await this.executeShellScriptAndCheck('scripts/GateX/authorize.sh')) ? 'true' : 'false';
 		} catch (error) {
 			console.error(error);
 			return 'false';
@@ -176,11 +149,7 @@ export class GateX extends ModBusDispenser {
 
 	async pumpStop() {
 		try {
-			return (await this.executeShellScriptAndCheck(
-				'scripts/GateX/unauthorize.sh'
-			))
-				? 'true'
-				: 'false';
+			return (await this.executeShellScriptAndCheck('scripts/GateX/unauthorize.sh')) ? 'true' : 'false';
 		} catch (error) {
 			console.error(error);
 			return 'false';
@@ -252,10 +221,7 @@ export class GateX extends ModBusDispenser {
 		return 'true';
 	}
 
-	calculateVolume(
-		previousTotalizer: TotalizerResponse | undefined,
-		currentTotalizer: TotalizerResponse
-	): VolumeResponse {
+	calculateVolume(previousTotalizer: TotalizerResponse | undefined, currentTotalizer: TotalizerResponse): VolumeResponse {
 		// Check if timestamps are valid and current timestamp is greater than previous
 		if (
 			!previousTotalizer ||
@@ -271,18 +237,13 @@ export class GateX extends ModBusDispenser {
 		}
 
 		// Calculate the time difference in minutes
-		const timeDifferenceInMinutes =
-			(currentTotalizer.timestamp - previousTotalizer.timestamp) / 60000;
+		const timeDifferenceInMinutes = (currentTotalizer.timestamp - previousTotalizer.timestamp) / 60000;
 
 		// Calculate the volume difference (assuming totalizer represents volume)
-		const volumeDifference =
-			currentTotalizer.totalizer - previousTotalizer.totalizer;
+		const volumeDifference = currentTotalizer.totalizer - previousTotalizer.totalizer;
 		return {
 			volume: volumeDifference,
-			litersPerMinute: this.toFixedNumber(
-				volumeDifference / timeDifferenceInMinutes,
-				2
-			),
+			litersPerMinute: this.toFixedNumber(volumeDifference / timeDifferenceInMinutes, 2),
 		};
 	}
 
@@ -293,323 +254,61 @@ export class GateX extends ModBusDispenser {
 		debugLog('printReceipt: %o', printObj);
 
 		if (printObj?.isReceiptRequired) {
-			printArr.push(
-				this.str2hex(
-					this.centerAlignValue(
-						'****  CUSTOMER COPY  ****',
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.centerAlignValue('****  CUSTOMER COPY  ****', printWidth)));
 			printArr.push('0A');
-			printArr.push(
-				this.str2hex(
-					this.centerAlignValue(
-						'FUELBUDDY FUEL SUPPLY LLC',
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.centerAlignValue('FUELBUDDY FUEL SUPPLY LLC', printWidth)));
 			printArr.push('0A');
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'BOWSER No',
-						printObj?.vehicleRegistrationNumber,
-						printWidth
-					)
-				)
-			);
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'ASSET No',
-						printObj?.registrationNumber,
-						printWidth
-					)
-				)
-			);
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'DATE',
-						new Date(printObj?.orderDate).toLocaleDateString(),
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.rightAlignValue('BOWSER No', printObj?.vehicleRegistrationNumber, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('ASSET No', printObj?.registrationNumber, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('DATE', new Date(printObj?.orderDate).toLocaleDateString(), printWidth)));
 			printArr.push('0A');
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'DRIVER',
-						printObj?.driverCode,
-						printWidth
-					)
-				)
-			);
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'CUSTOMER',
-						printObj?.customerCode,
-						printWidth
-					)
-				)
-			);
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'ORDER No',
-						printObj?.orderCode,
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.rightAlignValue('DRIVER', printObj?.driverCode, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('CUSTOMER', printObj?.customerCode, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('ORDER No', printObj?.orderCode, printWidth)));
 			printArr.push('0A');
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'Batch No',
-						printObj?.batchCode,
-						printWidth
-					)
-				)
-			);
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'START TIME',
-						new Date(printObj?.startTime).toLocaleTimeString(),
-						printWidth
-					)
-				)
-			);
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'END TIME',
-						new Date(printObj?.endTime).toLocaleTimeString(),
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.rightAlignValue('Batch No', printObj?.batchCode, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('START TIME', new Date(printObj?.startTime).toLocaleTimeString(), printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('END TIME', new Date(printObj?.endTime).toLocaleTimeString(), printWidth)));
 			printArr.push('0A');
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'PRODUCT',
-						printObj?.productName,
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.rightAlignValue('PRODUCT', printObj?.productName, printWidth)));
 			printArr.push('0A');
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'DELIVERED',
-						printObj?.quantity,
-						printWidth
-					)
-				)
-			);
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'START TOT.',
-						printObj?.startTotalizer,
-						printWidth
-					)
-				)
-			);
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'END TOT.',
-						printObj?.endTotalizer,
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.rightAlignValue('DELIVERED', printObj?.quantity, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('START TOT.', printObj?.startTotalizer, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('END TOT.', printObj?.endTotalizer, printWidth)));
 			if (printObj?.odometerReading) {
-				printArr.push(
-					this.str2hex(
-						this.rightAlignValue(
-							'ODOMETER',
-							printObj?.odometerReading,
-							printWidth
-						)
-					)
-				);
+				printArr.push(this.str2hex(this.rightAlignValue('ODOMETER', printObj?.odometerReading, printWidth)));
 			}
 			printArr.push('0A');
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'GROSS VOLUME',
-						printObj?.unitOfMeasure,
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.rightAlignValue('GROSS VOLUME', printObj?.unitOfMeasure, printWidth)));
 			printArr.push('0A0A1D564100');
 		}
 
-		printArr.push(
-			this.str2hex(
-				this.centerAlignValue('****  PRINT COPY  ****', printWidth)
-			)
-		);
+		printArr.push(this.str2hex(this.centerAlignValue('****  PRINT COPY  ****', printWidth)));
 		printArr.push('0A');
-		printArr.push(
-			this.str2hex(
-				this.centerAlignValue('FUELBUDDY FUEL SUPPLY LLC', printWidth)
-			)
-		);
+		printArr.push(this.str2hex(this.centerAlignValue('FUELBUDDY FUEL SUPPLY LLC', printWidth)));
 		printArr.push('0A');
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'BOWSER No',
-					printObj?.vehicleRegistrationNumber,
-					printWidth
-				)
-			)
-		);
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'ASSET No',
-					printObj?.registrationNumber,
-					printWidth
-				)
-			)
-		);
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'DATE',
-					new Date(printObj?.orderDate).toLocaleDateString(),
-					printWidth
-				)
-			)
-		);
+		printArr.push(this.str2hex(this.rightAlignValue('BOWSER No', printObj?.vehicleRegistrationNumber, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('ASSET No', printObj?.registrationNumber, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('DATE', new Date(printObj?.orderDate).toLocaleDateString(), printWidth)));
 		printArr.push('0A');
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'DRIVER ID',
-					printObj?.driverCode,
-					printWidth
-				)
-			)
-		);
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'CUSTOMER ID',
-					printObj?.customerCode,
-					printWidth
-				)
-			)
-		);
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'ORDER No',
-					printObj?.orderCode,
-					printWidth
-				)
-			)
-		);
+		printArr.push(this.str2hex(this.rightAlignValue('DRIVER ID', printObj?.driverCode, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('CUSTOMER ID', printObj?.customerCode, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('ORDER No', printObj?.orderCode, printWidth)));
 		printArr.push('0A');
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'Batch No',
-					printObj?.batchCode,
-					printWidth
-				)
-			)
-		);
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'START TIME',
-					new Date(printObj?.startTime).toLocaleTimeString(),
-					printWidth
-				)
-			)
-		);
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'END TIME',
-					new Date(printObj?.endTime).toLocaleTimeString(),
-					printWidth
-				)
-			)
-		);
+		printArr.push(this.str2hex(this.rightAlignValue('Batch No', printObj?.batchCode, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('START TIME', new Date(printObj?.startTime).toLocaleTimeString(), printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('END TIME', new Date(printObj?.endTime).toLocaleTimeString(), printWidth)));
 		printArr.push('0A');
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'PRODUCT',
-					printObj?.productName,
-					printWidth
-				)
-			)
-		);
+		printArr.push(this.str2hex(this.rightAlignValue('PRODUCT', printObj?.productName, printWidth)));
 		printArr.push('0A');
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'DELIVERED',
-					printObj?.quantity,
-					printWidth
-				)
-			)
-		);
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'START TOT.',
-					printObj?.startTotalizer,
-					printWidth
-				)
-			)
-		);
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'END TOT.',
-					printObj?.endTotalizer,
-					printWidth
-				)
-			)
-		);
+		printArr.push(this.str2hex(this.rightAlignValue('DELIVERED', printObj?.quantity, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('START TOT.', printObj?.startTotalizer, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('END TOT.', printObj?.endTotalizer, printWidth)));
 		if (printObj?.odometerReading) {
-			printArr.push(
-				this.str2hex(
-					this.rightAlignValue(
-						'ODOMETER',
-						printObj?.odometerReading,
-						printWidth
-					)
-				)
-			);
+			printArr.push(this.str2hex(this.rightAlignValue('ODOMETER', printObj?.odometerReading, printWidth)));
 		}
 		printArr.push('0A');
-		printArr.push(
-			this.str2hex(
-				this.rightAlignValue(
-					'GROSS VOLUME',
-					printObj?.unitOfMeasure,
-					printWidth
-				)
-			)
-		);
+		printArr.push(this.str2hex(this.rightAlignValue('GROSS VOLUME', printObj?.unitOfMeasure, printWidth)));
 
 		debugLog('printReceipt: %s', `${printArr.join('0A')}0A0A1D564200`);
 		return this.printOrder(`${printArr.join('0A')}0A0A1D564200`);

@@ -3,51 +3,31 @@ import { BaseDispenser } from './base/BaseDispenser';
 
 const debugLog = debug('dispenser:tcs3000');
 export class TCS3000 extends BaseDispenser {
-	private totalizerBuffer = Buffer.from([
-		0x7e, 0x01, 0x00, 0x40, 0x1e, 0x00, 0x47,
-	]);
-	private read_preset = Buffer.from([
-		0x7e, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x83,
-	]);
+	private totalizerBuffer = Buffer.from([0x7e, 0x01, 0x00, 0x40, 0x1e, 0x00, 0x47]);
+	private read_preset = Buffer.from([0x7e, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x83]);
 	private read_sale = Buffer.from([0x7e, 0x01, 0x00, 0x40, 0x2b, 0x00, 0x95]);
-	private read_status = Buffer.from([
-		0x7e, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x83,
-	]);
+	private read_status = Buffer.from([0x7e, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x83]);
 
-	private pump_start = Buffer.from([
-		0x7e, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x83,
-	]);
+	private pump_start = Buffer.from([0x7e, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x83]);
 	private pump_stop = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x3b, 0x00, 0xdc]);
 
-	private cancel_preset = Buffer.from([
-		0x7e, 0x01, 0x00, 0x20, 0x36, 0x00, 0x55,
-	]);
+	private cancel_preset = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x36, 0x00, 0x55]);
 
-	private authorize = Buffer.from([
-		0x7e, 0x01, 0x00, 0x20, 0x3c, 0x01, 0x03, 0xa8,
-	]);
+	private authorize = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x3c, 0x01, 0x03, 0xa8]);
 	private clear_sale = [0x7e, 0x01, 0x00, 0x20, 0x3e, 0x00, 0x23];
 	private suspend_sale = [0x7e, 0x01, 0x00, 0x20, 0x39, 0x00, 0x4d];
 	private resume_sale = [0x7e, 0x01, 0x00, 0x20, 0x3a, 0x00, 0x18];
 
 	private crc_array: number[] = [
-		0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65,
-		157, 195, 33, 127, 252, 162, 64, 30, 95, 1, 227, 189, 62, 96, 130, 220,
-		35, 125, 159, 193, 66, 28, 254, 160, 225, 191, 93, 3, 128, 222, 60, 98,
-		190, 224, 2, 92, 223, 129, 99, 61, 124, 34, 192, 158, 29, 67, 161, 255,
-		70, 24, 250, 164, 39, 121, 155, 197, 132, 218, 56, 102, 229, 187, 89, 7,
-		219, 133, 103, 57, 186, 228, 6, 88, 25, 71, 165, 251, 120, 38, 196, 154,
-		101, 59, 217, 135, 4, 90, 184, 230, 167, 249, 27, 69, 198, 152, 122, 36,
-		248, 166, 68, 26, 153, 199, 37, 123, 58, 100, 134, 216, 91, 5, 231, 185,
-		140, 210, 48, 110, 237, 179, 81, 15, 78, 16, 242, 172, 47, 113, 147,
-		205, 17, 79, 173, 243, 112, 46, 204, 146, 211, 141, 111, 49, 178, 236,
-		14, 80, 175, 241, 19, 77, 206, 144, 114, 44, 109, 51, 209, 143, 12, 82,
-		176, 238, 50, 108, 142, 208, 83, 13, 239, 177, 240, 174, 76, 18, 145,
-		207, 45, 115, 202, 148, 118, 40, 171, 245, 23, 73, 8, 86, 180, 234, 105,
-		55, 213, 139, 87, 9, 235, 181, 54, 104, 138, 212, 149, 203, 41, 119,
-		244, 170, 72, 22, 233, 183, 85, 11, 136, 214, 52, 106, 43, 117, 151,
-		201, 74, 20, 246, 168, 116, 42, 200, 150, 21, 75, 169, 247, 182, 232,
-		10, 84, 215, 137, 107, 53,
+		0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127, 252, 162, 64, 30, 95, 1, 227, 189, 62,
+		96, 130, 220, 35, 125, 159, 193, 66, 28, 254, 160, 225, 191, 93, 3, 128, 222, 60, 98, 190, 224, 2, 92, 223, 129, 99, 61, 124, 34,
+		192, 158, 29, 67, 161, 255, 70, 24, 250, 164, 39, 121, 155, 197, 132, 218, 56, 102, 229, 187, 89, 7, 219, 133, 103, 57, 186, 228, 6,
+		88, 25, 71, 165, 251, 120, 38, 196, 154, 101, 59, 217, 135, 4, 90, 184, 230, 167, 249, 27, 69, 198, 152, 122, 36, 248, 166, 68, 26,
+		153, 199, 37, 123, 58, 100, 134, 216, 91, 5, 231, 185, 140, 210, 48, 110, 237, 179, 81, 15, 78, 16, 242, 172, 47, 113, 147, 205, 17,
+		79, 173, 243, 112, 46, 204, 146, 211, 141, 111, 49, 178, 236, 14, 80, 175, 241, 19, 77, 206, 144, 114, 44, 109, 51, 209, 143, 12,
+		82, 176, 238, 50, 108, 142, 208, 83, 13, 239, 177, 240, 174, 76, 18, 145, 207, 45, 115, 202, 148, 118, 40, 171, 245, 23, 73, 8, 86,
+		180, 234, 105, 55, 213, 139, 87, 9, 235, 181, 54, 104, 138, 212, 149, 203, 41, 119, 244, 170, 72, 22, 233, 183, 85, 11, 136, 214,
+		52, 106, 43, 117, 151, 201, 74, 20, 246, 168, 116, 42, 200, 150, 21, 75, 169, 247, 182, 232, 10, 84, 215, 137, 107, 53,
 	];
 
 	checkType() {
@@ -101,9 +81,7 @@ export class TCS3000 extends BaseDispenser {
 	sendPreset(quantity: number) {
 		let crc = 0;
 		const buffer_array = [];
-		const volumePrecursor = [
-			0x7e, 0x01, 0x00, 0x20, 0x38, 0x0b, 0x03, 0x03, 0xf7,
-		];
+		const volumePrecursor = [0x7e, 0x01, 0x00, 0x20, 0x38, 0x0b, 0x03, 0x03, 0xf7];
 
 		// Calculate partial CRC for the precursor
 		for (const byte of volumePrecursor) {
@@ -123,9 +101,7 @@ export class TCS3000 extends BaseDispenser {
 		buffer_array.push(crc);
 
 		console.log(Buffer.from(buffer_array));
-		buffer_array.forEach((item) =>
-			console.log(item.toString(16).padStart(2, '0'))
-		);
+		buffer_array.forEach((item) => console.log(item.toString(16).padStart(2, '0')));
 
 		this.connection.write(Buffer.from(buffer_array));
 	}
@@ -234,11 +210,7 @@ export class TCS3000 extends BaseDispenser {
 		}
 
 		debugLog('processCommand: %s', res);
-		if (
-			res.includes('0011') ||
-			res.includes('0064') ||
-			res.includes('0044')
-		) {
+		if (res.includes('0011') || res.includes('0064') || res.includes('0044')) {
 			debugLog('processCommand: %s', 'Command success');
 			return true;
 		}
@@ -317,10 +289,7 @@ export class TCS3000 extends BaseDispenser {
 		if (readsale > quantity - 1) {
 			const response = {
 				status: true,
-				percentage: this.toFixedNumber(
-					(readsale / quantity) * 100.0,
-					2
-				),
+				percentage: this.toFixedNumber((readsale / quantity) * 100.0, 2),
 				// currentFlowRate: this.processFlowRate(res),
 				// averageFlowRate: this.processAverageFlowRate(res),
 				// batchNumber: this.processBatchNumber(res),
