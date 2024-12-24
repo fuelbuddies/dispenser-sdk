@@ -3,6 +3,28 @@ import { BaseDispenser } from "./base/BaseDispenser";
 
 const debugLog = debug("dispenser:veederEmr4");
 export class VeederEmr4 extends BaseDispenser {
+  private veeder_start             = Buffer.from([0x7E, 0x01, 0xFF, 0x53, 0x75, 0x00, 0x38, 0x7E]);
+  private veeder_mode              = Buffer.from([0x7E, 0x01, 0xFF, 0x53, 0x75, 0x02, 0x36, 0x7E]);
+  private veeder_finish            = Buffer.from([0x7E, 0x01, 0xFF, 0x53, 0x75, 0x01, 0x37, 0x7E]);
+  private veeder_totalizer         = Buffer.from([0x7E, 0x01, 0xFF, 0x47, 0x6C, 0x4D, 0x7E]);
+  private veeder_status            = Buffer.from([0x7E, 0x01, 0xFF, 0x54, 0x03, 0xA9, 0x7E]);
+  private veeder_read_volume       = Buffer.from([0x7E, 0x01, 0xFF, 0x47, 0x6B, 0x4E, 0x7E]);
+  private veeder_read_preset       = Buffer.from([0x7E, 0x01, 0xFF, 0x47, 0x6E, 0x4B, 0x7E]);
+  private veeder_reset             = Buffer.from([0x7E, 0x01, 0xFF, 0x52, 0x00, 0xAE, 0x7E]);
+  private veeder_preset            = Buffer.from([0x7E, 0x01, 0xFF, 0x53, 0x75, 0x03, 0x35, 0x7E]);
+  private veeder_authorize_on      = Buffer.from([0x7E, 0x01, 0xFF, 0x44, 0x25, 0x01, 0x96, 0x7E]);
+  private veeder_authorize_off     = Buffer.from([0x7E, 0x01, 0xFF, 0x44, 0x25, 0x00, 0x97, 0x7E]);
+  private veeder_show_preset       = Buffer.from([0x7E, 0x01, 0xFF, 0x53, 0x75, 0x03, 0x35, 0x7E]);
+  private veeder_emr_state         = Buffer.from([0x7E, 0x01, 0xFF, 0x54, 0x08, 0xA4, 0x7E]);
+  private veeder_pause             = Buffer.from([0x7E, 0x01, 0xFF, 0x4F, 0x02, 0xAF, 0x7E]);
+  private veeder_resume            = Buffer.from([0x7E, 0x01, 0xFF, 0x4F, 0x01, 0x00, 0xB0, 0x7E]);
+  private veeder_read_sale         = Buffer.from([0x7E, 0x01, 0xFF, 0x47, 0x4B, 0x6E, 0x7E]);
+  private veeder_get_authorization = Buffer.from([0x7E, 0x01, 0xFF, 0x54, 0x05, 0xA7, 0x7E]);
+  private veeder_emr_status        = Buffer.from([0x7E, 0x01, 0xFF, 0x47, 0x4B, 0x6F, 0x7E]);
+  private veeder_end_delivery      = Buffer.from([0x7E, 0x01, 0xFF, 0x4F, 0x03, 0xAE, 0x7E]);
+  private veeder_delivery_auth     = Buffer.from([0x7E, 0x01, 0xFF, 0x4F, 0x06, 0x01, 0xAA, 0x7E]);
+  private veeder_auth_required     = Buffer.from([0x7E, 0x01, 0xFF, 0x44, 0x25, 0x01, 0x96, 0x7E]);
+  
   private deliveryStatus: string[] = [
     "Delivery Error",
     "Delivery Completed",
@@ -22,105 +44,130 @@ export class VeederEmr4 extends BaseDispenser {
     "ATC Error",
   ];
 
-  // checkType() {
-  //   this.connection.send("Dispenser");
-  // }
+  getType() {
+    return 'VEEDER_EMR4';
+  }
 
-  // switchToRemote() {
-  //   this.connection.send("Go_Remote");
-  // }
+  processCommand(res: string) {
+    debugLog("processCommand: %s", res);
+    if (res.includes("7eff014100bf7e")) {
+      debugLog("processCommand: Command successful");
+      return true;
+    }
 
-  // switchToLocal() {
-  //   this.connection.send("Go_Local");
-  // }
+    throw Error("Command failed! check for status");
+  }
 
-  // elockStatus() {
-  //   this.connection.send("Lock_Status");
-  // }
 
-  // elockUnlock() {
-  //   this.connection.send("Lock_UnLock");
-  // }
+  checkType() {
+    debugLog("checkType");
+    return this.getType();
+  }
 
-  // elockReset() {
-  //   this.connection.send("Lock_Reset");
-  // }
+  async switchToRemote() {
+    await this.connection.write(this.veeder_authorize_on);
+    return await this.dispenserResponse();
+  }
 
-  // elockLock() {
-  //   this.connection.send("Lock_Lock");
-  // }
+  async switchToLocal() {
+    await this.connection.write(this.veeder_authorize_off);
+    return await this.dispenserResponse();
+  }
 
-  // totalizer() {
-  //   this.connection.send("Totalizer");
-  // }
+  async totalizer() {
+    await this.connection.write(this.veeder_totalizer);
+    return await this.dispenserResponse();
+  }
 
-  // readStatus() {
-  //   this.connection.send("Read_Status");
-  // }
+  async readStatus() {
+    await this.connection.write(this.veeder_status);
+    return await this.dispenserResponse();
+  }
 
-  // startPump() {
-  //   this.connection.send("Pump_Start");
-  // }
+  pumpStart() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.connection.write(this.veeder_auth_required);
+        const response = await this.dispenserResponse();
+        debugLog("pumpStart response: %s", response);
+        if(response.includes("7eff014100bf7e")) {
+          this.executeShellScriptAndCheck('scripts/EMR4/startpump.sh').then((result) => {
+            debugLog("pumpStart result: %s", result);
 
-  // stopPump() {
-  //   this.connection.send("Pump_Stop");
-  // }
+            if (result) {
+              debugLog("pumpStart result: %s", "7eff014100bf7e");
+              return resolve("7eff014100bf7e");
+            }
 
-  // authorizeSale() {
-  //   this.connection.send("Authorize");
-  // }
+            debugLog("pumpStart result: %s", "Command failed!");
+            return reject("Command failed!");
 
-  // setPreset(quantity: number) {
-  //   this.connection.send(`Preset_QTY=${quantity}`);
-  // }
+          });
+        } else {
+          return reject(response);
+        }
+      } catch (error) {
+        debugLog("pumpStart error: %s", error);
+        return reject("Command failed!");
+      }
+    });
+  }
 
-  // readPreset() {
-  //   this.connection.send("Read_Preset");
-  // }
+  async pumpStop() {
+    try {
+      const result = await this.executeShellScriptAndCheck('scripts/EMR4/stoppump.sh');
+      debugLog("pumpStop result: %s", result);
 
-  // cancelPreset() {
-  //   this.connection.send("Cancel_Preset");
-  // }
+      if (result) {
+        return "7eff014100bf7e";
+      }
 
-  // readSale() {
-  //   this.connection.send("Read_Sale");
-  // }
+      return "Command failed!";
+    } catch (error) {
+      debugLog("pumpStop error: %s", error);
+      return "Command failed!";
+    }
+  }
 
-  // suspendSale() {
-  //   this.connection.send("Suspend_Sale");
-  // }
+  async authorizeSale() {
+    await this.connection.write(this.veeder_delivery_auth);
+    return await this.dispenserResponse();
+  }
 
-  // resumeSale() {
-  //   this.connection.send("Resume_Sale");
-  // }
+  async readPreset() {
+    await this.connection.write(this.veeder_read_preset);
+    return await this.dispenserResponse();
+  }
 
-  // clearSale() {
-  //   this.connection.send("Clear_Sale");
-  // }
+  async cancelPreset() {
+    await this.connection.write(this.veeder_reset);
+    return await this.dispenserResponse();
+  }
 
-  // hasExternalPump() {
-  //   this.connection.send("External_Pump");
-  // }
+  async readSale() {
+    await this.connection.write(this.veeder_read_sale);
+    return await this.dispenserResponse();
+  }
 
-  // readExternalPumpStatus() {
-  //   this.connection.send("External_Pump_Status");
-  // }
+  async suspendSale() {
+    await this.connection.write(this.veeder_pause);
+    return await this.dispenserResponse();
+  }
 
-  // startExternalPump() {
-  //   this.connection.send("External_Pump_Start");
-  // }
+  async resumeSale() {
+    await this.connection.write(this.veeder_resume);
+    return await this.dispenserResponse();
+  }
 
-  // stopExternalPump() {
-  //   this.connection.send("External_Pump_Stop");
-  // }
+  async clearSale() {
+    await this.connection.write(this.veeder_end_delivery);
+    await this.connection.write(this.veeder_reset);
+    return await this.dispenserResponse();
+  }
 
-  // readAuthorization() {
-  //   this.connection.send("Read_Authorization");
-  // }
-
-  printReceipt(printObj: any) {
-    debugLog("printReceipt: %s", printObj);
-    // this.connection.send("Print_Receipt");
+  async readAuthorization() {
+    await this.connection.write(this.veeder_get_authorization);
+    return await this.dispenserResponse();
   }
 
   interpolateHex(originalString: string) {
@@ -179,14 +226,6 @@ export class VeederEmr4 extends BaseDispenser {
     }, {});
   }
 
-  processCommand(res: string) {
-    if (res.includes("7eff014100bf7e")) {
-      return true;
-    } else {
-      throw Error("Command failed! check for status");
-    }
-  }
-
   processReadSale(res: string) {
     return {
       unitPrice: 0.0, //this.processResponseRaw([responseCodedArray[0],responseCodedArray[1]], 4, 6),
@@ -209,6 +248,7 @@ export class VeederEmr4 extends BaseDispenser {
     return {
       totalizer: this.processTotalizer(res),
       batchNumber: this.processBatchNumber(res) + 1,  // called before pump start.. so +1
+      timestamp: new Date().getTime(),
     };
   }
 
@@ -306,24 +346,51 @@ export class VeederEmr4 extends BaseDispenser {
     return false;
   }
 
-  hasChecksBeforePumpStart() {
+  hasChecksBeforePumpStart(res: string) {
+    debugLog("hasChecksBeforePumpStart: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("hasChecksBeforePumpStart: %s", dispenserStatus);
     return false;
   }
 
-  isNozzleOnHook(): boolean {
+  isNozzleOnHook(res: string): boolean {
+    debugLog("isNozzleOnHook: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isNozzleOnHook: %s", dispenserStatus);
     return true;
   }
 
-  isNozzleOffHook(): boolean {
+  isNozzleOffHook(res: string): boolean {
+    debugLog("isNozzleOffHook: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isNozzleOffHook: %s", dispenserStatus);
     return true;
   }
 
   isOnline(res: string): boolean {
+    debugLog("isOnline: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isOnline: %s", dispenserStatus);
     return res.substring(10).slice(0, -4) == "01";
+  }
+
+  isPresetAvailable(res: string): boolean {
+    debugLog("isPresetAvailable: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isPresetAvailable: %s", dispenserStatus);
+    return true;
+  }
+
+  isNozzleCheckRequired(res: string) {
+    debugLog("isNozzleCheckRequired: %s", res);
+    const dispenserStatus = this.processStatus(res);
+    debugLog("isNozzleCheckRequired: %s", dispenserStatus);
+    return false;
   }
 
   isPresetVerified(res: string, quantity: number) {
     const presetValue = this.processReadPreset(res);
+    debugLog("isPresetVerified: %s", presetValue);
     if (quantity == presetValue) {
       return true;
     }
@@ -332,6 +399,7 @@ export class VeederEmr4 extends BaseDispenser {
 
   isDispensing(res: string) {
     const dispenserStatus = this.processStatus(res);
+    debugLog("isDispensing: %s", dispenserStatus);
     if (dispenserStatus.get("Delivery Is Active")) {
       return true;
     }
@@ -340,6 +408,7 @@ export class VeederEmr4 extends BaseDispenser {
 
   isIdle(res: string) {
     const dispenserStatus = this.processStatus(res);
+    debugLog("isIdle: %s", dispenserStatus);
     if (dispenserStatus.get("Delivery Completed")) {
       return true;
     }
@@ -348,14 +417,26 @@ export class VeederEmr4 extends BaseDispenser {
 
   isSaleCloseable(res: string) {
     const dispenserStatus = this.processStatus(res);
-    if (dispenserStatus.get("Net Preset Is Active")) {
+    debugLog("isSaleCloseable: %s", dispenserStatus);
+    // if (dispenserStatus.get("Net Preset Is Active") || dispenserStatus.get("Delivery Error")) {
       return true;
-    }
+    // }
+    // return false;
+  }
+
+  /**
+   * we can install a printer on this dispenser. but it's not installed.
+   * @returns false
+   */
+  isPrinterAvailable(res: string) {
+    debugLog("isPrinterAvailable: %s", res);
+    debugLog("isPrinterAvailable: %s", "false");
     return false;
   }
 
   isOrderComplete(res: string, quantity: number) {
     const readsale = this.processReadSale(res).volume;
+    debugLog("isOrderComplete: %s", readsale);
     if (readsale >= quantity) {
       return {
         status: true,
@@ -374,5 +455,48 @@ export class VeederEmr4 extends BaseDispenser {
       batchNumber: this.processBatchNumber(res),
       dispensedQty: this.toFixedNumber(readsale, 2),
     };
+  }
+
+  async setPreset(quantity: number) {
+    debugLog("setPreset: %s", quantity);
+    return await this.sendPreset(quantity);
+  }
+
+  calculateChecksum(headerBytes: any, messageBytes: any) {
+    // Add all header and message bytes
+    let checksum = headerBytes.reduce((sum: any, byte: any) => sum + byte, 0);
+    checksum += messageBytes.reduce((sum: any, byte: any) => sum + byte, 0);
+
+    // Two's complement (invert and add 1)
+    checksum = ~checksum + 1;
+    return checksum & 0xFF; // Ensure it's 8-bit
+  }
+
+  async sendPreset(veederPre: number) {
+    // Header bytes as per protocol
+    const START_BYTE = 0x7E;
+    const HEADER_BYTES = [0x01, 0xFF, 0x53, 0x6E];
+
+    // Convert the float to its 4-byte representation
+    const messageBytes = Buffer.alloc(4);
+    messageBytes.writeFloatLE(veederPre);
+
+    // Calculate checksum
+    const checksum = this.calculateChecksum(HEADER_BYTES, [...messageBytes]);
+
+    // Construct the full message
+    const fullMessage = [
+      START_BYTE,
+      ...HEADER_BYTES,
+      ...messageBytes,
+      checksum,
+      START_BYTE,
+    ];
+
+    debugLog("sendPreset: %s", fullMessage.map(byte => byte.toString(16).padStart(2, '0')).join(' '));
+    // Write all bytes to the connection at once
+    await this.connection.write(Buffer.from(fullMessage));
+    await this.connection.write(this.veeder_resume);
+    return await this.dispenserResponse();
   }
 }

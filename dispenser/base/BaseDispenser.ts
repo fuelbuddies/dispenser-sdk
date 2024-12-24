@@ -4,126 +4,81 @@ import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
 import debug from 'debug';
+import { execFile } from 'child_process';
+import * as path from 'path';
 
 const debugLog = debug('dispenser:base-dispenser');
 
 export class BaseDispenser implements IDispenser {
 	connection: SerialPort<AutoDetectTypes>;
-	queue: QueueObject<any>;
 	innerByteTimeoutParser: InterByteTimeoutParser;
-	// logger: Logger;
 	[key: string]: any;
 
 	constructor(socket: SerialPort, options?: DispenserOptions) {
 		this.connection = socket;
-		this.queue = queue(this.processTask.bind(this), 1);
 		// Adjust concurrency as needed
-		this.innerByteTimeoutParser = this.connection.pipe(
-			new InterByteTimeoutParser({ interval: 300 })
-		);
-		// this.logger = new Logger({id: 'dispenser', useConsole: false});
+		this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 300 }));
 	}
 
-	disconnect(callback: any): void {
-		this.connection.close(callback);
-	}
-
-	processTask(task: any, callback: any) {
-		const { bindFunction, callee, calleeArgs } = task;
-		this.innerByteTimeoutParser.once('data', (data: any): void => {
+	dispenserResponse(): Promise<any> {
+		return new Promise((resolve, reject) => {
 			try {
-				if (bindFunction instanceof Function) {
-					callback(
-						null,
-						bindFunction.call(
-							this,
-							data.toString('hex'),
-							calleeArgs,
-							callee.name
-						)
-					);
-				} else {
-					callback(null, data.toString('hex'));
-				}
+				this.innerByteTimeoutParser.once('data', (data: any): void => {
+					var res = data.toString('hex');
+					debugLog('awaitDispenserResponse: %s', res);
+					resolve(res);
+				});
 			} catch (e) {
-				debugLog('processTask: %s', 'error in try catch fn');
-				callback(e);
+				reject(e);
 			}
 		});
-		callee.call(this, calleeArgs || undefined);
 	}
 
-	// bind(fn: (...args: any[]) => void) {
-	//   return this.connection.pipe(new InterByteTimeoutParser({ interval: 200 })).addListener('data', fn);
-	// }
-
-	// unbind(fn: (...args: any[]) => void) {
-	//   return this.connection.removeListener('data', fn);
-	// }
-
-	execute(
-		callee: any,
-		bindFunction?: (...args: any[]) => unknown,
-		calleeArgs: any = undefined
-	): Promise<any> {
+	execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
 		return new Promise((resolve, reject) => {
-			this.queue.push(
-				{ callee, bindFunction, calleeArgs },
-				(err, result) => {
-					if (err) {
-						reject(err);
-					} else {
+			Promise.resolve(callee.call(this, calleeArgs || undefined))
+				.then(async (data: any) => {
+					if (bindFunction instanceof Function) {
+						const result = await bindFunction.call(this, data, calleeArgs || undefined, callee.name);
+						debugLog('bindFunction: %s', JSON.stringify(result));
 						resolve(result);
+					} else {
+						resolve(data);
 					}
-				}
-			);
+				})
+				.catch((err: any) => {
+					reject(err);
+				});
 		});
 	}
 
-	executeWork(
-		strCallee: string,
-		strBindFunction?: string,
-		calleeArgs: any = undefined
-	): Promise<any> {
+	executeWork(strCallee: string, strBindFunction?: string, calleeArgs: any = undefined): Promise<any> {
 		const callee = this[strCallee] as (...args: [any]) => any;
-		const bindFunction = strBindFunction
-			? this[strBindFunction]
-			: undefined;
+		const bindFunction = strBindFunction ? this[strBindFunction] : undefined;
 		if (!callee) throw new Error('Invalid callee function');
-		if (bindFunction && !(bindFunction instanceof Function))
-			throw new Error('Invalid Bind function');
+		if (bindFunction && !(bindFunction instanceof Function)) throw new Error('Invalid Bind function');
 		return this.execute(callee, bindFunction, calleeArgs);
 	}
 
-	executeInPriority(
-		callee: any,
-		bindFunction: any = undefined,
-		calleeArgs: any = undefined
-	): Promise<any> {
-		return new Promise((resolve, reject) => {
-			this.queue.unshift(
-				{ callee, bindFunction, calleeArgs },
-				(err, result) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(result);
-					}
-				}
-			);
+	executeInPriority(callee: any, bindFunction: any = undefined, calleeArgs: any = undefined): Promise<any> {
+		return this.execute(callee, bindFunction, calleeArgs);
+	}
+
+	async disconnect(callback: any) {
+		debugLog('disconnect: %s', 'Requesting disconnection from Seneca');
+		const connection = await this.connection;
+
+		connection.close(async () => {
+			// if (!this.printer) {
+			// debugLog("disconnect: %s", "No printer connection found");
+			return callback();
+			// }
+
+			// this.printer.close(() => {
+			//     debugLog("disconnect: %s", "Printer connection closed");
+			//     callback();
+			// });
 		});
-	}
-
-	/**
-	 * reset queue
-	 */
-	resetQueue(): void {
-		this.queue.kill();
-		this.queue = queue(this.processTask.bind(this), 1);
-	}
-
-	processExternalPump(res: string) {
-		return JSON.parse(res);
 	}
 
 	/**
@@ -136,7 +91,6 @@ export class BaseDispenser implements IDispenser {
 		if (cutFromLast) {
 			return str.substring(str.length - cutLength);
 		}
-
 		return str.substring(0, cutLength);
 	}
 
@@ -172,10 +126,7 @@ export class BaseDispenser implements IDispenser {
 		const hex = parseInt(hexString, 16);
 		const sign = hex >> 31 ? -1 : 1;
 		const exponent = (hex >> 23) & 0xff;
-		return (
-			((sign * ((hex & 0x7fffff) | 0x800000) * 1.0) / Math.pow(2, 23)) *
-			Math.pow(2, exponent - 127)
-		);
+		return ((sign * ((hex & 0x7fffff) | 0x800000) * 1.0) / Math.pow(2, 23)) * Math.pow(2, exponent - 127);
 	}
 
 	hexStringToByte(printText: string, needle: number): number {
@@ -200,19 +151,12 @@ export class BaseDispenser implements IDispenser {
 		// Classify the floating-point value.
 		if (exponent_bits == 0x7ff)
 			// infinity | not a number
-			return significand_bits == 0
-				? sign * Number.POSITIVE_INFINITY
-				: Number.NaN;
+			return significand_bits == 0 ? sign * Number.POSITIVE_INFINITY : Number.NaN;
 		else if (exponent_bits == 0)
 			// zero | subnormal number
 			return sign * Math.pow(2, 1 - 1023 - 52) * significand_bits;
 		// normal number
-		else
-			return (
-				sign *
-				Math.pow(2, exponent_bits - 1023 - 52) *
-				(Math.pow(2, 52) + significand_bits)
-			);
+		else return sign * Math.pow(2, exponent_bits - 1023 - 52) * (Math.pow(2, 52) + significand_bits);
 	}
 
 	toFixedNumber(num: number, digits: number, base?: number) {
@@ -225,9 +169,7 @@ export class BaseDispenser implements IDispenser {
 		const binary = absValue.toString(2).padStart(bitWidth - 1, '0');
 		return decimal >= 0
 			? binary.padStart(bitWidth, '0')
-			: ('1' + binary).replace(/[01]/g, (bit: string) =>
-					(parseInt(bit, 10) ^ 1).toString(2)
-			  );
+			: ('1' + binary).replace(/[01]/g, (bit: string) => (parseInt(bit, 10) ^ 1).toString(2));
 	}
 
 	delay(milliseconds: number) {
@@ -287,8 +229,30 @@ export class BaseDispenser implements IDispenser {
 		const leftSpaces = Math.floor(spacesToAdd / 2);
 		const rightSpaces = spacesToAdd - leftSpaces;
 
-		const alignedString =
-			' '.repeat(leftSpaces) + value + ' '.repeat(rightSpaces);
+		const alignedString = ' '.repeat(leftSpaces) + value + ' '.repeat(rightSpaces);
 		return alignedString;
 	};
+
+	// Function to execute a shell script and check if the result is "true"
+	executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
+		const absoluteScriptPath = path.join(__dirname, scriptPath);
+		debugLog('Executing script: %s', absoluteScriptPath);
+
+		return new Promise((resolve, reject) => {
+			execFile(absoluteScriptPath, (error, stdout, stderr) => {
+				debugLog('stdout: %s', stdout);
+				debugLog('stderr: %s', stderr);
+				debugLog('error: %s', error);
+				if (error) {
+					// If there's an error, consider the script execution unsuccessful
+					debugLog('Console: %s', stderr);
+					debugLog('Error: %s', error);
+					reject(false);
+				} else {
+					// If the script output is "true", consider the script execution successful
+					resolve(stdout.trim() == 'true');
+				}
+			});
+		});
+	}
 }
