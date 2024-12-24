@@ -9,7 +9,7 @@ const configuration = getConfigFromEnv();
 debugLog('Configuration: %O', configuration);
 createDispenser(configuration).then((dispenser) => {
 	dispenser
-		.execute(dispenser.clearSale, dispenser.processCommand)
+		.execute(dispenser.setPreset, dispenser.processCommand, 123.45)
 		.then((response) => {
 			dispenser.disconnect(() => {
 				console.log('Disconnected');
