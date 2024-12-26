@@ -8,6 +8,7 @@ import { Seneca } from './dispenser/workflows/GateX';
 import { delay } from './utils/delay';
 import debug from 'debug';
 import { findPrinterPort } from './utils/findPrinterPort';
+import { TCS3000 } from './dispenser/TCS3000';
 
 const debugLog = debug('dispenser:main');
 export { IDispenser, IRfid, RfidOptions, DispenserOptions, getConfigFromEnv, getRFIDConfigFromEnv };
@@ -31,6 +32,10 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
 			const ISoilUsbPath = await findDispenserPort(hardwareId, attributeId);
 			debugLog('Dispenser found at: %o', ISoilUsbPath);
 			return new IsoilVegaTVersion10.IsoilVegaTVersion10(new SerialPort({ path: ISoilUsbPath, baudRate: baudRate }), options);
+		case 'TCS3000':
+			const TCSUsbPath = await findDispenserPort(hardwareId, attributeId);
+			debugLog('Dispenser found at: %o', TCSUsbPath);
+			return new TCS3000(new SerialPort({ path: TCSUsbPath, baudRate: baudRate }));
 		case 'GateX':
 			const GateX = await import('./dispenser/GateX');
 			const serialPort = new Seneca(options);

@@ -190,6 +190,15 @@ export class BaseDispenser implements IDispenser {
 		return str;
 	}
 
+	doubleToHex(value: number): string {
+		const buffer = new ArrayBuffer(8); // 8 bytes for double precision
+		const view = new DataView(buffer);
+		view.setFloat64(0, value, false); // Write the double in big-endian format
+		return Array.from(new Uint8Array(buffer))
+			.map((byte) => byte.toString(16).padStart(2, '0'))
+			.join('');
+	}
+
 	/**
 	 * right align value in a string.
 	 * @param label
