@@ -35,7 +35,7 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
 		case 'TCS3000':
 			const TCSUsbPath = await findDispenserPort(hardwareId, attributeId);
 			debugLog('Dispenser found at: %o', TCSUsbPath);
-			return new TCS3000(new SerialPort({ path: TCSUsbPath, baudRate: 9600 }));
+			return new TCS3000(new SerialPort({ path: TCSUsbPath, baudRate: baudRate }));
 		case 'GateX':
 			const GateX = await import('./dispenser/GateX');
 			const serialPort = new Seneca(options);

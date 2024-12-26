@@ -107,8 +107,7 @@ export class TCS3000 extends BaseDispenser {
 		}
 		buffer_array.push(crc);
 
-		console.log(Buffer.from(buffer_array));
-		buffer_array.forEach((item) => console.log(item.toString(16).padStart(2, '0')));
+		debugLog('sendPreset: %s', buffer_array.map((item) => item.toString(16).padStart(2, '0')).join(' '));
 
 		await this.connection.write(Buffer.from(buffer_array));
 		return await this.dispenserResponse();
@@ -182,7 +181,6 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	processCommand(res: string, args: any, fnName: string) {
-		console.log(res);
 		if (args) {
 			debugLog('processCommand: %o', args);
 			console.log('processCommandArgs: %o', args);
