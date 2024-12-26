@@ -44,10 +44,7 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
 			if (!printer) throw new Error('Printer is required for GateX dispenser');
 			const GateXPrinterPath = await findPrinterPort(printer.hardwareId, printer.attributeId);
 			debugLog('Printer found at: %o', GateXPrinterPath);
-			const printerPort = new SerialPort({
-				path: GateXPrinterPath,
-				baudRate: printer.baudRate || 9600,
-			});
+			const printerPort = new SerialPort({ path: GateXPrinterPath, baudRate: printer.baudRate || 9600 });
 			const gatex = new GateX.GateX(serialPort, printerPort, options);
 			await delay(5000);
 			return gatex;
@@ -61,10 +58,7 @@ export async function createRfid(options: RfidOptions): Promise<IRfid> {
 	const { rfidType, hardwareId, attributeId, baudRate = 19200 } = options;
 	switch (rfidType) {
 		case 'PETROPOINTHECTRONICS':
-			const serialPort = new SerialPort({
-				path: await findRfidPort(hardwareId, attributeId),
-				baudRate: baudRate,
-			});
+			const serialPort = new SerialPort({ path: await findRfidPort(hardwareId, attributeId), baudRate: baudRate });
 			const RfidPetropoint = await import('./rfid/RfidPetropoint');
 			return new RfidPetropoint.RfidPetropoint(serialPort);
 		default:

@@ -8,12 +8,11 @@ const debugLog = debug('dispenser:main');
 const configuration = getConfigFromEnv();
 debugLog('Configuration: %O', configuration);
 createDispenser(configuration).then((dispenser) => {
-	dispenser
-		.execute(dispenser.readStatus, dispenser.processStatus)
-		.then((status) => {
-			dispenser.disconnect(() => {
-				console.log('Disconnected');
-			});
-			console.log(status);
+	// console.log(dispenser);
+	dispenser.execute(dispenser.readStatus, dispenser.processStatus).then((totalizer) => {
+		dispenser.disconnect(() => {
+			console.log('Disconnected');
 		});
+		console.log(totalizer);
+	});
 });

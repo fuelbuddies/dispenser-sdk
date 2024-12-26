@@ -154,8 +154,7 @@ export class BaseDispenser implements IDispenser {
 			return significand_bits == 0 ? sign * Number.POSITIVE_INFINITY : Number.NaN;
 		else if (exponent_bits == 0)
 			// zero | subnormal number
-			return sign * Math.pow(2, 1 - 1023 - 52) * significand_bits;
-		// normal number
+			return sign * Math.pow(2, 1 - 1023 - 52) * significand_bits; // normal number
 		else return sign * Math.pow(2, exponent_bits - 1023 - 52) * (Math.pow(2, 52) + significand_bits);
 	}
 

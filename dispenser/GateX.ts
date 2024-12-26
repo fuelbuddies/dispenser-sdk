@@ -229,10 +229,7 @@ export class GateX extends ModBusDispenser {
 			!previousTotalizer.timestamp ||
 			currentTotalizer.timestamp <= previousTotalizer.timestamp
 		) {
-			debugLog('calculateVolume: %o', {
-				previousTotalizer,
-				currentTotalizer,
-			});
+			debugLog('calculateVolume: %o', { previousTotalizer, currentTotalizer });
 			throw new Error('Invalid data or timestamps not in order'); // Invalid data or timestamps not in order
 		}
 
