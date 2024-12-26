@@ -37,38 +37,45 @@ export class TCS3000 extends BaseDispenser {
 	async totalizer() {
 		debugLog('totalizer', 'Read_Totalizer');
 		await this.connection.write(this.totalizerBuffer);
+		return await this.dispenserResponse();
 	}
 
 	async readPreset() {
 		debugLog('readPreset', 'Read_Status');
 		await this.connection.write(this.read_preset); // same command to get data on isoil
+		return await this.dispenserResponse();
 	}
 
 	// TODO: Need to set this up
-	readSale() {
+	async readSale() {
 		debugLog('readSale', 'Read_Sale');
-		this.connection.write(this.read_sale); // same command to get data on isoil
+		await this.connection.write(this.read_sale); // same command to get data on isoil
+		return await this.dispenserResponse();
 	}
 
 	// TODO: Need to set this up
-	readStatus() {
+	async readStatus() {
 		debugLog('readStatus', 'Read_Status');
-		this.connection.write(this.read_status); // response needs some statuses to be hardcoded .. will see
+		await this.connection.write(this.read_status); // response needs some statuses to be hardcoded .. will see
+		return await this.dispenserResponse();
 	}
 
 	async pumpStart() {
 		debugLog('startPump', 'Pump_Start');
 		await this.connection.write(this.pump_start);
+		return await this.dispenserResponse();
 	}
 
 	async pumpStop() {
 		debugLog('stopPump', 'Pump_Stop');
 		await this.connection.write(this.pump_stop);
+		return await this.dispenserResponse();
 	}
 
 	async authorizeSale() {
 		debugLog('authorizeSale', 'Start');
 		await this.connection.write(this.authorize);
+		return await this.dispenserResponse();
 	}
 
 	async setPreset(quantity: number) {
@@ -78,7 +85,7 @@ export class TCS3000 extends BaseDispenser {
 		await this.sendPreset(quantity);
 	}
 
-	sendPreset(quantity: number) {
+	async sendPreset(quantity: number) {
 		let crc = 0;
 		const buffer_array = [];
 		const volumePrecursor = [0x7e, 0x01, 0x00, 0x20, 0x38, 0x0b, 0x03, 0x03, 0xf7];
@@ -103,27 +110,32 @@ export class TCS3000 extends BaseDispenser {
 		console.log(Buffer.from(buffer_array));
 		buffer_array.forEach((item) => console.log(item.toString(16).padStart(2, '0')));
 
-		this.connection.write(Buffer.from(buffer_array));
+		await this.connection.write(Buffer.from(buffer_array));
+		return await this.dispenserResponse();
 	}
 
 	async cancelPreset() {
 		debugLog('cancelPreset', 'Cancel_Preset');
 		await this.connection.write(this.cancel_preset);
+		return await this.dispenserResponse();
 	}
 
 	async suspendSale() {
 		debugLog('suspendSale', 'Stop');
 		await this.connection.write(this.suspend_sale);
+		return await this.dispenserResponse();
 	}
 
 	async resumeSale() {
 		debugLog('resumeSale', 'Resume_Sale');
 		await this.connection.write(this.resume_sale);
+		return await this.dispenserResponse();
 	}
 
 	async clearSale() {
 		debugLog('clearSale', 'Clear_Sale');
 		await this.connection.write(this.clear_sale);
+		return await this.dispenserResponse();
 	}
 
 	hasExternalPump() {
