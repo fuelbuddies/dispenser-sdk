@@ -181,6 +181,7 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	processCommand(res: string, args: any, fnName: string) {
+		debugLog('processCommandAllArguments: %o', arguments);
 		if (args) {
 			debugLog('processCommand: %o', args);
 			console.log('processCommandArgs: %o', args);

@@ -199,11 +199,15 @@ export class GateX extends ModBusDispenser {
 		return 'true';
 	}
 
+	isReadyForPreset(): boolean {
+		return false;
+	}
+
 	isPresetAvailable(): boolean {
 		return false;
 	}
 
-	isNozzleCheckRequired() {
+	isNozzleCheckRequired(): boolean {
 		return false;
 	}
 
