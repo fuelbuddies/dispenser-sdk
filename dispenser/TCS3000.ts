@@ -82,7 +82,7 @@ export class TCS3000 extends BaseDispenser {
 		debugLog('setPreset', `Preset_QTY=${quantity}`);
 		// TODO: implement this
 		// this.connection.send(`Preset_QTY=${quantity}`);
-		await this.sendPreset(quantity);
+		return await this.sendPreset(quantity);
 	}
 
 	async sendPreset(quantity: number) {
