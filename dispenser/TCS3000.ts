@@ -82,7 +82,7 @@ export class TCS3000 extends BaseDispenser {
 		debugLog('setPreset', `Preset_QTY=${quantity}`);
 		// TODO: implement this
 		// this.connection.send(`Preset_QTY=${quantity}`);
-		await this.sendPreset(quantity);
+		return await this.sendPreset(quantity);
 	}
 
 	async sendPreset(quantity: number) {
@@ -181,15 +181,8 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	processCommand(res: string, args: any, fnName: string) {
-		if (args) {
-			debugLog('processCommand: %o', args);
-			console.log('processCommandArgs: %o', args);
-		}
-
-		if (fnName) {
-			console.log('processCommandfnName: %o', fnName);
-			debugLog('processCommand: %o', fnName);
-		}
+		debugLog('processCommandArguments: %o', arguments);
+		console.log('processCommandArguments: %o', arguments);
 
 		if (fnName === 'suspendSale') {
 			if (res.includes('0043') || res.includes('0023')) {
