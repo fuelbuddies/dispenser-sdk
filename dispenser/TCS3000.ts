@@ -246,10 +246,10 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	isPumpStopped(res: string) {
-		debugLog('isPumpStopped: %s', res);
+		debugLog('isPumpStoppedArgs: %s', res);
 		const status = this.processStatus(res);
 		debugLog('isPumpStopped: %o', status);
-		if (status.status == 'IDLE') {
+		if (status.status == 'STOPPED') {
 			debugLog('isPumpStopped: %s', 'true');
 			return true;
 		}
@@ -362,8 +362,27 @@ export class TCS3000 extends BaseDispenser {
 		return true;
 	}
 
-	isSaleCloseable() {
-		debugLog('isSaleCloseable: %s', 'true');
-		return true;
+	isSaleCloseable(res: string) {
+		debugLog('isSaleCloseableArgs', arguments);
+		const dispenserStatus = this.processStatus(res);
+		if (dispenserStatus.status == 'TCKT_PENDING') {
+			debugLog('isSaleCloseable: %s', 'true');
+			return true;
+		}
+
+		debugLog('isSaleCloseable: %s', 'false');
+		return false;
+	}
+
+	isSaleSuspended(res: string) {
+		debugLog('isSaleSuspendedArgs', arguments);
+		const dispenserStatus = this.processStatus(res);
+		if (dispenserStatus.status == 'PAUSED') {
+			debugLog('isSaleSuspended: %s', 'true');
+			return true;
+		}
+
+		debugLog('isSaleSuspended: %s', 'false');
+		return false;
 	}
 }
