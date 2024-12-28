@@ -14,10 +14,10 @@ createDispenser(configuration).then((dispenser) => {
 	try {
 		dispenser.execute(dispenser.suspendSale, dispenser.processCommand, 1000).then((presetStatus) => {
 			debugLog('suspendSale: %o', presetStatus);
-			delay(1000).then(() => {
+			delay(3000).then(() => {
 				dispenser.execute(dispenser.pumpStop, dispenser.processCommand).then((pumpStatus) => {
 					debugLog('pumpStop: %o', pumpStatus);
-					delay(1000).then(() => {
+					delay(5000).then(() => {
 						dispenser.execute(dispenser.clearSale, dispenser.processCommand).then((clearStatus) => {
 							debugLog('clearSale: %o', clearStatus);
 							dispenser.disconnect(() => {
