@@ -35,7 +35,11 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
 		case 'TCS3000':
 			const TCSUsbPath = await findDispenserPort(hardwareId, attributeId);
 			debugLog('Dispenser found at: %o', TCSUsbPath);
-			return new TCS3000(new SerialPort({ path: TCSUsbPath, baudRate: baudRate }));
+			if (!printer) throw new Error('Printer is required for TCS dispenser');
+			const TCS3000PrinterPath = await findPrinterPort(printer.hardwareId, printer.attributeId);
+			debugLog('Printer found at: %o', TCS3000PrinterPath);
+			const TCS3000printerPort = new SerialPort({ path: TCS3000PrinterPath, baudRate: printer.baudRate || 9600 });
+			return new TCS3000(new SerialPort({ path: TCSUsbPath, baudRate: baudRate }), TCS3000printerPort);
 		case 'GateX':
 			const GateX = await import('./dispenser/GateX');
 			const serialPort = new Seneca(options);
