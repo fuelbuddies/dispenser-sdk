@@ -1,5 +1,8 @@
 import debug from 'debug';
 import { BaseDispenser } from './base/BaseDispenser';
+import { AutoDetectTypes } from '@serialport/bindings-cpp';
+import { SerialPort } from 'serialport';
+import { DispenserOptions } from '../main';
 
 const debugLog = debug('dispenser:tcs3000');
 export class TCS3000 extends BaseDispenser {
@@ -29,6 +32,12 @@ export class TCS3000 extends BaseDispenser {
 		180, 234, 105, 55, 213, 139, 87, 9, 235, 181, 54, 104, 138, 212, 149, 203, 41, 119, 244, 170, 72, 22, 233, 183, 85, 11, 136, 214,
 		52, 106, 43, 117, 151, 201, 74, 20, 246, 168, 116, 42, 200, 150, 21, 75, 169, 247, 182, 232, 10, 84, 215, 137, 107, 53,
 	];
+
+	printer: SerialPort<AutoDetectTypes>;
+	constructor(socket: SerialPort, printer: SerialPort, options?: DispenserOptions) {
+		super(socket, options);
+		this.printer = printer;
+	}
 
 	checkType() {
 		return 'TCS3000';
@@ -455,7 +464,7 @@ export class TCS3000 extends BaseDispenser {
 
 	printOrder(printText: string): boolean {
 		if (!this.printer) {
-			throw new Error('Printer is required for GateX dispenser');
+			throw new Error('Printer is required for TCS3000 dispenser');
 		}
 
 		const buffer = Buffer.from(printText, 'hex');
