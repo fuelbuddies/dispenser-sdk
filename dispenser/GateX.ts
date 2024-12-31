@@ -199,8 +199,8 @@ export class GateX extends ModBusDispenser {
 		return 'true';
 	}
 
-	async isReadyForPreset(): Promise<boolean> {
-		return Promise.resolve(false);
+	isReadyForPreset() {
+		return false;
 	}
 
 	isPresetAvailable(): boolean {
