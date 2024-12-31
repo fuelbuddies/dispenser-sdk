@@ -5,9 +5,13 @@ import { findDispenserPort } from "../utils/findDispenserPort";
 const hardwareId = '10c4';
 const attributeId = 'ea60';
 
+const printerHardwareId = '067b';
+const printerAttributeId = '2303';
+
 describe('TCS3000', () => {
     let dispenser: TCS3000;
     let serialPort: SerialPort;
+    let printerPort: SerialPort;
 
     beforeEach(async () => {
         if (!serialPort) {
@@ -15,7 +19,14 @@ describe('TCS3000', () => {
                 path: await findDispenserPort(hardwareId, attributeId),
                 baudRate: 9600,
             });
-            dispenser = new TCS3000(serialPort);
+            printerPort = new SerialPort({ path: await findDispenserPort(printerHardwareId, printerAttributeId), baudRate: 9600 });
+            dispenser = new TCS3000(serialPort, printerPort, {
+				dispenserType: 'TCS3000',
+				hardwareId,
+				attributeId,
+				baudRate: 9600,
+				kFactor: 3692953.6,
+			});
         }
     });
 
