@@ -199,7 +199,8 @@ export class TCS3000 extends BaseDispenser {
 				return true;
 			}
 			debugLog('processCommand: %s', 'Command failed! check for status');
-			throw Error('Command failed! check for status for pause');
+			// throw Error('Command failed! check for status for pause');
+			return false;
 		}
 
 		if (fnName === 'resumeSale') {
@@ -208,7 +209,8 @@ export class TCS3000 extends BaseDispenser {
 				return true;
 			}
 			debugLog('processCommand: %s', 'Command failed! check for status');
-			throw Error('Command failed! check for status for resume');
+			// throw Error('Command failed! check for status for resume');
+			return false;
 		}
 
 		if (fnName === 'authorizeSale') {
@@ -227,8 +229,8 @@ export class TCS3000 extends BaseDispenser {
 			return true;
 		}
 
-		debugLog('processCommand: %s', 'Command failed! check for status');
-		throw Error('Command failed! check for status');
+		debugLog('processCommand: %s || %s', 'Command failed! check for status with response', res);
+		return false;
 	}
 
 	processReadSale(res: string) {
@@ -342,9 +344,15 @@ export class TCS3000 extends BaseDispenser {
 		return false;
 	}
 
-	isReadyForPreset() {
-		debugLog('isReadyForPreset: %s', 'true');
-		return true;
+	isReadyForPreset(res: string) {
+		debugLog('isReadyForPresetArgs: %o', arguments);
+		const dispenserStatus = this.processStatus(res);
+		if (dispenserStatus.status === 'IDLE') {
+			debugLog('isReadyForPreset: %s', 'true');
+			return true;
+		}
+		debugLog('isReadyForPreset: %s', 'false');
+		return false;
 	}
 
 	isNozzleOnHook() {
@@ -464,7 +472,8 @@ export class TCS3000 extends BaseDispenser {
 
 	printOrder(printText: string): boolean {
 		if (!this.printer) {
-			throw new Error('Printer is required for TCS3000 dispenser');
+			debugLog('Printer is required for TCS3000 dispenser');
+			return false;
 		}
 
 		const buffer = Buffer.from(printText, 'hex');
