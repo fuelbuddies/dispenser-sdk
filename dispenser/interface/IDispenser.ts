@@ -49,8 +49,8 @@ export interface IDispenser {
 	processResponse?(response: string[], exponentCut: number, mantessaCut: number): any;
 	processExternalPump?(res: string): boolean;
 	hasChecksBeforePumpStart?(res: string): boolean;
-	isPumpStopped?(res: string): boolean;
-	isReadyForPreset?(res: string): boolean;
+	isPumpStopped?(res: string): any;
+	isReadyForPreset?(res: string): any;
 	isPresetVerified?(res: string, quantity: number): boolean;
 	isDispensing?(res: string): boolean;
 	isIdle?(res: string): boolean;

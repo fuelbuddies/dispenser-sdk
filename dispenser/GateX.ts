@@ -199,7 +199,7 @@ export class GateX extends ModBusDispenser {
 		return 'true';
 	}
 
-	isReadyForPreset(): boolean {
+	isReadyForPreset() {
 		return false;
 	}
 
