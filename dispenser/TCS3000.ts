@@ -223,6 +223,11 @@ export class TCS3000 extends BaseDispenser {
 			return errorBytes[0] === '0' && errorBytes[1] === '0';
 		}
 
+		if (fnName === 'printReceipt') {
+			debugLog('processCommand: %s', `Response for ${fnName} = ${res}`);
+			return res === 'true';
+		}
+
 		debugLog('processCommand: %s', res);
 		if (res.includes('0011') || res.includes('0064') || res.includes('0044')) {
 			debugLog('processCommand: %s', 'Command success');
