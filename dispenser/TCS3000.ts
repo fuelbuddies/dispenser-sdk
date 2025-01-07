@@ -387,7 +387,7 @@ export class TCS3000 extends BaseDispenser {
 	isSaleCloseable(res: string) {
 		debugLog('isSaleCloseableArgs', arguments);
 		const dispenserStatus = this.processStatus(res);
-		if (dispenserStatus.status == 'STOPPED') {
+		if (['STOPPED', 'TCKT_PENDING'].includes(dispenserStatus.status!)) {
 			debugLog('isSaleCloseable: %s', 'true');
 			return true;
 		}
