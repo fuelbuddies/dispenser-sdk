@@ -77,6 +77,7 @@ export type DispenserOptions = {
 	printer?: PrinterOptions;
 	modbus?: ModbusOptions;
 	totalizerFile?: string;
+	interByteTimeoutInterval: number;
 };
 
 export type ModbusOptions = {

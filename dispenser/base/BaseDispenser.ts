@@ -17,12 +17,15 @@ export class BaseDispenser implements IDispenser {
 	constructor(socket: SerialPort, options?: DispenserOptions) {
 		this.connection = socket;
 		// Adjust concurrency as needed
-		this.innerByteTimeoutParser = this.connection.pipe(new InterByteTimeoutParser({ interval: 300 }));
+		this.innerByteTimeoutParser = this.connection.pipe(
+			new InterByteTimeoutParser({ interval: options?.interByteTimeoutInterval || 300 })
+		);
 	}
 
 	dispenserResponse(): Promise<any> {
 		return new Promise((resolve, reject) => {
 			try {
+				debugLog('dispenserResponse: AWAITING RESPONSE');
 				this.innerByteTimeoutParser.once('data', (data: any): void => {
 					var res = data.toString('hex');
 					debugLog('awaitDispenserResponse: %s', res);
