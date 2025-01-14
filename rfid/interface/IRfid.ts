@@ -27,4 +27,5 @@ export type RfidOptions = {
 	hardwareId: string;
 	attributeId: string;
 	baudRate?: number;
+	interByteTimeoutInterval?: number;
 };
