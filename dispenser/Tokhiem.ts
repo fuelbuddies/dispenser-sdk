@@ -103,10 +103,11 @@ export class Tokhiem extends BaseDispenser {
 		if (online) {
 			// for switching to online pump_start is recommended that is happening already in future flow
 			debugLog('switchMode: online');
-			await this.pumpStart();
+			return await this.pumpStart();
 		}
 		debugLog('switchMode: offline');
 		await this.connection.write(this.tokhim_authorize_off);
+		return await this.dispenserResponse();
 	}
 
 	async readDispencerStatus() {
@@ -157,8 +158,7 @@ export class Tokhiem extends BaseDispenser {
 
 	async switchToRemote() {
 		debugLog('switchToRemote');
-		await this.switchMode(true);
-		return await this.dispenserResponse();
+		return await this.switchMode(true);
 	}
 
 	checkType() {
@@ -168,8 +168,7 @@ export class Tokhiem extends BaseDispenser {
 
 	async switchToLocal() {
 		debugLog('switchToLocal');
-		await this.switchMode(false);
-		return await this.dispenserResponse();
+		return await this.switchMode(false);
 	}
 
 	// todo:  this will be moved to baseDispenser
@@ -191,44 +190,37 @@ export class Tokhiem extends BaseDispenser {
 
 	async readStatus() {
 		debugLog('readStatus');
-		await this.readDispencerStatus();
-		return await this.dispenserResponse();
+		return await this.readDispencerStatus();
 	}
 
 	async readAuthorization() {
 		debugLog('readAuthorization');
-		await this.readDispencerStatus();
-		return await this.dispenserResponse();
+		return await this.readDispencerStatus();
 	}
 
 	async startPump() {
 		debugLog('startPump');
-		await this.pumpStart();
-		return await this.dispenserResponse();
+		return await this.pumpStart();
 	}
 
 	async stopPump() {
 		debugLog('stopPump');
-		await this.pumpStop();
-		return await this.dispenserResponse();
+		return await this.pumpStop();
 	}
 
 	async setPreset(quantity: number) {
 		debugLog('setPreset', quantity);
-		await this.sendPreset(quantity);
-		return await this.dispenserResponse();
+		return await this.sendPreset(quantity);
 	}
 
 	async suspendSale() {
 		debugLog('suspendSale');
-		await this.suspendDispencer();
-		return await this.dispenserResponse();
+		return await this.suspendDispencer();
 	}
 
 	async resumeSale() {
 		debugLog('resumeSale');
-		await this.resumeDispencer();
-		return await this.dispenserResponse();
+		return await this.resumeDispencer();
 	}
 
 	hasExternalPump() {
