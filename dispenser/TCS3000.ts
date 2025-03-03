@@ -421,7 +421,7 @@ export class TCS3000 extends BaseDispenser {
 			printArr.push('0A');
 			printArr.push(this.str2hex(this.rightAlignValue('BOWSER No', printObj?.vehicleRegistrationNumber, printWidth)));
 			printArr.push(this.str2hex(this.rightAlignValue('ASSET No', printObj?.registrationNumber, printWidth)));
-			printArr.push(this.str2hex(this.rightAlignValue('DATE', new Date(printObj?.orderDate).toLocaleDateString(), printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('DATE', printObj?.orderDate, printWidth)));
 			printArr.push('0A');
 			printArr.push(this.str2hex(this.rightAlignValue('DRIVER', printObj?.driverCode, printWidth)));
 			printArr.push(this.str2hex(this.rightAlignValue('CUSTOMER', printObj?.customerCode, printWidth)));
