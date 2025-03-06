@@ -4,7 +4,7 @@ import debug from 'debug';
 import { BaseRfid } from './BaseRfid';
 import { RfidResponse } from './interface/IRfid';
 
-const debugLog = debug('dispenser:rfid-petropoint');
+const debugLog = debug('rfid:petropoint');
 
 export class RfidPetropoint extends BaseRfid {
 	checkType() {
@@ -15,10 +15,16 @@ export class RfidPetropoint extends BaseRfid {
 	/** callback when there is data and process that data through processRFIDResonse before calling back */
 	bind(callback: (status: unknown, data: RfidResponse | 'idle') => void): void {
 		this.listen((data: any) => {
+			const time = performance.now();
+			const convertedData = data.toString('hex');
+			debugLog(`RFID Data packet recieved at %{s}: %s`, time, convertedData);
 			try {
-				return callback(null, this.processRFIDresponse(data.toString('hex')));
+				debugLog('Initiating callback for RFID data: %s', convertedData);
+				return callback(null, this.processRFIDresponse(convertedData));
 			} catch (e) {
-				callback(e, 'idle');
+				debugLog('Error in RFID callback: %o', e);
+				console.error(e);
+				return callback(e, 'idle');
 			}
 		});
 	}
