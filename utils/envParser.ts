@@ -43,5 +43,6 @@ export function getRFIDConfigFromEnv(): RfidOptions {
 		attributeId: process.env.VITE_MAIN_RFID_ATTRIBUTE_ID || '',
 		hardwareId: process.env.VITE_MAIN_RFID_HARDWARE_ID || '',
 		baudRate: parseInt(process.env.VITE_MAIN_RFID_BAUD_RATE || '9600'),
+		interByteTimeoutInterval: parseInt(process.env.VITE_MAIN_RFID_INTERVAL || '200'),
 	} as RfidOptions;
 }
