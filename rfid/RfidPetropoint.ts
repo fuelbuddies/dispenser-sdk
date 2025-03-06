@@ -17,7 +17,7 @@ export class RfidPetropoint extends BaseRfid {
 		this.listen((data: any) => {
 			const time = performance.now();
 			const convertedData = data.toString('hex');
-			debugLog(`RFID Data packet recieved at %{s}: %s`, time, convertedData);
+			debugLog(`RFID Data packet recieved at %s: %s`, time, convertedData);
 			try {
 				debugLog('Initiating callback for RFID data: %s', convertedData);
 				return callback(null, this.processRFIDresponse(convertedData));
