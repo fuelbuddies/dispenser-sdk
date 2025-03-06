@@ -16,7 +16,7 @@ export class RfidPetropoint extends BaseRfid {
 	bind(callback: (status: unknown, data: RfidResponse | 'idle') => void): void {
 		this.listen((data: any) => {
 			try {
-				callback(null, this.processRFIDresponse(data.toString('hex')));
+				return callback(null, this.processRFIDresponse(data.toString('hex')));
 			} catch (e) {
 				callback(e, 'idle');
 			}
