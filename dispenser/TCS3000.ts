@@ -420,27 +420,25 @@ export class TCS3000 extends BaseDispenser {
 			printArr.push(this.str2hex(this.centerAlignValue('FUELBUDDY FUEL SUPPLY LLC', printWidth)));
 			printArr.push('0A');
 			printArr.push(this.str2hex(this.rightAlignValue('BOWSER No', printObj?.vehicleRegistrationNumber, printWidth)));
-			printArr.push(this.str2hex(this.rightAlignValue('ASSET No', printObj?.registrationNumber, printWidth)));
-			printArr.push(this.str2hex(this.rightAlignValue('DATE', new Date(printObj?.orderDate).toLocaleDateString(), printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('DRIVER No', printObj?.driverCode, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('Slip No', printObj?.slipNumber, printWidth)));
 			printArr.push('0A');
-			printArr.push(this.str2hex(this.rightAlignValue('DRIVER', printObj?.driverCode, printWidth)));
-			printArr.push(this.str2hex(this.rightAlignValue('CUSTOMER', printObj?.customerCode, printWidth)));
+			printArr.push(this.str2hex(this.centerAlignValue(printObj?.customerName, printWidth))); //customer name
 			printArr.push(this.str2hex(this.rightAlignValue('ORDER No', printObj?.orderCode, printWidth)));
-			printArr.push('0A');
-			printArr.push(this.str2hex(this.rightAlignValue('Batch No', printObj?.batchCode, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('ASSET No', printObj?.registrationNumber, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('PRODUCT', printObj?.productName, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('DATE', new Date(printObj?.orderDate).toLocaleDateString(), printWidth)));
 			printArr.push(this.str2hex(this.rightAlignValue('START TIME', new Date(printObj?.startTime).toLocaleTimeString(), printWidth)));
 			printArr.push(this.str2hex(this.rightAlignValue('END TIME', new Date(printObj?.endTime).toLocaleTimeString(), printWidth)));
 			printArr.push('0A');
-			printArr.push(this.str2hex(this.rightAlignValue('PRODUCT', printObj?.productName, printWidth)));
-			printArr.push('0A');
-			printArr.push(this.str2hex(this.rightAlignValue('DELIVERED', printObj?.quantity, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('GROSS VOLUME', printObj?.unitOfMeasure, printWidth)));
+			printArr.push(this.str2hex(this.rightAlignValue('QUANTITY', printObj?.quantity, printWidth)));
 			printArr.push(this.str2hex(this.rightAlignValue('START TOT.', printObj?.startTotalizer, printWidth)));
 			printArr.push(this.str2hex(this.rightAlignValue('END TOT.', printObj?.endTotalizer, printWidth)));
 			if (printObj?.odometerReading) {
 				printArr.push(this.str2hex(this.rightAlignValue('ODOMETER', printObj?.odometerReading, printWidth)));
 			}
 			printArr.push('0A');
-			printArr.push(this.str2hex(this.rightAlignValue('GROSS VOLUME', printObj?.unitOfMeasure, printWidth)));
 			printArr.push('0A0A1D564100');
 		}
 
@@ -449,27 +447,25 @@ export class TCS3000 extends BaseDispenser {
 		printArr.push(this.str2hex(this.centerAlignValue('FUELBUDDY FUEL SUPPLY LLC', printWidth)));
 		printArr.push('0A');
 		printArr.push(this.str2hex(this.rightAlignValue('BOWSER No', printObj?.vehicleRegistrationNumber, printWidth)));
-		printArr.push(this.str2hex(this.rightAlignValue('ASSET No', printObj?.registrationNumber, printWidth)));
-		printArr.push(this.str2hex(this.rightAlignValue('DATE', new Date(printObj?.orderDate).toLocaleDateString(), printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('DRIVER No', printObj?.driverCode, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('Slip No', printObj?.slipNumber, printWidth)));
 		printArr.push('0A');
-		printArr.push(this.str2hex(this.rightAlignValue('DRIVER ID', printObj?.driverCode, printWidth)));
-		printArr.push(this.str2hex(this.rightAlignValue('CUSTOMER ID', printObj?.customerCode, printWidth)));
+		printArr.push(this.str2hex(this.centerAlignValue(printObj?.customerName, printWidth))); //customer name
 		printArr.push(this.str2hex(this.rightAlignValue('ORDER No', printObj?.orderCode, printWidth)));
-		printArr.push('0A');
-		printArr.push(this.str2hex(this.rightAlignValue('Batch No', printObj?.batchCode, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('ASSET No', printObj?.registrationNumber, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('PRODUCT', printObj?.productName, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('DATE', new Date(printObj?.orderDate).toLocaleDateString(), printWidth)));
 		printArr.push(this.str2hex(this.rightAlignValue('START TIME', new Date(printObj?.startTime).toLocaleTimeString(), printWidth)));
 		printArr.push(this.str2hex(this.rightAlignValue('END TIME', new Date(printObj?.endTime).toLocaleTimeString(), printWidth)));
 		printArr.push('0A');
-		printArr.push(this.str2hex(this.rightAlignValue('PRODUCT', printObj?.productName, printWidth)));
-		printArr.push('0A');
-		printArr.push(this.str2hex(this.rightAlignValue('DELIVERED', printObj?.quantity, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('GROSS VOLUME', printObj?.unitOfMeasure, printWidth)));
+		printArr.push(this.str2hex(this.rightAlignValue('QUANTITY', printObj?.quantity, printWidth)));
 		printArr.push(this.str2hex(this.rightAlignValue('START TOT.', printObj?.startTotalizer, printWidth)));
 		printArr.push(this.str2hex(this.rightAlignValue('END TOT.', printObj?.endTotalizer, printWidth)));
 		if (printObj?.odometerReading) {
 			printArr.push(this.str2hex(this.rightAlignValue('ODOMETER', printObj?.odometerReading, printWidth)));
 		}
 		printArr.push('0A');
-		printArr.push(this.str2hex(this.rightAlignValue('GROSS VOLUME', printObj?.unitOfMeasure, printWidth)));
 
 		debugLog('printReceipt: %s', `${printArr.join('0A')}0A0A1D564200`);
 		return this.printOrder(`${printArr.join('0A')}0A0A1D564200`);
