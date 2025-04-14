@@ -180,19 +180,6 @@ export class BaseDispenser implements IDispenser {
 		});
 	}
 
-	/**
-	 * Convert String to HEX
-	 * @param num
-	 * @returns
-	 */
-	str2hex(num: string) {
-		let str = '';
-		for (let i = 0; i < num.length; i++) {
-			str += num.charCodeAt(i).toString(16);
-		}
-		return str;
-	}
-
 	doubleToHex(value: number): string {
 		const buffer = new ArrayBuffer(8); // 8 bytes for double precision
 		const view = new DataView(buffer);
@@ -201,39 +188,6 @@ export class BaseDispenser implements IDispenser {
 			.map((byte) => byte.toString(16).padStart(2, '0'))
 			.join('');
 	}
-
-	/**
-	 * right align value in a string.
-	 * @param label
-	 * @param value
-	 * @param totalWidth
-	 * @returns
-	 */
-	rightAlignValue = (label: string, valueStr: string, totalWidth: number) => {
-		debugLog('rightAlignValue: %s', `${label}, ${valueStr}, ${totalWidth}`);
-		const value = valueStr ? valueStr + '' : 'N/A';
-		const labelWidth = label.length;
-		const valueWidth = value.length;
-		const spacesToAdd = totalWidth - labelWidth - valueWidth;
-
-		const alignedString = label + ' '.repeat(spacesToAdd) + value;
-		return alignedString;
-	};
-
-	/**
-	 * Center Align Value in a string
-	 * @param value
-	 * @param totalWidth
-	 */
-	centerAlignValue = (value: string, totalWidth: number) => {
-		const valueWidth = value.length;
-		const spacesToAdd = totalWidth - valueWidth;
-		const leftSpaces = Math.floor(spacesToAdd / 2);
-		const rightSpaces = spacesToAdd - leftSpaces;
-
-		const alignedString = ' '.repeat(leftSpaces) + value + ' '.repeat(rightSpaces);
-		return alignedString;
-	};
 
 	// Function to execute a shell script and check if the result is "true"
 	executeShellScriptAndCheck(scriptPath: string): Promise<boolean> {
