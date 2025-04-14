@@ -410,17 +410,15 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	printReceipt(printObj: any) {
-		const printWidth = 40;
 		const printArr = [];
 
 		debugLog('printReceipt: %o', printObj);
 
 		if (printObj?.isReceiptRequired) {
 			printArr.push(...printFormat(printObj, 'DISPENSING SLIP'));
-			printArr.push('0A0A1D564100');
 		}
 
-		printArr.push(...printFormat(printObj));
+		printArr.push(...printFormat(printObj, 'PRINT COPY'));
 
 		const recieptString = printArr.join('0A');
 
