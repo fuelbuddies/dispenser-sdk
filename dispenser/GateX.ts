@@ -256,11 +256,11 @@ export class GateX extends ModBusDispenser {
 		debugLog('printReceipt: %o', printObj);
 
 		if (printObj?.isReceiptRequired) {
-			printArr.push(...printFormat(printObj, 'DISPENSING SLIP', this));
+			printArr.push(...printFormat(printObj, 'DISPENSING SLIP'));
 			printArr.push('0A0A1D564100');
 		}
 
-		printArr.push(...printFormat(printObj, 'PRINT COPY', this));
+		printArr.push(...printFormat(printObj));
 
 		const recieptString = printArr.join('0A');
 

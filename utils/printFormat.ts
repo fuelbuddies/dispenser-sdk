@@ -1,6 +1,3 @@
-import type { BaseDispenser } from '../dispenser/base/BaseDispenser';
-import type { ModBusDispenser } from '../dispenser/base/ModBusDispenser';
-
 /**
  * Convert String to HEX
  * @param num
@@ -63,7 +60,7 @@ const wrapText = (text: string, maxWidth: number): string[] => {
 	return lines;
 };
 
-export const printFormat = (printObj: any, type: string = 'PRINT COPY', dispenser: ModBusDispenser | BaseDispenser) => {
+export const printFormat = (printObj: any, type: string = 'PRINT COPY') => {
 	const printWidth = 40;
 	const printArr = [];
 
