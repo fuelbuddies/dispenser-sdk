@@ -22,8 +22,6 @@ export class TCS3000 extends BaseDispenser {
 	private suspend_sale = [0x7e, 0x01, 0x00, 0x20, 0x39, 0x00, 0x4d];
 	private resume_sale = [0x7e, 0x01, 0x00, 0x20, 0x3a, 0x00, 0x18];
 
-	private clear_ticket = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0xa9, 0x00, 0x8e]);
-
 	private crc_array: number[] = [
 		0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127, 252, 162, 64, 30, 95, 1, 227, 189, 62,
 		96, 130, 220, 35, 125, 159, 193, 66, 28, 254, 160, 225, 191, 93, 3, 128, 222, 60, 98, 190, 224, 2, 92, 223, 129, 99, 61, 124, 34,
@@ -146,12 +144,6 @@ export class TCS3000 extends BaseDispenser {
 	async clearSale() {
 		debugLog('clearSale', 'Clear_Sale');
 		await this.connection.write(this.clear_sale);
-		return await this.dispenserResponse();
-	}
-
-	async clearTicket() {
-		debugLog('clearTicket');
-		await this.connection.write(this.clear_ticket);
 		return await this.dispenserResponse();
 	}
 
