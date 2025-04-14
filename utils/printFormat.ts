@@ -1,5 +1,5 @@
-import { BaseDispenser } from '../dispenser/base/BaseDispenser';
-import { ModBusDispenser } from '../dispenser/base/ModBusDispenser';
+import type { BaseDispenser } from '../dispenser/base/BaseDispenser';
+import type { ModBusDispenser } from '../dispenser/base/ModBusDispenser';
 
 const wrapText = (text: string, maxWidth: number): string[] => {
 	const words = text.split(' ');
