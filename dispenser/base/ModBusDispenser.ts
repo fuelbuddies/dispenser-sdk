@@ -10,6 +10,10 @@ import debug from 'debug';
 
 import ModbusRTU from 'modbus-serial';
 
+/**
+ * TODO: [TECH DEBT][IDEV-1272]
+ * There are few methods, like str2hex that are being re-declared in BaseDispenser and ModBusDispenser. This is not a good practice. We should refactor this to avoid code duplication.
+ */
 const debugLog = debug('dispenser:modbus-dispenser');
 export class ModBusDispenser implements IDispenser {
 	connection: Promise<Seneca>;
