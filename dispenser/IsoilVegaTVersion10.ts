@@ -689,7 +689,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 			printArr.push('0A0A1D564100');
 		}
 
-		printArr.push(...printFormat(printObj));
+		printArr.push(...printFormat(printObj, 'PRINT COPY'));
 
 		const recieptString = `02303031313438313030303930${printArr.join('0A')}0A0A2020202020`;
 
