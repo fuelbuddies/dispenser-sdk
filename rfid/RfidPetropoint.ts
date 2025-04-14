@@ -8,7 +8,7 @@ const debugLog = debug('rfid:petropoint');
 
 export class RfidPetropoint extends BaseRfid {
 	checkType() {
-		debugLog('rfidType: %s', 'RFID');
+		debugLog('rfidType: %s', 'PETROPOINTHECTRONICS');
 		return 'PETROPOINTHECTRONICS';
 	}
 
