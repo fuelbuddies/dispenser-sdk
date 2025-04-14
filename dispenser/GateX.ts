@@ -250,7 +250,6 @@ export class GateX extends ModBusDispenser {
 	}
 
 	printReceipt(printObj: any) {
-		const printWidth = 40;
 		const printArr = [];
 
 		debugLog('printReceipt: %o', printObj);

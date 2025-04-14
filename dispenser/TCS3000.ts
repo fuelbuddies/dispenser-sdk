@@ -410,7 +410,6 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	printReceipt(printObj: any) {
-		const printWidth = 40;
 		const printArr = [];
 
 		debugLog('printReceipt: %o', printObj);
