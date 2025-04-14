@@ -60,10 +60,11 @@ const wrapText = (text: string, maxWidth: number): string[] => {
 	return lines;
 };
 
-export const printFormat = (printObj: any, type: string = 'PRINT COPY') => {
+export const printFormat = (printObj: any, type: string) => {
 	const printWidth = 40;
 	const printArr = [];
 
+	printArr.push('0A0A');
 	printArr.push(str2hex(centerAlignValue(`****  ${type}  ****`, printWidth)));
 	printArr.push('0A');
 	printArr.push(str2hex(centerAlignValue('FUELBUDDY FUEL SUPPLY LLC', printWidth)));
@@ -92,7 +93,7 @@ export const printFormat = (printObj: any, type: string = 'PRINT COPY') => {
 	if (printObj?.odometerReading) {
 		printArr.push(str2hex(rightAlignValue('ODOMETER', printObj?.odometerReading, printWidth)));
 	}
-	printArr.push('OA0A0A1D564100');
+	printArr.push('OA0A0A1D564200');
 
 	return printArr;
 };

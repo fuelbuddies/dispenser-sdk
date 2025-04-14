@@ -260,7 +260,7 @@ export class GateX extends ModBusDispenser {
 			printArr.push('0A0A1D564100');
 		}
 
-		printArr.push(...printFormat(printObj));
+		printArr.push(...printFormat(printObj, 'PRINT COPY'));
 
 		const recieptString = printArr.join('0A');
 
