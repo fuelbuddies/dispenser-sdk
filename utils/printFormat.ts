@@ -93,8 +93,6 @@ export const printFormat = (printObj: any, type: string) => {
 	if (printObj?.odometerReading) {
 		printArr.push(str2hex(rightAlignValue('ODOMETER', printObj?.odometerReading, printWidth)));
 	}
-	printArr.push('0A');
-	printArr.push('0A0A0A1D564100');
 
 	return printArr;
 };

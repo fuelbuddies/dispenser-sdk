@@ -686,7 +686,8 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
 		if (printObj?.isReceiptRequired) {
 			printArr.push(...printFormat(printObj, 'DISPENSING SLIP'));
-			printArr.push('0A0A1D564100');
+			printArr.push('0A');
+			printArr.push('0A0A0A1D564100');
 		}
 
 		printArr.push(...printFormat(printObj, 'PRINT COPY'));
