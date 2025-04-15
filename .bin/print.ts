@@ -29,7 +29,7 @@ createDispenser(configuration).then((dispenser) => {
 		unitOfMeasure: 'litre',
 		isReceiptRequired: true,
 		invoiceDate: '2025-04-08T13:49:27.574184',
-		customerName: 'Shreesh Katyayan dgsgfgdhf dfbhfh eryeryeqqtw b bc bdfgfdg',
+		customerName: 'Shreesh Katyayan The quick brown fox jumps over the lazy dog',
 		slipNumber: '1744120167768',
 	};
 
