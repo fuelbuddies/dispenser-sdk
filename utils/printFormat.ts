@@ -64,7 +64,6 @@ export const printFormat = (printObj: any, type: string) => {
 	const printWidth = 40;
 	const printArr = [];
 
-	printArr.push('0A0A');
 	printArr.push(str2hex(centerAlignValue(`****  ${type}  ****`, printWidth)));
 	printArr.push('0A');
 	printArr.push(str2hex(centerAlignValue('FUELBUDDY FUEL SUPPLY LLC', printWidth)));
@@ -79,6 +78,7 @@ export const printFormat = (printObj: any, type: string) => {
 			printArr.push(str2hex(centerAlignValue(line, printWidth)));
 		});
 	}
+	printArr.push('0A');
 	printArr.push(str2hex(rightAlignValue('ORDER No', printObj?.orderCode, printWidth)));
 	printArr.push(str2hex(rightAlignValue('ASSET No', printObj?.registrationNumber, printWidth)));
 	printArr.push(str2hex(rightAlignValue('PRODUCT', printObj?.productName, printWidth)));

@@ -686,13 +686,12 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
 		if (printObj?.isReceiptRequired) {
 			printArr.push(...printFormat(printObj, 'DISPENSING SLIP'));
-			printArr.push('0A');
-			printArr.push('0A0A0A1D564100');
+			printArr.push('0A1D564100');
 		}
 
 		printArr.push(...printFormat(printObj, 'PRINT COPY'));
 
-		const recieptString = `02303031313438313030303930${printArr.join('0A')}0A0A2020202020`;
+		const recieptString = `02303031313438313030303930${printArr.join('0A')}0A2020202020`;
 
 		debugLog('printReceipt: %s', `${recieptString}`);
 		return this.printOrder(recieptString);
