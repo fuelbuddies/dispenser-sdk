@@ -29,33 +29,9 @@ createDispenser(configuration).then((dispenser) => {
 		unitOfMeasure: 'litre',
 		isReceiptRequired: true,
 		invoiceDate: '2025-04-08T13:49:27.574184',
-		customerName: 'Shreesh Katyayan',
+		customerName: 'Shreesh Katyayan The quick brown fox jumps over the lazy dog',
 		slipNumber: '1744120167768',
 	};
-
-
-	// const printObj = {
-	// 	customerCode: 212,
-	// 	driverCode: 777,
-	// 	endBatchCode: null,
-	// 	endTime: '2025-03-21T11:22:56.566959Z',
-	// 	endTotalizer: '503144.73',
-	// 	orderCode: 173529,
-	// 	productName: 'Diesel',
-	// 	orderDate: '2025-03-21T11:22:57.137Z',
-	// 	quantity: 22.18,
-	// 	startBatchCode: null,
-	// 	startTime: '2025-03-21T11:22:08.582716Z',
-	// 	registrationNumber: '482393',
-	// 	vehicleRegistrationNumber: 'ccDubai61465',
-	// 	startTotalizer: '503122.55',
-	// 	odometerReading: null,
-	// 	unitOfMeasure: 'litre',
-	// 	isReceiptRequired: true,
-	// 	invoiceDate: '2025-03-21T11:13:32.018356',
-	// 	slipNumber: '3xdfksjnvirbh',
-	// 	customerName: 'Sdajifhwie ogmjeribbeoij oertjemboibejior mveorjt'
-	// };
 
 	dispenser.execute(dispenser.printReceipt, dispenser.processCommand, printObj).then((totalizer) => {
 		dispenser.disconnect(() => {
