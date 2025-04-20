@@ -14,14 +14,10 @@ debugLog('Configuration: %O', configuration);
 
 createDispenser(configuration).then((dispenser) => {
 	// console.log(dispenser);
-	dispenser.execute(dispenser.setDirectDelivery, dispenser.processCommand).then(async (response) => {
-		console.log(response);
-		await delay(2000);
-		dispenser.execute(dispenser.setPreset, dispenser.processCommand, qty).then((totalizer) => {
-			dispenser.disconnect(() => {
-				console.log('Disconnected');
-			});
-			console.log(totalizer);
+	dispenser.execute(dispenser.setPreset, dispenser.processCommand, qty).then((totalizer) => {
+		dispenser.disconnect(() => {
+			console.log('Disconnected');
 		});
+		console.log(totalizer);
 	});
 });
