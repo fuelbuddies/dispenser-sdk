@@ -98,7 +98,12 @@ export class TCS3000 extends BaseDispenser {
 	async sendPreset(quantity: number) {
 		let crc = 0;
 		const buffer_array = [];
-		const volumePrecursor = [0x7e, 0x01, 0x00, 0x20, 0x38, 0x0b, 0x03, 0x03, 0xf7];
+		
+		// Use TCS Product ID from options or fallback to environment variable or default
+		const tcsProductId = this.options?.tcsProductId || process.env.VITE_TCS_PROD_ID || '0x03,0xf7';
+		const prodIdBytes = tcsProductId.split(',').map((id: string) => parseInt(id.trim(), 16));
+		
+		const volumePrecursor = [0x7e, 0x01, 0x00, 0x20, 0x38, 0x0b, 0x03, prodIdBytes[0], prodIdBytes[1]];
 
 		// Calculate partial CRC for the precursor
 		for (const byte of volumePrecursor) {

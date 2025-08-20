@@ -18,6 +18,7 @@ export interface IDispenser {
 	elockLock?(): any;
 	totalizer?(): any;
 	readStatus?(): any;
+	read_prod_ID?(): any;
 	pumpStart?(): any;
 	pumpStop?(): any;
 	hasExternalPump?(): any;
@@ -78,6 +79,7 @@ export type DispenserOptions = {
 	modbus?: ModbusOptions;
 	totalizerFile?: string;
 	interByteTimeoutInterval?: number;
+	tcsProductId?: string;
 };
 
 export type ModbusOptions = {

@@ -26,6 +26,7 @@ describe('TCS3000', () => {
 				attributeId,
 				baudRate: 9600,
 				kFactor: 3692953.6,
+                tcsProductId: '0x03,0xf7'
 			});
         }
     });
