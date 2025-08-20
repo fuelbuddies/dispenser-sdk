@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { findDispenserPort } from './utils/findDispenserPort';
 import { findRfidPort } from './utils/findRfidPort';
 import { DispenserOptions, IDispenser } from './dispenser/interface/IDispenser';
