@@ -1,5 +1,5 @@
 {
-  "name": "dispenser-sdk-test",
+  "name": "@fuelbuddy/dispenser-sdk",
   "version": "0.1.92",
   "description": "",
   "main": "dist/main.js",
