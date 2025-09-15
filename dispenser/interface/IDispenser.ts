@@ -74,6 +74,7 @@ export type DispenserOptions = {
 	attributeId: string;
 	baudRate?: number;
 	kFactor?: number;
+	tcsProductId?: string;
 	printer?: PrinterOptions;
 	modbus?: ModbusOptions;
 	totalizerFile?: string;
