@@ -15,6 +15,10 @@ export function getConfigFromEnv() {
 		dispenserConfig.kFactor = Number(process.env.VITE_MAIN_DISPENSER_K_FACTOR);
 	}
 
+	if (process.env.VITE_TCS_PROD_ID) {
+		dispenserConfig.tcsProductId = process.env.VITE_TCS_PROD_ID || '1015';
+	}
+
 	if (process.env.VITE_MAIN_PRINTER_TYPE) {
 		dispenserConfig.printer = {
 			printerType: process.env.VITE_MAIN_PRINTER_TYPE,
