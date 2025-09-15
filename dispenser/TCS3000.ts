@@ -95,16 +95,13 @@ export class TCS3000 extends BaseDispenser {
 		return await this.sendPreset(quantity);
 	}
 
-	async getProductIDBytes() {
-		// Get product ID from environment variable, defaulting to '1015' if not set
-		const productIdString = this.options?.tcsProductId;
-
+	getProductIDBytes() {
 		// Parse the product ID string into a base-10 integer
-		const productId = parseInt(productIdString, 10);
+		const productId = parseInt(this.options?.tcsProductId, 10);
 
 		// Validate the parsed product ID
 		if (isNaN(productId) || productId < 1001 || productId > 9998) {
-			throw new Error(`Invalid product ID: ${productIdString}. Must be a number between 1001 and 9998.`);
+			throw new Error(`Invalid product ID: ${this.options?.tcsProductId}. Must be a number between 1001 and 9998.`);
 		}
 
 		// Convert the single product ID integer into two bytes
@@ -127,7 +124,7 @@ export class TCS3000 extends BaseDispenser {
 		let crc = 0;
 		const buffer_array = [];
 
-		const [productIdHighByte, productIdLowByte] = await this.getProductIDBytes();
+		const [productIdHighByte, productIdLowByte] = this.getProductIDBytes();
 
 		const volumePrecursor = [0x7e, 0x01, 0x00, 0x20, 0x38, 0x0b, 0x03, productIdHighByte, productIdLowByte];
 
