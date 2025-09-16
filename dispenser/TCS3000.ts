@@ -103,7 +103,7 @@ export class TCS3000 extends BaseDispenser {
 
 		// Validate the parsed product ID
 		if (isNaN(productId) || productId < 1001 || productId > 9998) {
-			throw new Error(`Invalid product ID: ${this.options?.tcsProductId}. Must be a number between 1001 and 9998.`);
+			throw new Error(`Invalid product ID: ${this.options.tcsProductId}. Must be a number between 1001 and 9998.`);
 		}
 
 		// Convert the single product ID integer into two bytes

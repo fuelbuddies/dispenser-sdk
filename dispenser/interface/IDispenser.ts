@@ -69,12 +69,12 @@ export interface IDispenser {
 }
 
 export type DispenserOptions = {
+	tcsProductId: number;
 	dispenserType: string;
 	hardwareId: string;
 	attributeId: string;
 	baudRate?: number;
 	kFactor?: number;
-	tcsProductId: number;
 	printer?: PrinterOptions;
 	modbus?: ModbusOptions;
 	totalizerFile?: string;
