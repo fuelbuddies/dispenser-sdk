@@ -8,15 +8,12 @@ export function getConfigFromEnv() {
 		baudRate: parseInt(process.env.VITE_MAIN_DISPENSER_BAUD_RATE || '0'), // Parse as integer
 		totalizerFile: process.env.VITE_MAIN_DISPENSER_TOTALIZER_FILE || 'totalizer.json',
 		interByteTimeoutInterval: parseInt(process.env.VITE_MAIN_DISPENSER_INTERVAL || '300'),
+		tcsProductId: parseInt(process.env.VITE_TCS_PROD_ID || '1015'),
 	};
 
 	// Optionally, you can add more properties to the object if they exist in the environment variables
 	if (process.env.VITE_MAIN_DISPENSER_K_FACTOR) {
 		dispenserConfig.kFactor = Number(process.env.VITE_MAIN_DISPENSER_K_FACTOR);
-	}
-
-	if (process.env.VITE_TCS_PROD_ID) {
-		dispenserConfig.tcsProductId = process.env.VITE_TCS_PROD_ID || '1015';
 	}
 
 	if (process.env.VITE_MAIN_PRINTER_TYPE) {

@@ -35,7 +35,7 @@ export class TCS3000 extends BaseDispenser {
 	];
 
 	printer: SerialPort<AutoDetectTypes>;
-	constructor(socket: SerialPort, printer: SerialPort, options?: DispenserOptions) {
+	constructor(socket: SerialPort, printer: SerialPort, options: DispenserOptions) {
 		super(socket, options);
 		this.printer = printer;
 	}
@@ -96,12 +96,14 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	getProductIDBytes() {
+		debugLog('TCS3000 constructor options: %O', this.options, process.env.VITE_TCS_PROD_ID);
 		// Parse the product ID string into a base-10 integer
-		const productId = parseInt(this.options?.tcsProductId, 10);
+		
+		const productId = this.options.tcsProductId;
 
 		// Validate the parsed product ID
 		if (isNaN(productId) || productId < 1001 || productId > 9998) {
-			throw new Error(`Invalid product ID: ${this.options?.tcsProductId}. Must be a number between 1001 and 9998.`);
+			throw new Error(`Invalid product ID: ${this.options.tcsProductId}. Must be a number between 1001 and 9998.`);
 		}
 
 		// Convert the single product ID integer into two bytes
