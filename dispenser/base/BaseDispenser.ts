@@ -1,5 +1,4 @@
 import { DispenserOptions, IDispenser } from '../interface/IDispenser';
-import { QueueObject, queue } from 'async';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
@@ -12,10 +11,12 @@ const debugLog = debug('dispenser:base-dispenser');
 export class BaseDispenser implements IDispenser {
 	connection: SerialPort<AutoDetectTypes>;
 	innerByteTimeoutParser: InterByteTimeoutParser;
+	options?: DispenserOptions;
 	[key: string]: any;
 
 	constructor(socket: SerialPort, options?: DispenserOptions) {
 		this.connection = socket;
+		this.options = options;
 		// Adjust concurrency as needed
 		this.innerByteTimeoutParser = this.connection.pipe(
 			new InterByteTimeoutParser({ interval: options?.interByteTimeoutInterval || 300 })
