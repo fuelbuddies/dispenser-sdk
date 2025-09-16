@@ -35,7 +35,7 @@ export class TCS3000 extends BaseDispenser {
 	];
 
 	printer: SerialPort<AutoDetectTypes>;
-	constructor(socket: SerialPort, printer: SerialPort, options?: DispenserOptions) {
+	constructor(socket: SerialPort, printer: SerialPort, options: DispenserOptions) {
 		super(socket, options);
 		this.printer = printer;
 	}
@@ -98,10 +98,8 @@ export class TCS3000 extends BaseDispenser {
 	getProductIDBytes() {
 		debugLog('TCS3000 constructor options: %O', this.options, process.env.VITE_TCS_PROD_ID);
 		// Parse the product ID string into a base-10 integer
-		if (!this.options?.tcsProductId) {
-			throw new Error('TCS Product ID is required but not provided in options');
-		}
-		const productId = parseInt(this.options?.tcsProductId, 10);
+		
+		const productId = this.options.tcsProductId;
 
 		// Validate the parsed product ID
 		if (isNaN(productId) || productId < 1001 || productId > 9998) {

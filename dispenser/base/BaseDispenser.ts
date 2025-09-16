@@ -11,10 +11,10 @@ const debugLog = debug('dispenser:base-dispenser');
 export class BaseDispenser implements IDispenser {
 	connection: SerialPort<AutoDetectTypes>;
 	innerByteTimeoutParser: InterByteTimeoutParser;
-	options?: DispenserOptions;
+	options: DispenserOptions;
 	[key: string]: any;
 
-	constructor(socket: SerialPort, options?: DispenserOptions) {
+	constructor(socket: SerialPort, options: DispenserOptions) {
 		this.connection = socket;
 		this.options = options;
 		// Adjust concurrency as needed
