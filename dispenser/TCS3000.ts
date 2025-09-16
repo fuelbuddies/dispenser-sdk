@@ -96,6 +96,7 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	getProductIDBytes() {
+		debugLog('TCS3000 constructor options: %O', this.options);
 		// Parse the product ID string into a base-10 integer
 		const productId = parseInt(this.options?.tcsProductId, 10);
 
