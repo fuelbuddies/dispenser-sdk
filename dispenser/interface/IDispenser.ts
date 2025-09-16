@@ -69,7 +69,7 @@ export interface IDispenser {
 }
 
 export type DispenserOptions = {
-	tcsProductId: number;
+	tcsProductId?: number;
 	dispenserType: string;
 	hardwareId: string;
 	attributeId: string;

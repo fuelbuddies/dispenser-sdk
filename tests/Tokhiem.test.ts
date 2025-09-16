@@ -9,7 +9,11 @@ describe('Tokhiem', () => {
 	beforeEach(async () => {
 		if (!serialPort) {
 			serialPort = new SerialPort({ path: await findDispenserPort(hardwareId, attributeId), baudRate: 9600 });
-			dispenser = new Tokhiem(serialPort);
+			dispenser = new Tokhiem(serialPort, {
+				hardwareId,
+				attributeId,
+				dispenserType: 'Tokhiem'
+			});
 		}
 	});
 

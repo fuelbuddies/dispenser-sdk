@@ -10,7 +10,11 @@ describe('IsoilVegaTVersion10', () => {
 	beforeEach(async () => {
 		if (!serialPort) {
 			serialPort = new SerialPort({ path: await findDispenserPort(hardwareId, attributeId), baudRate: 9600 });
-			dispenser = new IsoilVegaTVersion10(serialPort);
+			dispenser = new IsoilVegaTVersion10(serialPort, {
+				dispenserType: 'IsoilVegaTVersion10',
+				hardwareId,
+				attributeId
+			});
 		}
 	});
 

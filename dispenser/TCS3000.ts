@@ -99,7 +99,7 @@ export class TCS3000 extends BaseDispenser {
 		debugLog('TCS3000 constructor options: %O', this.options, process.env.VITE_TCS_PROD_ID);
 		// Parse the product ID string into a base-10 integer
 		
-		const productId = this.options.tcsProductId;
+		const productId = this.options.tcsProductId || 1015;
 
 		// Validate the parsed product ID
 		if (isNaN(productId) || productId < 1001 || productId > 9998) {
