@@ -98,7 +98,7 @@ export class TCS3000 extends BaseDispenser {
 	getProductIDBytes() {
 		debugLog('TCS3000 constructor options: %O', this.options, process.env.VITE_TCS_PROD_ID);
 		// Parse the product ID string into a base-10 integer
-		
+
 		const productId = this.options.tcsProductId || 1015;
 
 		// Validate the parsed product ID
@@ -278,7 +278,17 @@ export class TCS3000 extends BaseDispenser {
 
 	processStatus(res: string) {
 		debugLog('processStatus: %s', res);
-		const statusBit = res.slice(16, -2);
+
+		// Handle duplicate response pattern
+		// Normal response: 7e0001c71f030061065c (20 chars)
+		// Duplicate response: 7e0001c71f030061065c7e0001c71f030061065c (40 chars)
+		let cleanRes = res;
+		if (res.length === 40) {
+			cleanRes = res.slice(20, 40);
+			debugLog('processStatus: Duplicate response detected, using second half: %s', cleanRes);
+		}
+
+		const statusBit = cleanRes.slice(16, -2);
 		const statusMap = new Map([
 			['00', 'ERROR'],
 			['01', 'IDLE'],
