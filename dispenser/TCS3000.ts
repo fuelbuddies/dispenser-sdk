@@ -279,16 +279,26 @@ export class TCS3000 extends BaseDispenser {
 	processStatus(res: string) {
 		debugLog('processStatus: %s', res);
 
-		// Handle duplicate response pattern
-		// Normal response: 7e0001c71f030061065c (20 chars)
-		// Duplicate response: 7e0001c71f030061065c7e0001c71f030061065c (40 chars)
-		let cleanRes = res;
-		if (res.length === 40) {
-			cleanRes = res.slice(20, 40);
-			debugLog('processStatus: Duplicate response detected, using second half: %s', cleanRes);
+		// Find valid packet by scanning from end to start
+		// Valid packet: starts with '7e' and is exactly 20 characters long
+		let validPacket: string | null = null;
+
+		// Start from the end of the string and look for valid packets
+		for (let i = res.length - 20; i >= 0; i--) {
+			const substring = res.slice(i, i + 20);
+			if (substring.length === 20 && substring.startsWith('7e')) {
+				validPacket = substring;
+				debugLog('processStatus: Valid packet found at position %d: %s', i, validPacket);
+				break;
+			}
 		}
 
-		const statusBit = cleanRes.slice(16, -2);
+		if (!validPacket) {
+			debugLog('processStatus: No valid packet found in response: %s', res);
+			return { status: undefined };
+		}
+
+		const statusBit = validPacket.slice(16, -2);
 		const statusMap = new Map([
 			['00', 'ERROR'],
 			['01', 'IDLE'],
