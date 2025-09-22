@@ -98,7 +98,7 @@ export class TCS3000 extends BaseDispenser {
 	getProductIDBytes() {
 		debugLog('TCS3000 constructor options: %O', this.options, process.env.VITE_TCS_PROD_ID);
 		// Parse the product ID string into a base-10 integer
-		
+
 		const productId = this.options.tcsProductId || 1015;
 
 		// Validate the parsed product ID
@@ -278,7 +278,26 @@ export class TCS3000 extends BaseDispenser {
 
 	processStatus(res: string) {
 		debugLog('processStatus: %s', res);
-		const statusBit = res.slice(16, -2);
+
+		// Find valid packet by scanning from end to start
+		// Valid packet: starts with '7e' and is exactly 20 characters long
+		const parts = res.split('7e');
+
+		// Filter out empty parts
+		const validParts = parts.filter((part) => part.length > 0);
+
+		// Add "7e" prefix to each valid part to reconstruct
+		const reconstructedParts = validParts.map((part) => '7e' + part);
+
+		// Find parts that are exactly 20 characters
+		const twentyCharParts = reconstructedParts.filter((part) => part.length === 20);
+
+		if (!twentyCharParts || twentyCharParts.length < 1) {
+			debugLog('processStatus: No valid packet found in response: %s', res);
+			return { status: undefined };
+		}
+
+		const statusBit = twentyCharParts.pop()!.slice(16, -2);
 		const statusMap = new Map([
 			['00', 'ERROR'],
 			['01', 'IDLE'],
