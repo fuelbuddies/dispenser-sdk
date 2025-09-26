@@ -21,67 +21,67 @@ export class Tokhiem extends BaseDispenser {
 
 	async totalizer() {
 		debugLog('totalizer');
-		await this.connection.write(this.totalizerBuffer);
+		await this.write(this.totalizerBuffer, 'totalizer');
 		return await this.dispenserResponse();
 	}
 
 	async authorizeSale() {
 		debugLog('authorizeSale');
-		await this.connection.write(this.authorize);
+		await this.write(this.authorize, 'authorizeSale');
 		return await this.dispenserResponse();
 	}
 
 	async readPreset() {
 		debugLog('readPreset');
-		await this.connection.write(this.read_preset);
+		await this.write(this.read_preset, 'readPreset');
 		return await this.dispenserResponse();
 	}
 
 	async suspendDispencer() {
 		debugLog('suspendDispencer');
-		await this.connection.write(this.suspend_sale);
+		await this.write(this.suspend_sale, 'suspendDispencer');
 		return await this.dispenserResponse();
 	}
 
 	async clearSale() {
 		debugLog('clearSale');
-		await this.connection.write(this.clear_sale);
+		await this.write(this.clear_sale, 'clearSale');
 		return await this.dispenserResponse();
 	}
 
 	async readSale() {
 		debugLog('readSale');
-		await this.connection.write(this.tokhim_read_sale);
+		await this.write(this.tokhim_read_sale, 'readSale');
 		return await this.dispenserResponse();
 	}
 
 	async readAuth() {
 		debugLog('readAuth');
-		await this.connection.write(this.tokhim_status);
+		await this.write(this.tokhim_status, 'readAuth');
 		return await this.dispenserResponse();
 	}
 
 	async cancelPreset() {
 		debugLog('cancelPreset');
-		await this.connection.write(this.cancel_preset);
+		await this.write(this.cancel_preset, 'cancelPreset');
 		return await this.dispenserResponse();
 	}
 
 	async resumeDispencer() {
 		debugLog('resumeDispencer');
-		await this.connection.write(this.resume_sale);
+		await this.write(this.resume_sale, 'resumeDispencer');
 		return await this.dispenserResponse();
 	}
 
 	async pumpStop() {
 		debugLog('pumpStop');
-		await this.connection.write(this.pump_stop);
+		await this.write(this.pump_stop, 'pumpStop');
 		return await this.dispenserResponse();
 	}
 
 	async pumpStart() {
 		debugLog('pumpStart');
-		await this.connection.write(this.pump_start);
+		await this.write(this.pump_start, 'pumpStart');
 		return await this.dispenserResponse();
 	}
 
@@ -106,13 +106,13 @@ export class Tokhiem extends BaseDispenser {
 			return await this.pumpStart();
 		}
 		debugLog('switchMode: offline');
-		await this.connection.write(this.tokhim_authorize_off);
+		await this.write(this.tokhim_authorize_off, 'switchMode:offline');
 		return await this.dispenserResponse();
 	}
 
 	async readDispencerStatus() {
 		debugLog('readDispencerStatus');
-		await this.connection.write(this.tokhim_status);
+		await this.write(this.tokhim_status, 'readDispencerStatus');
 		return await this.dispenserResponse();
 	}
 
@@ -152,7 +152,7 @@ export class Tokhiem extends BaseDispenser {
 
 		// Assuming you have a serialport object named 'dispencerSerial'
 		debugLog('volume sent', volume);
-		await this.connection.write(volume);
+		await this.write(volume, 'sendPreset');
 		return await this.dispenserResponse();
 	}
 

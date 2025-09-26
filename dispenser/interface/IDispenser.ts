@@ -1,6 +1,7 @@
 import ModbusRTU from 'modbus-serial';
 import { SerialPort } from 'serialport';
 import { Seneca } from '../workflows/GateX';
+import { PubSubConfig } from '../../utils/PubSubLogger';
 
 export interface IDispenser {
 	connection: SerialPort | Promise<Seneca>;
@@ -71,6 +72,8 @@ export interface IDispenser {
 export type DispenserOptions = {
 	tcsProductId?: number;
 	dispenserType: string;
+	dispenserId?: string;
+	pumpAddress?: string;
 	hardwareId: string;
 	attributeId: string;
 	baudRate?: number;
@@ -79,6 +82,7 @@ export type DispenserOptions = {
 	modbus?: ModbusOptions;
 	totalizerFile?: string;
 	interByteTimeoutInterval?: number;
+	pubsubConfig?: PubSubConfig;
 };
 
 export type ModbusOptions = {

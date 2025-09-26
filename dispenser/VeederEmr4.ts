@@ -64,29 +64,29 @@ export class VeederEmr4 extends BaseDispenser {
 	}
 
 	async switchToRemote() {
-		await this.connection.write(this.veeder_authorize_on);
+		await this.write(this.veeder_authorize_on, 'switchToRemote');
 		return await this.dispenserResponse();
 	}
 
 	async switchToLocal() {
-		await this.connection.write(this.veeder_authorize_off);
+		await this.write(this.veeder_authorize_off, 'switchToLocal');
 		return await this.dispenserResponse();
 	}
 
 	async totalizer() {
-		await this.connection.write(this.veeder_totalizer);
+		await this.write(this.veeder_totalizer, 'totalizer');
 		return await this.dispenserResponse();
 	}
 
 	async readStatus() {
-		await this.connection.write(this.veeder_status);
+		await this.write(this.veeder_status, 'readStatus');
 		return await this.dispenserResponse();
 	}
 
 	pumpStart() {
 		return new Promise(async (resolve, reject) => {
 			try {
-				await this.connection.write(this.veeder_auth_required);
+				await this.write(this.veeder_auth_required, 'pumpStart');
 				const response = await this.dispenserResponse();
 				debugLog('pumpStart response: %s', response);
 				if (response.includes('7eff014100bf7e')) {
@@ -128,43 +128,43 @@ export class VeederEmr4 extends BaseDispenser {
 	}
 
 	async authorizeSale() {
-		await this.connection.write(this.veeder_delivery_auth);
+		await this.write(this.veeder_delivery_auth, 'authorizeSale');
 		return await this.dispenserResponse();
 	}
 
 	async readPreset() {
-		await this.connection.write(this.veeder_read_preset);
+		await this.write(this.veeder_read_preset, 'readPreset');
 		return await this.dispenserResponse();
 	}
 
 	async cancelPreset() {
-		await this.connection.write(this.veeder_reset);
+		await this.write(this.veeder_reset, 'cancelPreset');
 		return await this.dispenserResponse();
 	}
 
 	async readSale() {
-		await this.connection.write(this.veeder_read_sale);
+		await this.write(this.veeder_read_sale, 'readSale');
 		return await this.dispenserResponse();
 	}
 
 	async suspendSale() {
-		await this.connection.write(this.veeder_pause);
+		await this.write(this.veeder_pause, 'suspendSale');
 		return await this.dispenserResponse();
 	}
 
 	async resumeSale() {
-		await this.connection.write(this.veeder_resume);
+		await this.write(this.veeder_resume, 'resumeSale');
 		return await this.dispenserResponse();
 	}
 
 	async clearSale() {
-		await this.connection.write(this.veeder_end_delivery);
-		await this.connection.write(this.veeder_reset);
+		await this.write(this.veeder_end_delivery, 'clearSale');
+		await this.write(this.veeder_reset, 'clearSale');
 		return await this.dispenserResponse();
 	}
 
 	async readAuthorization() {
-		await this.connection.write(this.veeder_get_authorization);
+		await this.write(this.veeder_get_authorization, 'readAuthorization');
 		return await this.dispenserResponse();
 	}
 
@@ -463,8 +463,8 @@ export class VeederEmr4 extends BaseDispenser {
 
 		debugLog('sendPreset: %s', fullMessage.map((byte) => byte.toString(16).padStart(2, '0')).join(' '));
 		// Write all bytes to the connection at once
-		await this.connection.write(Buffer.from(fullMessage));
-		await this.connection.write(this.veeder_resume);
+		await this.write(Buffer.from(fullMessage), 'sendPreset');
+		await this.write(this.veeder_resume, 'sendPreset');
 		return await this.dispenserResponse();
 	}
 }

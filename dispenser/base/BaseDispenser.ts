@@ -5,6 +5,7 @@ import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
 import debug from 'debug';
 import { execFile } from 'child_process';
 import * as path from 'path';
+import { getPubSubLogger, PubSubLogger, MessagePayload } from '../../utils/PubSubLogger';
 
 const debugLog = debug('dispenser:base-dispenser');
 
@@ -12,6 +13,7 @@ export class BaseDispenser implements IDispenser {
 	connection: SerialPort<AutoDetectTypes>;
 	innerByteTimeoutParser: InterByteTimeoutParser;
 	options: DispenserOptions;
+	private pubsubLogger?: PubSubLogger;
 	[key: string]: any;
 
 	constructor(socket: SerialPort, options: DispenserOptions) {
@@ -21,6 +23,43 @@ export class BaseDispenser implements IDispenser {
 		this.innerByteTimeoutParser = this.connection.pipe(
 			new InterByteTimeoutParser({ interval: options?.interByteTimeoutInterval || 300 })
 		);
+
+		try {
+			const pubsubConfig = this.options.pubsubConfig;
+			if (pubsubConfig && pubsubConfig.enabled !== false) {
+				this.pubsubLogger = getPubSubLogger(pubsubConfig);
+				debugLog('PubSub logger initialized');
+			}
+		} catch (error) {
+			debugLog('Failed to initialize PubSub logger: %O', error);
+		}
+	}
+
+	private async logDispenserMessage(
+		messageType: 'sent' | 'received',
+		data: Buffer,
+		command?: string
+	): Promise<void> {
+		if (!this.pubsubLogger) return;
+
+		try {
+			const message: MessagePayload = {
+				dispenserId: this.options.dispenserId || 'unknown',
+				dispenserType: this.options.dispenserType,
+				messageType,
+				command,
+				data,
+				timestamp: new Date(),
+				metadata: {
+					pumpAddress: this.options.pumpAddress || 'unknown',
+					interByteTimeoutInterval: this.options.interByteTimeoutInterval
+				}
+			};
+
+			await this.pubsubLogger.logMessage(message);
+		} catch (error) {
+			debugLog('Failed to log message to PubSub: %O', error);
+		}
 	}
 
 	dispenserResponse(): Promise<any> {
@@ -30,6 +69,7 @@ export class BaseDispenser implements IDispenser {
 				this.innerByteTimeoutParser.once('data', (data: any): void => {
 					var res = data.toString('hex');
 					debugLog('awaitDispenserResponse: %s', res);
+					this.logDispenserMessage('received', data);
 					resolve(res);
 				});
 			} catch (e) {
@@ -70,6 +110,11 @@ export class BaseDispenser implements IDispenser {
 
 	async disconnect(callback: any) {
 		debugLog('disconnect: %s', 'Requesting disconnection from Seneca');
+
+		if (this.pubsubLogger) {
+			await this.pubsubLogger.flush();
+		}
+
 		const connection = await this.connection;
 
 		connection.close(async () => {
@@ -83,6 +128,12 @@ export class BaseDispenser implements IDispenser {
 			//     callback();
 			// });
 		});
+	}
+
+	protected async write(data: Buffer | string, command?: string): Promise<boolean> {
+		const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'hex');
+		await this.logDispenserMessage('sent', buffer, command);
+		return await this.connection.write(buffer);
 	}
 
 	/**

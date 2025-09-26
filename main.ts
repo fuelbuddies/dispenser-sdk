@@ -12,6 +12,7 @@ import { TCS3000 } from './dispenser/TCS3000';
 
 const debugLog = debug('dispenser:main');
 export { IDispenser, IRfid, RfidOptions, DispenserOptions, getConfigFromEnv, getRFIDConfigFromEnv };
+export { PubSubConfig, getPubSubLogger, shutdownPubSubLogger } from './utils/PubSubLogger';
 
 /* Factory for creating dispenser objects */
 export async function createDispenser(options: DispenserOptions): Promise<IDispenser> {

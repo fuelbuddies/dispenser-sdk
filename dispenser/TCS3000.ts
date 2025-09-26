@@ -18,9 +18,9 @@ export class TCS3000 extends BaseDispenser {
 	private cancel_preset = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x36, 0x00, 0x55]);
 
 	private authorize = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x3c, 0x01, 0x03, 0xa8]);
-	private clear_sale = [0x7e, 0x01, 0x00, 0x20, 0x3e, 0x00, 0x23];
-	private suspend_sale = [0x7e, 0x01, 0x00, 0x20, 0x39, 0x00, 0x4d];
-	private resume_sale = [0x7e, 0x01, 0x00, 0x20, 0x3a, 0x00, 0x18];
+	private clear_sale = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x3e, 0x00, 0x23]);
+	private suspend_sale = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x39, 0x00, 0x4d]);
+	private resume_sale = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x3a, 0x00, 0x18]);
 
 	private crc_array: number[] = [
 		0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127, 252, 162, 64, 30, 95, 1, 227, 189, 62,
@@ -46,45 +46,45 @@ export class TCS3000 extends BaseDispenser {
 
 	async totalizer() {
 		debugLog('totalizer', 'Read_Totalizer');
-		await this.connection.write(this.totalizerBuffer);
+		await this.write(this.totalizerBuffer, 'totalizer');
 		return await this.dispenserResponse();
 	}
 
 	async readPreset() {
 		debugLog('readPreset', 'Read_Status');
-		await this.connection.write(this.read_preset); // same command to get data on isoil
+		await this.write(this.read_preset, 'readPreset'); // same command to get data on isoil
 		return await this.dispenserResponse();
 	}
 
 	// TODO: Need to set this up
 	async readSale() {
 		debugLog('readSale', 'Read_Sale');
-		await this.connection.write(this.read_sale); // same command to get data on isoil
+		await this.write(this.read_sale, 'readSale'); // same command to get data on isoil
 		return await this.dispenserResponse();
 	}
 
 	// TODO: Need to set this up
 	async readStatus() {
 		debugLog('readStatus', 'Read_Status');
-		await this.connection.write(this.read_status); // response needs some statuses to be hardcoded .. will see
+		await this.write(this.read_status,'readStatus'); // response needs some statuses to be hardcoded .. will see
 		return await this.dispenserResponse();
 	}
 
 	async pumpStart() {
 		debugLog('startPump', 'Pump_Start');
-		await this.connection.write(this.pump_start);
+		await this.write(this.pump_start, 'startPump');
 		return await this.dispenserResponse();
 	}
 
 	async pumpStop() {
 		debugLog('stopPump', 'Pump_Stop');
-		await this.connection.write(this.pump_stop);
+		await this.write(this.pump_stop, 'pumpStop');
 		return await this.dispenserResponse();
 	}
 
 	async authorizeSale() {
 		debugLog('authorizeSale', 'Start');
-		await this.connection.write(this.authorize);
+		await this.write(this.authorize, 'authorizeSale');
 		return await this.dispenserResponse();
 	}
 
@@ -149,31 +149,31 @@ export class TCS3000 extends BaseDispenser {
 
 		debugLog('sendPreset: %s', buffer_array.map((item) => item.toString(16).padStart(2, '0')).join(' '));
 
-		await this.connection.write(Buffer.from(buffer_array));
+		await this.write(Buffer.from(buffer_array), 'sendPreset');
 		return await this.dispenserResponse();
 	}
 
 	async cancelPreset() {
 		debugLog('cancelPreset', 'Cancel_Preset');
-		await this.connection.write(this.cancel_preset);
+		await this.write(this.cancel_preset, 'cancelPreset');
 		return await this.dispenserResponse();
 	}
 
 	async suspendSale() {
 		debugLog('suspendSale', 'Stop');
-		await this.connection.write(this.suspend_sale);
+		await this.write(this.suspend_sale, 'suspendSale');
 		return await this.dispenserResponse();
 	}
 
 	async resumeSale() {
 		debugLog('resumeSale', 'Resume_Sale');
-		await this.connection.write(this.resume_sale);
+		await this.write(this.resume_sale, 'resumeSale');
 		return await this.dispenserResponse();
 	}
 
 	async clearSale() {
 		debugLog('clearSale', 'Clear_Sale');
-		await this.connection.write(this.clear_sale);
+		await this.write(this.clear_sale, 'clearSale');
 		return await this.dispenserResponse();
 	}
 
