@@ -64,23 +64,23 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
 	async totalizer() {
 		debugLog('totalizer: %s', 'Read_Totalizer');
-		await this.connection.write(this.totalizerBuffer);
+		await this.write(this.totalizerBuffer, 'totalizer');
 	}
 
 	async readPreset() {
 		debugLog('readPreset: %s', 'Read_Status');
-		await this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
+		await this.write(this.check_nozzle_totalizer, 'readPreset'); // same command to get data on isoil
 	}
 
 	async readSale() {
 		debugLog('readSale: %s', 'Read_Status');
-		await this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
+		await this.write(this.check_nozzle_totalizer, 'readSale'); // same command to get data on isoil
 	}
 
 	async readStatus() {
 		debugLog('readStatus: %s', 'Read_Status');
 		if (!this.connection.isOpen) return '';
-		await this.connection.write(this.check_nozzle_totalizer); // response needs some statuses to be hardcoded .. will see
+		await this.write(this.check_nozzle_totalizer, 'readStatus'); // response needs some statuses to be hardcoded .. will see
 	}
 
 	switchToRemote() {
@@ -95,20 +95,20 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
 	async pumpStart() {
 		debugLog('startPump: %s', 'Pump_Start');
-		await this.connection.write(this.transaction_enable);
+		await this.write(this.transaction_enable, 'pumpStart');
 	}
 
 	async pumpStop() {
 		debugLog('stopPump: %s', 'Pump_Stop');
-		await this.connection.write(this.terminate);
+		await this.write(this.terminate, 'pumpStop');
 		await this.delay(300);
-		await this.connection.write(this.inbetween_close);
+		await this.write(this.inbetween_close, 'pumpStop');
 		await this.delay(300);
 	}
 
 	async authorizeSale() {
 		debugLog('authorizeSale: %s', 'Start');
-		await this.connection.write(this.start);
+		await this.write(this.start, 'authorizeSale');
 	}
 
 	async setPreset(quantity: number) {
@@ -219,7 +219,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 		// Call write_command with volume array
 		// write_command(volume);
 		// Assuming dispencerSerial is accessible
-		await this.connection.write(Buffer.from(volume));
+		await this.write(Buffer.from(volume), 'sendPreset');
 	}
 
 	async cancelPreset() {
@@ -229,20 +229,20 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
 	async suspendSale() {
 		debugLog('suspendSale: %s', 'Stop');
-		await this.connection.write(this.stop);
+		await this.write(this.stop, 'suspendSale');
 	}
 
 	async resumeSale() {
 		debugLog('resumeSale: %s', 'Resume_Sale');
-		await this.connection.write(this.terminate);
+		await this.write(this.terminate, 'resumeSale');
 		await this.delay(300);
-		await this.connection.write(this.start);
+		await this.write(this.start, 'resumeSale');
 		await this.delay(300);
 	}
 
 	async clearSale() {
 		debugLog('clearSale: %s', 'Clear_Sale');
-		await this.connection.write(this.transaction_close);
+		await this.write(this.transaction_close, 'clearSale');
 	}
 
 	hasExternalPump() {
@@ -252,7 +252,7 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 
 	readAuthorization() {
 		debugLog('readAuthorization: %s', 'Read_Authorization');
-		this.connection.write(this.check_nozzle_totalizer); // same command to get data on isoil
+		this.write(this.check_nozzle_totalizer, 'readAuthorization'); // same command to get data on isoil
 	}
 
 	processLegacyCommand(res: string) {
@@ -697,6 +697,9 @@ export class IsoilVegaTVersion10 extends BaseDispenser {
 		return this.printOrder(recieptString);
 	}
 
+	/**
+	 * This has large text on this so no logging on pub sub
+	 */
 	printOrder(printText: string): boolean {
 		let i: number;
 		let checksum: number = 0;
