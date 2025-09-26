@@ -46,6 +46,9 @@ export function getConfigFromEnv() {
 			retryIntervalMs: parseInt(process.env.PUBSUB_RETRY_INTERVAL_MS || '30000'),
 			batchSize: parseInt(process.env.PUBSUB_BATCH_SIZE || '100')
 		};
+
+		dispenserConfig.dispenserId = process.env.DISPENSER_ID || 'test-dispenser-001';
+		dispenserConfig.pumpAddress = process.env.PUMP_ADDRESS || '1';
 	}
 
 	return dispenserConfig;
