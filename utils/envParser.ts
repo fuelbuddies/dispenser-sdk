@@ -35,6 +35,19 @@ export function getConfigFromEnv() {
 		};
 	}
 
+	if(process.env.PUBSUB_ENABLED) {
+		dispenserConfig.pubsubConfig =  {
+			projectId: process.env.GOOGLE_CLOUD_PROJECT,
+			topicName: process.env.PUBSUB_TOPIC_NAME || 'dispenser-messages',
+			keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+			enabled: process.env.PUBSUB_ENABLED === 'true',
+			cachePath: process.env.PUBSUB_CACHE_PATH,
+			maxCacheSize: parseInt(process.env.PUBSUB_MAX_CACHE_SIZE || '10000'),
+			retryIntervalMs: parseInt(process.env.PUBSUB_RETRY_INTERVAL_MS || '30000'),
+			batchSize: parseInt(process.env.PUBSUB_BATCH_SIZE || '100')
+		};
+	}
+
 	return dispenserConfig;
 }
 
