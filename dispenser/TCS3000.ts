@@ -281,23 +281,24 @@ export class TCS3000 extends BaseDispenser {
 
 		// Find valid packet by scanning from end to start
 		// Valid packet: starts with '7e' and is exactly 20 characters long
-		const parts = res.split('7e');
+		let validPacket: string | null = null;
 
-		// Filter out empty parts
-		const validParts = parts.filter((part) => part.length > 0);
+		// Start from the end of the string and look for valid packets
+		for (let i = res.length - 20; i >= 0; i--) {
+			const substring = res.slice(i, i + 20);
+			if (substring.length === 20 && substring.startsWith('7e')) {
+				validPacket = substring;
+				debugLog('processStatus: Valid packet found at position %d: %s', i, validPacket);
+				break;
+			}
+		}
 
-		// Add "7e" prefix to each valid part to reconstruct
-		const reconstructedParts = validParts.map((part) => '7e' + part);
-
-		// Find parts that are exactly 20 characters
-		const twentyCharParts = reconstructedParts.filter((part) => part.length === 20);
-
-		if (!twentyCharParts || twentyCharParts.length < 1) {
+		if (!validPacket) {
 			debugLog('processStatus: No valid packet found in response: %s', res);
 			return { status: undefined };
 		}
 
-		const statusBit = twentyCharParts.pop()!.slice(16, -2);
+		const statusBit = validPacket.slice(16, -2);
 		const statusMap = new Map([
 			['00', 'ERROR'],
 			['01', 'IDLE'],
