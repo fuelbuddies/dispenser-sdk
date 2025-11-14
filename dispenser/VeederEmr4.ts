@@ -236,7 +236,7 @@ export class VeederEmr4 extends BaseDispenser {
 	 * @returns
 	 */
 	processTotalizer(res: string) {
-		return this.processResponse(res.split('2e'), 14, 4);
+		return this.processResponse(res /* res.split('2e') */, 14, 4);
 	}
 
 	processTotalizerWithBatch(res: string) {
@@ -286,11 +286,18 @@ export class VeederEmr4 extends BaseDispenser {
 		return this.hexToFloat(volumeHex);
 	}
 
-	processResponseRaw(response: string[], exponentCut: number, mantessaCut: number) {
-		const exponent = this.hex2a(this.cutStringFromLast(response[0], exponentCut, true));
-		let mantessa = '0';
-		if (response.length > 1) mantessa = this.hex2a(this.cutStringFromLast(response[1], mantessaCut, false));
-		return `${exponent}.${mantessa}`;
+	processResponseRaw(response: string, exponentCut: number, mantessaCut: number) {
+		const fullAscii = this.hex2a(response);
+		debugLog("processResponseRaw Full ASCII: %s", fullAscii);
+
+		// Extract all numeric values (including decimals)
+		const numericValues = fullAscii.match(/\d+\.?\d*/g);
+		console.log("processResponseRaw All numeric values:", numericValues);
+
+		// Get the last numeric value
+		const lastValue = numericValues ? numericValues[numericValues.length - 1] : '0.0';
+		debugLog("processResponseRaw Last float value: %s", lastValue);
+		return lastValue;
 	}
 
 	/**
@@ -300,8 +307,10 @@ export class VeederEmr4 extends BaseDispenser {
 	 * @param mantessaCut number
 	 * @returns
 	 */
-	processResponse(response: string[], exponentCut: number, mantessaCut: number) {
-		return parseFloat(this.processResponseRaw(response, exponentCut, mantessaCut));
+	processResponse(response: string, exponentCut: number, mantessaCut: number) {
+		const respRaw  = this.processResponseRaw(response, exponentCut, mantessaCut);
+		debugLog("processResponse before parseFloat %s", respRaw);
+		return parseFloat(respRaw);
 	}
 
 	isPumpStopped(res: string) {
