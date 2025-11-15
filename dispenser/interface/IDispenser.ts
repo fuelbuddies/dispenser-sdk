@@ -26,7 +26,7 @@ export interface IDispenser {
 	startExternalPump?(): any;
 	stopExternalPump?(): any;
 	authorizeSale?(): any;
-	setPreset?(quantity: number): any;
+	setPreset?(quantity: number, productId?: number): any;
 	readPreset?(): any;
 	readAuthorization?(): any;
 	cancelPreset?(): any;
