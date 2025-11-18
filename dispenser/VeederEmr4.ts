@@ -236,7 +236,7 @@ export class VeederEmr4 extends BaseDispenser {
 	 * @returns
 	 */
 	processTotalizer(res: string) {
-		return this.processResponse(res /* res.split('2e') */, 14, 4);
+		return this.processResponse(res.split('2e'), 14, 4);
 	}
 
 	processTotalizerWithBatch(res: string) {
@@ -307,8 +307,8 @@ export class VeederEmr4 extends BaseDispenser {
 	 * @param mantessaCut number
 	 * @returns
 	 */
-	processResponse(response: string, exponentCut: number, mantessaCut: number) {
-		const respRaw  = this.processResponseRaw(response, exponentCut, mantessaCut);
+	processResponse(response: string[], exponentCut: number, mantessaCut: number) {
+		const respRaw  = this.processResponseRaw(response.join('2e'), exponentCut, mantessaCut);
 		debugLog("processResponse before parseFloat %s", respRaw);
 		return parseFloat(respRaw);
 	}
