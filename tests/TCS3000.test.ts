@@ -40,4 +40,14 @@ describe('TCS3000', () => {
         const totalizer = await dispenser.execute(dispenser.totalzer, dispenser.processTotalizer);
         expect(totalizer).toBeGreaterThan(0);
     })
+
+    it("Should set preset with custom productId", async () => {
+        const result = await dispenser.execute(dispenser.setPreset, dispenser.processCommand, [10, 1020]);
+        expect(result).toBeDefined();
+    })
+
+    it("Should set preset with default productId from options", async () => {
+        const result = await dispenser.execute(dispenser.setPreset, dispenser.processCommand, [10]);
+        expect(result).toBeDefined();
+    })
 })

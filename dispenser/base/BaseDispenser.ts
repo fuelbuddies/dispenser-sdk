@@ -80,7 +80,7 @@ export class BaseDispenser implements IDispenser {
 
 	execute(callee: any, bindFunction?: (...args: any[]) => unknown, calleeArgs: any = undefined): Promise<any> {
 		return new Promise((resolve, reject) => {
-			Promise.resolve(callee.call(this, calleeArgs || undefined))
+			Promise.resolve(callee.call(this, ...(Array.isArray(calleeArgs) ? calleeArgs : [calleeArgs || undefined])))
 				.then(async (data: any) => {
 					if (bindFunction instanceof Function) {
 						const result = await bindFunction.call(this, data, calleeArgs || undefined, callee.name);
