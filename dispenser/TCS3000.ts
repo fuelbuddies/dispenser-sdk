@@ -88,32 +88,33 @@ export class TCS3000 extends BaseDispenser {
 		return await this.dispenserResponse();
 	}
 
-	async setPreset(quantity: number) {
-		debugLog('setPreset', `Preset_QTY=${quantity}`);
+	async setPreset(quantity: number, productId?: number) {
+		debugLog('setPreset', `Preset_QTY=${quantity}, ProductID=${productId || this.options.tcsProductId}`);
 		// TODO: implement this
 		// this.connection.send(`Preset_QTY=${quantity}`);
-		return await this.sendPreset(quantity);
+		return await this.sendPreset(quantity, productId);
 	}
 
-	getProductIDBytes() {
-		debugLog('TCS3000 constructor options: %O', this.options, process.env.VITE_TCS_PROD_ID);
+	getProductIDBytes(productId?: number) {
+		debugLog('TCS3000 constructor options: %O', this.options);
+		debugLog('PRODUCT_ID: %d', productId);
 		// Parse the product ID string into a base-10 integer
-		
-		const productId = this.options.tcsProductId || 1015;
+
+		const parsedProductId = productId ?? this.options.tcsProductId ?? 1015;
 
 		// Validate the parsed product ID
-		if (isNaN(productId) || productId < 1001 || productId > 9998) {
+		if (isNaN(parsedProductId) || parsedProductId < 1001 || parsedProductId > 9998) {
 			throw new Error(`Invalid product ID: ${this.options.tcsProductId}. Must be a number between 1001 and 9998.`);
 		}
 
 		// Convert the single product ID integer into two bytes
-		const productIdHighByte = (productId >> 8) & 0xff;
-		const productIdLowByte = productId & 0xff;
+		const productIdHighByte = (parsedProductId >> 8) & 0xff;
+		const productIdLowByte = parsedProductId & 0xff;
 
 		// Log the conversion for debugging purposes
 		debugLog(
 			'sendPreset: Using Product ID %d (0x%s, 0x%s)',
-			productId,
+			parsedProductId,
 			productIdHighByte.toString(16).padStart(2, '0'),
 			productIdLowByte.toString(16).padStart(2, '0')
 		);
@@ -122,11 +123,11 @@ export class TCS3000 extends BaseDispenser {
 		return [productIdHighByte, productIdLowByte];
 	}
 
-	async sendPreset(quantity: number) {
+	async sendPreset(quantity: number, productId?: number) {
 		let crc = 0;
 		const buffer_array = [];
 
-		const [productIdHighByte, productIdLowByte] = this.getProductIDBytes();
+		const [productIdHighByte, productIdLowByte] = this.getProductIDBytes(productId);
 
 		const volumePrecursor = [0x7e, 0x01, 0x00, 0x20, 0x38, 0x0b, 0x03, productIdHighByte, productIdLowByte];
 
