@@ -12,6 +12,6 @@ pin_state=$(pinctrl get 26)
 # Check if the pin state contains "lo" or "hi"
 if [[ $pin_state == *"lo"* ]]; then
     echo "false"
-else if [[ $pin_state == *"hi"* ]]; then
+elif [[ $pin_state == *"hi"* ]]; then
     echo "true"
 fi
