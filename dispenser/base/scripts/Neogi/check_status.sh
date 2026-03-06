@@ -11,7 +11,7 @@ pin_state=$(pinctrl get 26)
 
 # Check if the pin state contains "lo"
 if [[ $pin_state == *"lo"* ]]; then
-    echo "true"
-else
-    echo "false"
+    echo "OFF_HOOK"
+else if [[ $pin_state == *"hi"* ]]; then
+    echo "ON HOOK"
 fi
