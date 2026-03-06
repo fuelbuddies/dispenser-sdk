@@ -191,9 +191,14 @@ export class Neogi extends BaseDispenser {
 		return await this.dispenserResponse();
 	}
 
-	async readNozzleStatus() {
-		debugLog('readNozzleStatus');
-		return (await this.executeShellScriptAndCheck('scripts/Neogi/status.sh')) ? 'true' : 'false';
+	async readOnHookNozzleStatus() {
+		debugLog('readOnHookNozzleStatus');
+		return (await this.executeShellScriptAndCheck('scripts/Neogi/isOnHook.sh')) ? 'true' : 'false';
+	}
+
+	async readOffHookNozzleStatus() {
+		debugLog('readOffHookNozzleStatus');
+		return (await this.executeShellScriptAndCheck('scripts/Neogi/isOffHook.sh')) ? 'true' : 'false';
 	}
 
 	// this commnad take care of authorization as well
