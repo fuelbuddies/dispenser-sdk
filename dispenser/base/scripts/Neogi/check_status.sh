@@ -9,9 +9,9 @@ pinctrl set 26 ip
 
 pin_state=$(pinctrl get 26)
 
-# Check if the pin state contains "lo"
+# Check if the pin state contains "lo" or "hi"
 if [[ $pin_state == *"lo"* ]]; then
-    echo "OFF_HOOK"
+    echo "false"
 else if [[ $pin_state == *"hi"* ]]; then
-    echo "ON HOOK"
+    echo "true"
 fi
