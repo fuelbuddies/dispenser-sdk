@@ -192,8 +192,8 @@ export class Neogi extends BaseDispenser {
 	}
 
 	async readOnHookNozzleStatus() {
-		debugLog('readOnHookNozzleStatus');
-		return (await this.executeShellScriptAndCheck('scripts/Neogi/isOnHook.sh')) ? 'true' : 'false';
+		debugLog('check_status');
+		return (await this.executeShellScriptAndCheck('scripts/Neogi/check_status.sh')) ? 'true' : 'false';
 	}
 
 	async readOffHookNozzleStatus() {
