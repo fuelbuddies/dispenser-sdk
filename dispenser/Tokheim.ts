@@ -1,8 +1,8 @@
 import debug from 'debug';
 import { BaseDispenser } from './base/BaseDispenser';
 
-const debugLog = debug('dispenser:Tokhiem');
-export class Tokhiem extends BaseDispenser {
+const debugLog = debug('dispenser:Tokheim');
+export class Tokheim extends BaseDispenser {
 	private totalizerBuffer = Buffer.from([0x01, 0x41, 0x54, 0x7f, 0x6b]);
 	private pump_start = Buffer.from([0x01, 0x41, 0x4f, 0x7f, 0x70]);
 	private pump_stop = Buffer.from([0x01, 0x41, 0x5a, 0x7f, 0x65]);
@@ -13,11 +13,11 @@ export class Tokhiem extends BaseDispenser {
 	private clear_sale = Buffer.from([0x01, 0x41, 0x46, 0x7f, 0x79]);
 	private suspend_sale = Buffer.from([0x01, 0x41, 0x44, 0x7f, 0x7b]);
 	private resume_sale = Buffer.from([0x01, 0x41, 0x55, 0x7f, 0x6a]);
-	private tokhim_read_sale = Buffer.from([0x01, 0x41, 0x52, 0x7f, 0x6d]);
-	private tokhim_status = Buffer.from([0x01, 0x41, 0x53, 0x7f, 0x6c]);
-	private tokhim_authorize_on = Buffer.from([0x01, 0x41, 0x41, 0x7f, 0x7e]);
-	private tokhim_authorize_off = Buffer.from([0x01, 0x41, 0x47, 0x7f, 0x78]);
-	private tokhim_show_preset = Buffer.from([0x01, 0x41, 0x43, 0x7f, 0x7c]);
+	private tokheim_read_sale = Buffer.from([0x01, 0x41, 0x52, 0x7f, 0x6d]);
+	private tokheim_status = Buffer.from([0x01, 0x41, 0x53, 0x7f, 0x6c]);
+	private tokheim_authorize_on = Buffer.from([0x01, 0x41, 0x41, 0x7f, 0x7e]);
+	private tokheim_authorize_off = Buffer.from([0x01, 0x41, 0x47, 0x7f, 0x78]);
+	private tokheim_show_preset = Buffer.from([0x01, 0x41, 0x43, 0x7f, 0x7c]);
 
 	async totalizer() {
 		debugLog('totalizer');
@@ -51,13 +51,13 @@ export class Tokhiem extends BaseDispenser {
 
 	async readSale() {
 		debugLog('readSale');
-		await this.write(this.tokhim_read_sale, 'readSale');
+		await this.write(this.tokheim_read_sale, 'readSale');
 		return await this.dispenserResponse();
 	}
 
 	async readAuth() {
 		debugLog('readAuth');
-		await this.write(this.tokhim_status, 'readAuth');
+		await this.write(this.tokheim_status, 'readAuth');
 		return await this.dispenserResponse();
 	}
 
@@ -91,7 +91,7 @@ export class Tokhiem extends BaseDispenser {
 	}
 
 	getType() {
-		return 'TOKHIEM';
+		return 'TOKHEIM';
 	}
 
 	getExternalPump() {
@@ -106,13 +106,13 @@ export class Tokhiem extends BaseDispenser {
 			return await this.pumpStart();
 		}
 		debugLog('switchMode: offline');
-		await this.write(this.tokhim_authorize_off, 'switchMode:offline');
+		await this.write(this.tokheim_authorize_off, 'switchMode:offline');
 		return await this.dispenserResponse();
 	}
 
 	async readDispencerStatus() {
 		debugLog('readDispencerStatus');
-		await this.write(this.tokhim_status, 'readDispencerStatus');
+		await this.write(this.tokheim_status, 'readDispencerStatus');
 		return await this.dispenserResponse();
 	}
 

@@ -1,25 +1,25 @@
 import { SerialPort } from 'serialport';
-import { Tokhiem } from '../dispenser/Tokhiem';
+import { Tokheim } from '../dispenser/Tokheim';
 import { findDispenserPort, attributeId, hardwareId } from '../utils/findDispenserPort';
 
-describe('Tokhiem', () => {
-	let dispenser: Tokhiem;
+describe('Tokheim', () => {
+	let dispenser: Tokheim;
 	let serialPort: SerialPort;
 
 	beforeEach(async () => {
 		if (!serialPort) {
 			serialPort = new SerialPort({ path: await findDispenserPort(hardwareId, attributeId), baudRate: 9600 });
-			dispenser = new Tokhiem(serialPort, {
+			dispenser = new Tokheim(serialPort, {
 				hardwareId,
 				attributeId,
-				dispenserType: 'Tokhiem'
+				dispenserType: 'Tokheim'
 			});
 		}
 	});
 
 	it('should return TOKHIEM on checkType', () => {
 		const kind = dispenser.checkType();
-		expect(kind).toBe('TOKHIEM');
+		expect(kind).toBe('TOKHEIM');
 	});
 
 	it('should return greater than 0 on checkTotalizer', async () => {
