@@ -421,6 +421,20 @@ export class Neogi extends BaseDispenser {
 	}
 
 	isOrderComplete(res: string, quantity: number): any {
+		// Detect if dispenser auto-sent LT response (fires when preset is reached)
+		// instead of the expected RV response. LT serial number would otherwise be
+		// parsed as volume by processRunningVolume, producing a corrupted dispensedQty.
+		const ascii = res.startsWith('#') ? res : this.hex2a(res);
+		if (ascii.startsWith('#LT')) {
+			const ltData = this.processReadSale(res);
+			debugLog('isOrderComplete: LT response detected (preset reached), volume: %s', ltData.volume);
+			return {
+				status: true,
+				percentage: 100,
+				dispensedQty: this.toFixedNumber(ltData.volume, 2),
+			};
+		}
+
 		// Use running volume data from RV response
 		const volumeData = this.processRunningVolume(res);
 		const dispensed = volumeData.volume;
