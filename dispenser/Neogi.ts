@@ -5,6 +5,18 @@ import { TotalizerResponse } from './interface/IDispenser';
 const debugLog = debug('dispenser:Neogi');
 
 export class Neogi extends BaseDispenser {
+	private readonly cmd_totalizer = Buffer.from('VT\r', 'ascii');
+	private readonly cmd_readStatus = Buffer.from('ST\r', 'ascii');
+	private readonly cmd_cancelPreset = Buffer.from('CT\r', 'ascii');
+	private readonly cmd_readSale = Buffer.from('RV\r', 'ascii');
+	private readonly cmd_pumpStop = Buffer.from('TP\r', 'ascii');
+	private readonly cmd_suspendSale = Buffer.from('TP\r', 'ascii');
+	private readonly cmd_resumeSale = Buffer.from('SL\r', 'ascii');
+	private readonly cmd_clearSale = Buffer.from('CT\r', 'ascii');
+	private readonly cmd_switchToRemote = Buffer.from('DM\r', 'ascii');
+	private readonly cmd_switchToLocal = Buffer.from('AM\r', 'ascii');
+	private readonly nozzleStatusScript = 'scripts/Neogi/check_status.sh';
+
 	/**
 	 * Calculate checksum for Neogi protocol
 	 * Sum of ASCII character codes, take last 2 DECIMAL digits
@@ -126,25 +138,6 @@ export class Neogi extends BaseDispenser {
 	}
 
 	/**
-	 * Override write method to handle ASCII strings (not hex)
-	 * BaseDispenser.write() treats strings as hex, but Neogi uses ASCII
-	 */
-	protected async write(data: Buffer | string, _command?: string): Promise<boolean> {
-		let buffer: Buffer;
-
-		if (Buffer.isBuffer(data)) {
-			buffer = data;
-		} else {
-			// Convert ASCII string to Buffer (not hex!)
-			buffer = Buffer.from(data, 'ascii');
-		}
-
-		debugLog('write: %s bytes - %s', buffer.length, buffer.toString('ascii').replace(/\r/g, '\\r').replace(/\n/g, '\\n'));
-
-		return this.connection.write(buffer);
-	}
-
-	/**
 	 * Override dispenserResponse to add timeout and cleanup orphaned listeners
 	 * Prevents listener accumulation when dispenser becomes unresponsive
 	 */
@@ -179,87 +172,73 @@ export class Neogi extends BaseDispenser {
 
 	async totalizer() {
 		debugLog('totalizer');
-		const cmd = this.buildCommand('VT');
-		await this.write(cmd, 'totalizer');
+		await this.write(this.cmd_totalizer, 'totalizer');
 		return await this.dispenserResponse();
 	}
 
 	async readStatus() {
 		debugLog('readStatus');
-		const cmd = this.buildCommand('ST');
-		await this.write(cmd, 'readStatus');
+		await this.write(this.cmd_readStatus, 'readStatus');
 		return await this.dispenserResponse();
 	}
 
 	async readNozzleStatus() {
 		debugLog('readNozzleStatus');
-		return (await this.executeShellScriptAndCheck('scripts/Neogi/check_status.sh')) ? 'true' : 'false';
+		return (await this.executeShellScriptAndCheck(this.nozzleStatusScript)) ? 'true' : 'false';
 	}
 
-	// this commnad take care of authorization as well
+	// this command takes care of authorization as well
 	async setPreset(quantity: number, _productId?: number) {
 		debugLog('setPreset - quantity: %s', quantity);
-		const cmd = this.buildPresetCommand(quantity);
-		await this.write(cmd, 'setPreset');
+		await this.write(Buffer.from(this.buildPresetCommand(quantity), 'ascii'), 'setPreset');
 		return await this.dispenserResponse();
 	}
 
 	async cancelPreset() {
 		debugLog('cancelPreset');
-		const cmd = this.buildCommand('CT');
-		await this.write(cmd, 'cancelPreset');
+		await this.write(this.cmd_cancelPreset, 'cancelPreset');
 		return await this.dispenserResponse();
 	}
 
 	async readSale() {
 		debugLog('readSale');
-		const cmd = this.buildCommand('RV');
-		await this.write(cmd, 'readSale');
+		await this.write(this.cmd_readSale, 'readSale');
 		return await this.dispenserResponse();
 	}
 
 	async pumpStop() {
 		debugLog('pumpStop');
-		const cmd = this.buildCommand('TP');
-		await this.write(cmd, 'pumpStop');
+		await this.write(this.cmd_pumpStop, 'pumpStop');
 		return await this.dispenserResponse();
 	}
 
 	async suspendSale() {
 		debugLog('suspendSale');
-		// TP = Terminate Pump (suspend)
-		const cmd = this.buildCommand('TP');
-		await this.write(cmd, 'suspendSale');
+		await this.write(this.cmd_suspendSale, 'suspendSale');
 		return await this.dispenserResponse();
 	}
 
 	async resumeSale() {
 		debugLog('resumeSale');
-		// Re-authorize with SL command
-		const cmd = this.buildCommand('SL');
-		await this.write(cmd, 'resumeSale');
+		await this.write(this.cmd_resumeSale, 'resumeSale');
 		return await this.dispenserResponse();
 	}
 
 	async clearSale() {
 		debugLog('clearSale');
-		// First cancel transaction
-		const cancelCmd = this.buildCommand('CT');
-		await this.write(cancelCmd, 'clearSale');
+		await this.write(this.cmd_clearSale, 'clearSale');
 		await this.dispenserResponse();
 	}
 
 	async switchToRemote() {
 		debugLog('switchToRemote');
-		const cmd = this.buildCommand('DM');
-		await this.write(cmd, 'switchToRemote');
+		await this.write(this.cmd_switchToRemote, 'switchToRemote');
 		return await this.dispenserResponse();
 	}
 
 	async switchToLocal() {
 		debugLog('switchToLocal');
-		const cmd = this.buildCommand('AM');
-		await this.write(cmd, 'switchToLocal');
+		await this.write(this.cmd_switchToLocal, 'switchToLocal');
 		return await this.dispenserResponse();
 	}
 
