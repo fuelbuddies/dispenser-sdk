@@ -137,37 +137,6 @@ export class Neogi extends BaseDispenser {
 		return this.buildCommandWithChecksum(data);
 	}
 
-	/**
-	 * Override dispenserResponse to add timeout and cleanup orphaned listeners
-	 * Prevents listener accumulation when dispenser becomes unresponsive
-	 */
-	override dispenserResponse(timeoutMs: number = 20000): Promise<any> {
-		return new Promise((resolve, reject) => {
-			try {
-				debugLog('override-dispenserResponse-Neogi: AWAITING RESPONSE');
-				const handler = (data: any): void => {
-					clearTimeout(timer);
-					const res = data.toString('hex');
-					debugLog('awaitDispenserResponse: %s', res);
-					this.logDispenserMessage('received', data);
-					resolve(res);
-				};
-
-				// setup timeout to clean up orphaned listner
-				const timer = setTimeout(() => {
-					this.innerByteTimeoutParser.removeListener('data', handler);
-					debugLog('dispenserResponse: TIMEOUT - listener removed');
-					reject(new Error(`Dispenser response timed out after ${timeoutMs}ms`));
-				}, timeoutMs);
-
-				//register the new listener
-				this.innerByteTimeoutParser.once('data', handler);
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
 	// ==================== COMMAND METHODS ====================
 
 	async totalizer() {

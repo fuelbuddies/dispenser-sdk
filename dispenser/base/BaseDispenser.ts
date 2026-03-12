@@ -62,16 +62,25 @@ export class BaseDispenser implements IDispenser {
 		}
 	}
 
-	dispenserResponse(): Promise<any> {
+	dispenserResponse(timeoutMs: number = 20000): Promise<any> {
 		return new Promise((resolve, reject) => {
 			try {
 				debugLog('dispenserResponse: AWAITING RESPONSE');
-				this.innerByteTimeoutParser.once('data', (data: any): void => {
-					var res = data.toString('hex');
+				const handler = (data: any): void => {
+					clearTimeout(timer);
+					const res = data.toString('hex');
 					debugLog('awaitDispenserResponse: %s', res);
 					this.logDispenserMessage('received', data);
 					resolve(res);
-				});
+				};
+
+				const timer = setTimeout(() => {
+					this.innerByteTimeoutParser.removeListener('data', handler);
+					debugLog('dispenserResponse: TIMEOUT - listener removed');
+					reject(new Error(`Dispenser response timed out after ${timeoutMs}ms`));
+				}, timeoutMs);
+
+				this.innerByteTimeoutParser.once('data', handler);
 			} catch (e) {
 				reject(e);
 			}
