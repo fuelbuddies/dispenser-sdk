@@ -18,11 +18,11 @@ export { PubSubConfig, getPubSubLogger, shutdownPubSubLogger } from './utils/Pub
 export async function createDispenser(options: DispenserOptions): Promise<IDispenser> {
 	const { dispenserType, hardwareId, attributeId, baudRate = 9600, printer } = options;
 	switch (dispenserType) {
-		case 'Tokheim':
-			const DispenserType = await import('./dispenser/Tokheim');
-			const tokheimUsbPath = await findDispenserPort(hardwareId, attributeId);
-			debugLog('Dispenser found at: %o', tokheimUsbPath);
-			return new DispenserType.Tokheim(new SerialPort({ path: tokheimUsbPath, baudRate: baudRate }), options);
+		case 'Tokhiem':
+			const DispenserType = await import('./dispenser/Tokhiem');
+			const tokhiemUsbPath = await findDispenserPort(hardwareId, attributeId);
+			debugLog('Dispenser found at: %o', tokhiemUsbPath);
+			return new DispenserType.Tokhiem(new SerialPort({ path: tokhiemUsbPath, baudRate: baudRate }), options);
 		case 'VeederEmr4':
 			const VeederEmr4 = await import('./dispenser/VeederEmr4');
 			const veederUsbPath = await findDispenserPort(hardwareId, attributeId);

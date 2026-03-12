@@ -15,7 +15,7 @@ To test other dispensers, modify jest.config.js testMatch pattern or run:
 ```bash
 npx jest tests/TCS3000.test.ts
 npx jest tests/IsoilVegaTVersion10.test.ts
-npx jest tests/Tokheim.test.ts
+npx jest tests/Tokhiem.test.ts
 ```
 
 ### CLI Tools
@@ -37,7 +37,7 @@ The SDK implements a factory pattern with interface-based design for hardware ab
 4. **Hardware Detection**: Automatic USB port discovery via hardware/attribute IDs
 
 ### Supported Hardware Types
-- **Dispensers**: Tokheim, VeederEmr4, IsoilVegaTVersion10, TCS3000, GateX
+- **Dispensers**: Tokhiem, VeederEmr4, IsoilVegaTVersion10, TCS3000, GateX
 - **RFID**: RfidPetropoint
 - **Printers**: Required for TCS3000 and GateX dispensers
 
