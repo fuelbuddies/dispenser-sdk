@@ -158,7 +158,7 @@ export class Neogi extends BaseDispenser {
 
 	async isNozzleOffHook() {
 		debugLog('isNozzleOffHook');
-		return (await this.executeShellScriptAndCheck(this.nozzleStatusScript)) ? 'true' : 'false';
+		return (await this.executeShellScriptAndCheck(this.nozzleStatusScript)) ? 'false' : 'true';
 	}
 
 	// this command takes care of authorization as well
