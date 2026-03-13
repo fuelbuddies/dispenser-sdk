@@ -9,10 +9,12 @@ const configuration = getConfigFromEnv();
 debugLog('Configuration: %O', configuration);
 
 createDispenser(configuration).then((dispenser) => {
-	dispenser.execute(dispenser.readSale, dispenser.isOrderComplete).then((response) => {
-		dispenser.disconnect(() => {
-			console.log('Disconnected');
-		});
-		console.log(response);
-	});
+    // console.log(dispenser);
+    dispenser.execute(dispenser.resumeSale, dispenser.processCommand).then((totalizer) => {
+        console.log("THE ANSWER FOR THIS RESUME SALE IS ", totalizer);
+        dispenser.disconnect(() => {
+            console.log('Disconnected');
+        });
+        
+    });
 });

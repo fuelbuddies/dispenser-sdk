@@ -53,6 +53,11 @@ export async function createDispenser(options: DispenserOptions): Promise<IDispe
 			const gatex = new GateX.GateX(serialPort, printerPort, options);
 			await delay(5000);
 			return gatex;
+		case 'Neogi':
+			const Neogi = await import('./dispenser/Neogi');
+			const neogiUsbPath = await findDispenserPort(hardwareId, attributeId);
+			debugLog('Dispenser found at: %o', neogiUsbPath);
+			return new Neogi.Neogi(new SerialPort({ path: neogiUsbPath, baudRate: baudRate }), options);
 		default:
 			throw new Error('Invalid dispenser type');
 	}
