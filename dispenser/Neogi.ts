@@ -151,8 +151,13 @@ export class Neogi extends BaseDispenser {
 		return await this.dispenserResponse();
 	}
 
-	async readNozzleStatus() {
-		debugLog('readNozzleStatus');
+	async isNozzleOnHook() {
+		debugLog('isNozzleOnHook');
+		return (await this.executeShellScriptAndCheck(this.nozzleStatusScript)) ? 'true' : 'false';
+	}
+
+	async isNozzleOffHook() {
+		debugLog('isNozzleOffHook');
 		return (await this.executeShellScriptAndCheck(this.nozzleStatusScript)) ? 'true' : 'false';
 	}
 
