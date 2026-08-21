@@ -3,7 +3,7 @@ import { BaseDispenser } from './base/BaseDispenser';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { SerialPort } from 'serialport';
 import { DispenserOptions } from '../main';
-import { printFormat } from '../utils/printFormat';
+import { FULL_CUT, LF, buildSlip } from '../utils/printFormat';
 
 const debugLog = debug('dispenser:tcs3000');
 export class TCS3000 extends BaseDispenser {
@@ -23,7 +23,6 @@ export class TCS3000 extends BaseDispenser {
 	private resume_sale = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0x3a, 0x00, 0x18]);
 	private switch_remote = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0xF4, 0x01, 0x02, 0x80]);
 	private switch_local = Buffer.from([0x7e, 0x01, 0x00, 0x20, 0xF4, 0x01, 0x01, 0x62]);
-	
 
 	private crc_array: number[] = [
 		0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127, 252, 162, 64, 30, 95, 1, 227, 189, 62,
@@ -69,7 +68,7 @@ export class TCS3000 extends BaseDispenser {
 	// TODO: Need to set this up
 	async readStatus() {
 		debugLog('readStatus', 'Read_Status');
-		await this.write(this.read_status,'readStatus'); // response needs some statuses to be hardcoded .. will see
+		await this.write(this.read_status, 'readStatus'); // response needs some statuses to be hardcoded .. will see
 		return await this.dispenserResponse();
 	}
 
@@ -457,19 +456,9 @@ export class TCS3000 extends BaseDispenser {
 	}
 
 	printReceipt(printObj: any) {
-		const printArr = [];
-
 		debugLog('printReceipt: %o', printObj);
 
-		if (printObj?.isReceiptRequired) {
-			printArr.push(...printFormat(printObj, 'DISPENSING SLIP'));
-			printArr.push('0A1D564100');
-		}
-
-		printArr.push(...printFormat(printObj, 'PRINT COPY'));
-
-		const recieptString = `${printArr.join('0A')}0A1D564200`;
-
+		const recieptString = `${buildSlip(printObj).join(LF)}${FULL_CUT}`;
 		debugLog('printReceipt: %s', `${recieptString}`);
 		return this.printOrder(recieptString);
 	}
