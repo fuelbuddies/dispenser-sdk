@@ -160,13 +160,26 @@ export const deliverySlipDetailedFormat = (printObj: any, printWidth: number, si
 
 	// Truck / driver / slip
 	printArr.push(str2hex(rightAlignValue('BOWSER No', printObj?.vehicleRegistrationNumber || 'N/A', printWidth)));
-	printArr.push(str2hex(rightAlignValue('DRIVER No', printObj?.driverCode || 'N/A', printWidth)));
+	printArr.push(str2hex(rightAlignValue('DRIVER', printObj?.driverName || 'N/A', printWidth)));
+	// Ops asked for the code alongside the name only where there is one, so an
+	// unassigned driver does not print a bare 'N/A' row.
+	if (printObj?.driverCode) {
+		printArr.push(str2hex(rightAlignValue('DRIVER No', printObj.driverCode, printWidth)));
+	}
 	printArr.push(LF);
 
 	// Customer name (centered, wrapped)
 	wrapText(printObj?.customerName || 'N/A', printWidth).forEach((line) => {
 		printArr.push(str2hex(centerAlignValue(line, printWidth)));
 	});
+
+	// Delivery location, left-aligned and wrapped: it is prose, not a field, and is
+	// usually wider than the slip.
+	if (printObj?.customerLocation) {
+		wrapText('LOCATION: ' + printObj.customerLocation, printWidth).forEach((line) => {
+			printArr.push(str2hex(line));
+		});
+	}
 	printArr.push(LF);
 
 	// Order number
@@ -179,6 +192,9 @@ export const deliverySlipDetailedFormat = (printObj: any, printWidth: number, si
 	let totalQty = 0;
 	for (const asset of assets) {
 		printArr.push(str2hex(rightAlignValue('ASSET No', asset.registrationNumber || 'N/A', printWidth)));
+		// Same labels as the legacy per-asset slip, so ops read the two the same way.
+		printArr.push(str2hex(rightAlignValue('START TOT.', asset.startTotalizer ?? 'N/A', printWidth)));
+		printArr.push(str2hex(rightAlignValue('END TOT.', asset.endTotalizer ?? 'N/A', printWidth)));
 		printArr.push(str2hex(rightAlignValue('VOLUME', asset.quantity != null ? String(asset.quantity) + 'L' : 'N/A', printWidth)));
 		const at = asset.endTime ? new Date(asset.endTime) : null;
 		printArr.push(str2hex(rightAlignValue('TIME', at ? at.toLocaleTimeString() : 'N/A', printWidth)));
