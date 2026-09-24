@@ -2,7 +2,7 @@ import { SerialPort } from 'serialport';
 import { delay } from './delay';
 
 /** Bytes per write: well under the ~5 KB a TCS3000 printer took before it started dropping bytes. */
-const CHUNK_BYTES = 1024;
+const CHUNK_BYTES = 800;
 /** Pause after each chunk while the printer prints it. */
 const PAUSE_MS = 1000;
 
