@@ -4,6 +4,7 @@ import { SerialPort } from 'serialport';
 import { Seneca } from './workflows/GateX';
 import debug from 'debug';
 import { FULL_CUT, LF, buildSlip } from '../utils/printFormat';
+import { writeToPrinter } from '../utils/writeToPrinter';
 const debugLog = debug('dispenser:GateX');
 export class GateX extends ModBusDispenser {
 	private AuthorizeValveGPIO: number = 26;
@@ -256,13 +257,12 @@ export class GateX extends ModBusDispenser {
 		return this.printOrder(recieptString);
 	}
 
-	printOrder(printText: string): boolean {
+	async printOrder(printText: string): Promise<boolean> {
 		if (!this.printer) {
 			throw new Error('Printer is required for GateX dispenser');
 		}
 
-		const buffer = Buffer.from(printText, 'hex');
-		this.printer.write(buffer);
+		await writeToPrinter(this.printer, Buffer.from(printText, 'hex'));
 		return true;
 	}
 

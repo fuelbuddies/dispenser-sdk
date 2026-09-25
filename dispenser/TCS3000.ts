@@ -4,6 +4,7 @@ import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { SerialPort } from 'serialport';
 import { DispenserOptions } from '../main';
 import { FULL_CUT, LF, buildSlip } from '../utils/printFormat';
+import { writeToPrinter } from '../utils/writeToPrinter';
 
 const debugLog = debug('dispenser:tcs3000');
 export class TCS3000 extends BaseDispenser {
@@ -463,14 +464,13 @@ export class TCS3000 extends BaseDispenser {
 		return this.printOrder(recieptString);
 	}
 
-	printOrder(printText: string): boolean {
+	async printOrder(printText: string): Promise<boolean> {
 		if (!this.printer) {
 			debugLog('Printer is required for TCS3000 dispenser');
 			return false;
 		}
 
-		const buffer = Buffer.from(printText, 'hex');
-		this.printer.write(buffer);
+		await writeToPrinter(this.printer, Buffer.from(printText, 'hex'));
 		return true;
 	}
 }
