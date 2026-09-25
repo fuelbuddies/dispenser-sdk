@@ -9,15 +9,8 @@ const CHUNK_BYTES = 800;
  */
 const PAUSE_MS = 3000;
 
-/**
- * Send a slip to a printer that may not pace us itself. One large write overruns the
- * printer's receive buffer and it silently drops the overflow, so a 25-asset detailed slip
- * lost everything after asset 16. Send it in chunks instead: wait for each chunk to leave
- * the port, then pause while the printer prints it. Resolves once the last byte is out.
- *
- * The port also honours XON/XOFF (see main.ts), so a printer that sends XOFF holds the drain
- * until its XON; the pause is the fallback for printers that never send it.
- */
+// Paced chunks: the printer silently drops whatever overflows its buffer. XON/XOFF (main.ts)
+// holds drain() when the printer sends it; PAUSE_MS covers printers that don't.
 export async function writeToPrinter(printer: SerialPort, data: Buffer): Promise<void> {
 	for (let offset = 0; offset < data.length; offset += CHUNK_BYTES) {
 		printer.write(data.subarray(offset, offset + CHUNK_BYTES));
