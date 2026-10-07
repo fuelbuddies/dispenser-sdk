@@ -14,6 +14,10 @@
   },
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fuelbuddies/dispenser-sdk.git"
+  },
   "dependencies": {
     "@google-cloud/pubsub": "^5.2.0",
     "async": "^3.2.5",
